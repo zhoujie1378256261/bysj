@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>首页</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+		<link rel="stylesheet" href="../../css/index.css" />
+		<link rel="stylesheet" href="../../css/borrowBooks.css" />
+		<link rel="stylesheet" href="../../css/shoppingcart.css" />
+		<link rel="stylesheet" href="../../css/media.css" />
+		<script type="text/javascript" src="../../js/hui.js"></script>
+		<script type="text/javascript" src="../../js/hui-refresh-load-more.js"></script>
+		<script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+		<script type="text/javascript" src="../../js/jsw-public.js"></script>
+	</head>
+
+	<body>
+		<header class="hui-header">
+			<div id="hui-back"></div>
+			<h1>在借图书</h1>
+		</header>
+		<div class="main hui-wrap footermgh" id="bookList" >
+		</div>
+		<footer>
+			<div class="footer product-js">
+				<div class="product-al">
+					<div class="product-all">
+						<em class=""></em>
+					</div>
+					<div class="all-xz"><span class="product-all-qx">全选</span></div>
+				</div>
+				<div class="footer_right ">
+					<button class="btn sumitbtn"  onclick="">续借 (<span class=" product-all-sl">0</span>)</button>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>
+
+
+<script>
+    $.get("/weixinwode/borrow",{token:sessionStorage.token},function (data) {
+        console.log(data);
+        $("#bookList").append("<div class=\"bookName\">共"+data.resMsg.totalRow+"本</div>")
+        append(data.resMsg.list);
+    });
+
+    var page = 2;
+    hui.loadMore(getMore)
+    function getMore(){
+        hui.postJSON('/weixinwode/borrow',{token:sessionStorage.token,pageIndex:page},
+            function(data){
+                console.log(data);
+                //判断加载完毕
+                if(data.resMsg.list.length == 0){
+                    hui.endLoadMore(true, '没有更多图书');
+                    return false;
+                }
+                append(data.resMsg.list);
+                page++;
+                hui.endLoadMore();
+            }
+        );
+    }
+
+    function append(ary) {
+        ary.forEach(function (item) {
+            $("#bookList").append(
+                "<div class=\"wrapper wrapperSlect\">" +
+					"<div class=\"select\">" +
+						"<div class=product-ckb><em class=product-em></em></div>" +
+					"</div>" +
+					"<div>" +
+						"<div class=\"bookTitle wrapLeft\">" +item.title+"</div>" +
+							 "<div class=\"wrap\">" +
+								   "<div class=\"imgBox\">" +
+										 "<img src=\"../../img/fengmian.png\"/>" +
+								   "</div>" +
+									"<div class=\"bookText\">" +
+										"<p>条码："+item.barcode+"</p>" +
+										"<p>著者："+item.author+"</p>" +
+										"<p>出版社："+item.publisher+"</p>" +
+										"<p>出版年月："+item.publishdate+"</p>" +
+										"<p>已续借次数："+item.continuenum+"</p>" +
+									"</div>" +
+							 "</div>" +
+							 "<div class=\"bookTime\">" +
+									"<div>到期日：<span>"+item.duetime+"</span></div>" +
+									"<div>剩余<span class=\"red\">"+item.dueday+"</span>天</div>" +
+							  "</div>"+
+						"</div>"+
+					"</div>"+
+				"</div>"
+			)
+        })
+        $(".product-ckb").click(function(){
+            $(this).children("em").toggleClass("product-xz");
+            productxz();
+        });
+        productxz();
+    }
+
+</script>

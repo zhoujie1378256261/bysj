@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>个人中心</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="../../js/hui.js" charset="utf-8"></script>
+    <script src="../../js/hui-popover-msg.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/hui-tab.js" type="text/javascript"></script>
+</head>
+<body>
+    <header class="hui-header ">
+        <div id="hui-back"></div>
+        <h1 class="bookp_h1">我的借阅</h1>
+        <div class="bookp_reset" id="saixuanbtn">筛选</div>
+    </header>
+    <div class="hui-wrap">
+        <ul class="myBorr_header">
+            <li><a class="jieyueactiv">当前借阅</a></li>
+            <li><a>借阅历史</a></li>
+            <li><a>借阅分析</a></li>
+        </ul>
+        <div class="index-search">
+            <img src="../../img/search_11.png" alt=""><input type="text"  placeholder="正题名、著者">
+        </div>
+        <ul class="myBorr_center">
+            <li class="show">
+                <div class="wrapper">
+                    <div class="bookTime">
+                        <div>
+                            王阳明传
+                        </div>
+                        <div class="red">
+                            超期
+                        </div>
+                    </div>
+                    <div class="wrap">
+                        <div class="imgBox">
+                            <img src="../../img/fengmian.png"/>
+                        </div>
+                        <div class="bookText">
+                            <p>条码：0000001</p>
+                            <p>著者：0000001</p>
+                            <p>出版社：0000001</p>
+                            <p>出版年月：0000001</p>
+                            <p>馆藏地：0000001</p>
+                        </div>
+                    </div>
+                    <div class="bookTime lineHeight myborrmag">
+                        <div>
+                            <div >
+                                借书日期：<span>2018-07-20</span>
+                            </div>
+                            <div class="text_left">
+                                应还日期：<span>2018-07-20</span>
+                            </div>
+                        </div>
+                        <div class="myborr_tuij">
+                            <span>推荐</span><span>评价</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="wrapper">
+
+                    <div class="bookTime" >
+                        <div class="text_left">
+                            王阳明传
+                        </div>
+                    </div>
+                    <div class="wrap">
+                        <div class="imgBox">
+                            <img src="../../img/fengmian.png"/>
+                        </div>
+                        <div class="bookText">
+                            <p>条码：0000001</p>
+                            <p>著者：0000001</p>
+                            <p>出版社：0000001</p>
+                            <p>出版年月：0000001</p>
+                            <p>馆藏地：0000001</p>
+                        </div>
+                    </div>
+                    <div class="bookTime lineHeight myborrmag">
+                        <div class="text_left tex_center">
+                            还书日期：<span>2018-07-20</span>
+                        </div>
+                        <div class="myborr_tuij">
+                            <span>推荐</span><span>评价</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li></li>
+        </ul>
+    </div>
+    <script type="text/javascript">
+        $('.myBorr_header li ').click(function() {
+            var i = $(this).index();
+            $(this).children("a").addClass('jieyueactiv').parent().siblings().children().removeClass('jieyueactiv');
+            $('.myBorr_center li').eq(i).addClass('show').siblings().removeClass('show');
+            if (i==2){
+                $(".index-search").hide();
+            }else {
+                $(".index-search").show();
+            }
+        });
+    </script>
+</body>
+</html>

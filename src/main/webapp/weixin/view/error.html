@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>系统错误</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="../css/hui.css" />
+		<link rel="stylesheet" href="../css/index.css" />
+		<link rel="stylesheet" href="../css/media.css" />
+		<script type="text/javascript" src="../js/jquery-3.1.1.min.js" ></script>
+	</head>
+	<style>
+		body{
+			background-color: #fff;
+		}		
+		section{
+			position: relative;
+		}
+		.title{	
+			margin-top: 4rem;		
+			color: #7595ff;
+			text-align: center;
+		}
+		#hui-back:before {		    
+		    color: #fff;
+		}		
+	</style>
+	<body>
+		<header class="hui-header" style="background: initial;">
+		    <div id="hui-back"></div>		    
+		</header>
+		<section>
+			<div class="login_img"><img src="../img/login.png" /></div>
+			<div class="logo"><img src="../img/logo.png" /></div>			
+		</section>
+		<div>
+			<h3 class="title">绑定读者证号</h3>
+		</div>
+		<form class="hui-form" id="form1">
+		<div class="formbox">
+			<ul>
+				<li>所在地区 <input type="text" name="userAddress" id="userAddress" value="" /></li>
+				<li>所在学校<input type="text" name="userSchool"  value="" /></li>
+				<li>读者证号<input type="text" name="userId"  value="" /></li>
+				<li>密码<input type="password" name="userPsw"  value="" /></li>
+			</ul>
+		</div>
+		<button type="button" class=""  id="sumitbtn">绑定</button>
+		</form>
+		<script type="text/javascript" src="../js/hui.js" charset="utf-8"></script>
+		<script type="text/javascript" src="../js/hui-picker.js" charset="utf-8"></script>
+		<script type="text/javascript" src="../js/cities.js" charset="utf-8"></script>
+		<script type="text/javascript" src="../js/hui-form.js"></script>
+		<script type="text/javascript">
+            /* 地区选择， 关联型数据 */
+            var picker2 = new huiPicker('#userAddress', function(){
+                var sheng   = picker2.getText(0);
+                var shi     = picker2.getText(1);
+                var qu      = picker2.getText(2);
+                hui('#userAddress').val(sheng + shi + qu);
+            });
+            picker2.level = 3;
+            //cities 数据来源于 cities.js
+            picker2.bindRelevanceData(cities);
+
+            hui.formInit();
+            //表单元素数据收集演示
+            hui('#sumitbtn').click(function(){
+                hui.alert('请观察控制台');
+                var data = hui.getFormData('#form1');
+                console.log(JSON.stringify(data));
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "",
+                data: data,
+                success: function(msg){
+                    hui.alert( "Data Saved: " + msg );
+                }
+
+            });
+		</script>
+	</body>
+</html>

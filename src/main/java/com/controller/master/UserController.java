@@ -14,13 +14,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 平台管理人员
- */
-@ControllerInterface(path="user")
+
+@ControllerInterface(path="/user")
 public class UserController extends BaseController {
     Log log = Log.getLog(this.getClass());
     private UserService service = UserService.me;
+
+    public void index() {
+        render("/weixin/view/index/index.html");
+    }
     /**
      * 增加/修改
      */

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+</head>
+<style>
+    .index_newsli li a{
+        display: block;
+    }
+    .index_newslist{
+        height: 1rem;
+        line-height: 1rem;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.8rem;
+    }
+    .index_newstime{
+        font-size: 0.7rem;
+        color: #999;
+    }
+</style>
+<body>
+    <header class="hui-header blue">
+        <div id="hui-back"></div>
+        <h1>阅读活动</h1>
+    </header>
+    <div class="main hui-wrap">
+        <div id="refreshContainer" class="hui-refresh">
+            <div class="hui-refresh-icon"></div>
+            <div class="hui-refresh-content ">
+                <div class="hui-media-list index_newsli" style="padding:10px;">
+                    <ul id="list">
+                        <li>
+                            <a href="../index/readingDetail.html">
+                                <div class=""><img src="../../img/index_logo.png" /></div>
+                                <div class="index_newslist">
+                                    <div>标题</div>
+                                    <div class="index_newstime">星期一</div>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="../../js/hui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/hui-refresh-load-more.js" type="text/javascript" charset="utf-8"></script>
+    <!--<script type="text/javascript">-->
+        <!--var pageNumber = 1;-->
+        <!--var apiRoot = 'http://localhost:1000';-->
+        <!--var token="eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiIzIiwiaW5mbyI6IntcInVzZXJpZFwiOjN9IiwiaWF0IjoxNTU3NDcxNDA4LCJleHAiOjE1NjAwNjM0MDh9.5AfxIMx9DV8sR6_gcqaRX0ss9kD2Eze0ICLthuRJYyg"-->
+        <!--hui.refresh('#refreshContainer', refresh);-->
+        <!--hui.loadMore(getMore);-->
+        <!--//加载更多-->
+        <!--function getMore(){-->
+            <!--alert(111);-->
+            <!--$.ajax({-->
+                <!--type : 'POST',-->
+                <!--url : apiRoot+'/weixinwode/news_bulletin',-->
+                <!--data :{token:token,pageNumber:pageNumber},-->
+                <!--success:function(data){-->
+                    <!--console.log(data)-->
+                    <!--//判断加载完毕-->
+                    <!--if(res == 'null'){-->
+                        <!--hui.endLoadMore(true, '已全部加载...');-->
+                        <!--return false;-->
+                    <!--}-->
+                    <!--//var data = res.split('&#45;&#45;hcSplitor&#45;&#45;');-->
+                    <!--for(var i = 0; i < data.length; i++){-->
+                        <!--var li = document.createElement('li');-->
+                        <!--li.innerHTML = '<div >'+data[i]+'</div>';-->
+                        <!--hui(li).appendTo('#list');-->
+                    <!--}-->
+                    <!--page++;-->
+                    <!--hui.endLoadMore();-->
+                <!--}-->
+            <!--});-->
+        <!--}-->
+        <!--//下拉刷新-->
+        <!--function refresh(){-->
+            <!--hui.loading('加载中...');-->
+            <!--alert(1)-->
+            <!--$.ajax({-->
+                <!--type : 'POST',-->
+                <!--url :  apiRoot+'/weixinwode/news_bulletin',-->
+                <!--data :  {token:token,pageNumber:pageNumber},-->
+                <!--success:function(data){-->
+                    <!--console.log(data)-->
+                    <!--hui.closeLoading();-->
+                    <!--//var data = res.split('&#45;&#45;hcSplitor&#45;&#45;');-->
+                    <!--var html = '';-->
+                    <!--for(var i = 0; i < data.length; i++){-->
+
+                    <!--}-->
+                    <!--pageNumber = 2;-->
+                    <!--hui('#list').html(html);-->
+                    <!--//结束刷新-->
+                    <!--hui.endRefresh();-->
+                    <!--//重置加载更多状态-->
+                    <!--hui.resetLoadMore();-->
+                <!--},-->
+                <!--function(){-->
+                    <!--hui.closeLoading();-->
+                    <!--hui.upToast('连接服务器失败！');-->
+                    <!--hui.endRefresh();-->
+                <!--}-->
+            <!--});-->
+        <!--}-->
+
+    <!--</script>-->
+    </body>
+
+<script type="text/javascript">
+    $.ajax({
+        url:"/weixinreading/list",
+        type:"GET",
+        data:{token:sessionStorage.token,orgid:sessionStorage.orgid},
+        success:function (result) {
+            if(result.code == 200){
+                $("#list").html("");
+                for(var i=0;i<result.data.resMsg.list.length;i++){
+                    var r = result.data.resMsg.list[i];
+                    var html = "<li>\n" +
+                        "                            <a href=\"../index/readingDetail.html?id="+r.id+"\">\n" +
+                        "                                <div class=\"\"><img src=\"../../img/index_logo.png\" /></div>\n" +
+                        "                                <div class=\"index_newslist\">\n" +
+                        "                                    <div>"+r.title+"</div>\n" +
+                        "                                    <div class=\"index_newstime\">"+r.createtime+"</div>\n" +
+                        "                                </div>\n" +
+                        "                            </a>\n" +
+                        "                        </li>";
+                    $("#list").append(html);
+                }
+            }
+        }
+    });
+</script>
+</html>

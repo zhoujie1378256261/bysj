@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+</head>
+<style>
+    #hui-input-clear{
+        line-height: 37px;
+    }
+    .hui-form-items-title {
+        width: 22%;
+        line-height: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        font-size: 0.8rem;
+        color: #999;
+    }
+
+</style>
+<body>
+<header class="hui-header ">
+    <div id="hui-back"></div>
+    <h1 class="bookp_h1">高级检索</h1>
+</header>
+<div class="hui-wrap">
+    <p class="chazhaoluj">查找途径</p>
+    <form  class="hui-form jiansf" id="form1">
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">正题名</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">著者</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">ISBN</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">主题词</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">出版社</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">分类号</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+        <div class="hui-form-items adlist">
+            <div class="hui-form-items-title">任意词</div>
+            <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+        </div>
+    </form>
+    <p class="chazhaoluj">语言</p>
+    <div class="yuyan">
+        <span >中文</span>
+        <span>其他</span>
+    </div>
+    <p class="chazhaoluj">显示</p>
+       <div class="yuyan">
+           <span class="zaigjlu">只显示在馆记录</span>
+       </div>
+    <div style="padding:15px 8px;">
+        <button type="button" class="sumitbtn" id="submitBtn">检索</button>
+    </div>
+</div>
+<script type="text/javascript" src="../../js/hui.js"></script>
+<script type="text/javascript" src="../../js/hui-form.js"></script>
+<script type="text/javascript">
+    hui.formInit();
+    //表单元素数据收集演示
+    hui('#submitBtn').click(function(){
+        hui.alert('请观察控制台');
+        var data = hui.getFormData('#form1');
+        console.log(JSON.stringify(data));
+    });
+
+    $(function(){
+        $(".yuyan span").each(function () {
+            $(this).click(function(){
+                $(this).addClass("adlist_active").siblings().removeClass("adlist_active");
+            })
+        })
+    })
+</script>
+</body>
+</html>

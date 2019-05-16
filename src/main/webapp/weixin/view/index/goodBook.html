@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="../../js/hui.js" charset="utf-8"></script>
+</head>
+    <style>
+
+    </style>
+<body>
+    <header class="hui-header">
+        <div id="hui-back"></div>
+        <h1>好书推荐</h1>
+    </header>
+    <div class="hui-wrap">
+    <div id="refreshContainer" class="hui-refresh">
+        <div class="hui-refresh-icon"></div>
+        <div class="hui-refresh-content ">
+            <ul class="index_list3 footermgh">
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>05本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+                <li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+                    <div class="book_newslist" style="display: none">
+                        <div class="book_newslist_title">在馆信息</div>
+                        <div class="book_newslists"><span>一楼藏书室</span><span>10本</span></div>
+                        <div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </div>
+    </div>
+    <script type="text/javascript">
+        $(function(){
+            $("li .book_news").each(function(){
+                $(this).click(function(){
+                    $(this).siblings(".book_newslist").css("display","block");
+                    $(this).parent().siblings().children("div").css("display","none");
+                })
+            });
+            $("li .book_newslist_title").each(function(){
+                $(this).click(function(){
+                    $(this).parent().css("display","none");
+                })
+            });
+
+        })
+    </script>
+</body>
+</html>

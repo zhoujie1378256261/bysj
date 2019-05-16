@@ -1,13 +1,7 @@
 package com.service.master;
 
 
-import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Page;
-import com.model.SysUser;
 import com.model.User;
-import com.utils.CommonUtils;
-
-import java.util.*;
 
 public class UserService {
     public static final UserService me = new UserService();

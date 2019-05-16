@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+</head>
+    <style>
+        .hui-form-items-title {
+            width: 22%;
+            line-height: 22px;
+            height: 22px;
+            flex-shrink: 0;
+            font-size: 0.8rem;
+            color: #999;
+        }
+    </style>
+<body>
+    <header class="hui-header ">
+        <div id="hui-back"></div>
+        <h1 class="bookp_h1">图书荐购</h1>
+        <div class="bookp_reset"><input type="submit" name="" id="rsetbtn" value="重置"/>重置</div>
+    </header>
+    <div class="hui-wrap">
+        <form style="padding:28px 10px;" class="hui-form" id="form1">
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">书名</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">著者</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">出版社</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">出版时间</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">ISBN</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">分类号</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div class="hui-form-items">
+                <div class="hui-form-items-title">价格</div>
+                <input type="text" class="hui-input hui-input-clear" name="nickname" placeholder="" />
+            </div>
+            <div style="padding:15px 8px;">
+                <button type="button" class="sumitbtn" id="submitBtn">提交</button>
+            </div>
+        </form>
+    </div>
+    <script type="text/javascript" src="../../js/hui.js"></script>
+    <script type="text/javascript" src="../../js/hui-form.js"></script>
+    <script type="text/javascript">
+        hui.formInit();
+        //表单元素数据收集演示
+        hui('#submitBtn').click(function(){
+            hui.alert('请观察控制台');
+            var data = hui.getFormData('#form1');
+            console.log(JSON.stringify(data));
+        });
+
+        $(function(){
+            $("#rsetbtn").click(function () {
+                $('#form1')[0].reset()
+            })
+        })
+    </script>
+</body>
+</html>

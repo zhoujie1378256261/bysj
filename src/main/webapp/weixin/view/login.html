@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<head>
+	<meta charset="UTF-8">
+	<title>用户绑定</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	<link rel="stylesheet" type="text/css" href="../css/hui.css" />
+	<link rel="stylesheet" href="../css/index.css" />
+	<link rel="stylesheet" href="../css/media.css" />
+	<link rel="stylesheet" href="/lib/layui/css/layui.css"/>
+	<link rel="stylesheet" href="../css/selectivity-jquery.css"/>
+
+	<script src="../js/jquery-3.1.1.min.js"></script>
+	<script type="text/javascript" src="../js/selectivity-jquery.min.js" ></script>
+	<script type="text/javascript" src="../js/hui.js" charset="utf-8"></script>
+	<script type="text/javascript" src="../js/hui-picker.js" charset="utf-8"></script>
+	<script type="text/javascript" src="../js/hui-form.js"></script>
+	<script type="text/javascript" src="../js/jsw-public.js"></script>
+</head>
+<style>
+	body{
+		background-color: #fff;
+	}
+	section{
+		position: relative;
+	}
+	.title{
+		margin-top: 4rem;
+		color: #7595ff;
+		text-align: center;
+	}
+	#hui-back:before {
+		color: #fff;
+	}
+	#words{
+		display: none;
+		width: 15rem;
+		float: right;
+	}
+</style>
+<body>
+<header class="hui-header" style="background: initial;">
+	<div id="hui-back"></div>
+</header>
+<section>
+	<div class="login_img"><img src="../img/login.png" /></div>
+	<div class="logo"><img src="../img/logo.png" /></div>
+</section>
+<div>
+	<h3 class="title">绑定读者证号</h3>
+</div>
+<form class="" id="form1" lay-filter="form1">
+	<div class="formbox">
+		<ul>
+			<li class="layui-form-item">
+				所在地区
+					<input type="text" name="userAddress" id="userAddress" value="" />
+			</li>
+			<li class="layui-form-item">
+				所在学校
+				<div class="we">
+					<div id="roleselect" name="name"></div>
+				</div>
+			</li>
+			<li>读者证号<input type="text" name="userId" id="userId" value="" /></li>
+			<li>密码<input type="password" name="userPsw" id="userPsw" value="" /></li>
+		</ul>
+	</div>
+	<button type="button" class="sumitbtn"  id="sumitbtn">绑定</button>
+</form>
+
+<script type="text/javascript">
+    $('#inputa').val($('#roleselect').val());
+    var schoolList= {};
+    var orgid = 0;
+    var params = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        params[pair[0]]=pair[1];
+    }
+
+    $(function(){
+        $.ajax({
+            url: "/weixinlogin/selectAllArea",
+            type: "get",
+            success:function (result) {
+                /* 地区选择， 关联型数据 */
+                var picker2 = new huiPicker('#userAddress', function(){
+                    var sheng   = picker2.getText(0);
+                    var shi     = picker2.getText(1);
+                    var qu      = picker2.getText(2);
+                    orgid = picker2.getVal(2);
+                    hui('#userAddress').val(sheng + shi + qu);
+                    loadSchoolInfo();
+                });
+                picker2.level = 3;
+                //cities 数据来源于 cities.js
+                console.log(result);
+                picker2.bindRelevanceData(result.resMsg);
+            },
+            error: function (msg) {//ajax请求失败后触发的方法
+                hui.toast(JSON.stringify(msg));//弹出错误信息
+            }
+        })
+
+    });
+    hui.formInit();
+    //表单元素数据收集演示
+    hui('#sumitbtn').click(function(){
+        var schoolname = $("#roleselect").find("span").html().split("</a>")[1];
+        var schoolorgid = schoolList[schoolname];
+        $.ajax({
+            type: "POST",
+            url: "/weixin/bindWeixin",
+            data: {openid:params["openid"],orgid:schoolorgid,username:$("#userId").val(),password:$("#userPsw").val()},
+            success: function(result){
+                if(result.code == 200){
+                    var token = result.data;
+                    location.href = "/weixin/view/index/index.html?token="+token;
+                }else{
+                    hui.toast(result.msg);
+                    return;
+                }
+            }
+
+        });
+    });
+
+    function loadSchoolInfo() {
+        if(orgid != null && orgid != 0) {
+            $.ajax({
+                type: "POST",
+                url: "/weixinlogin/findSchoolsByOrgid",
+                data: {orgid:orgid,schoolName:""},
+                success: function(result){
+                    if(result.resCode == 200){
+                        var items =[];
+                        result.resMsg.forEach(function (item) {
+                            schoolList[item.orgname] = item.id;
+                            items.push(item.orgname);
+                        });
+                        $('#roleselect').selectivity({
+                            allowClear: true,
+                            items: items,
+                            placeholder: '请选择学校'
+                        });
+                    }else{
+                        hui.toast(result.msg);
+                        return;
+                    }
+                }
+            });
+        }
+    }
+
+</script>
+</body>
+</html>

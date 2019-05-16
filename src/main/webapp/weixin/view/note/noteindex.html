@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>笔记</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+    <script src="../../js/hui.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/hui-refresh-load-more.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<style>
+    .index_newsli li {
+        display: block;
+    }
+    .index_newslist{
+        height: 1rem;
+        line-height: 1rem;
+        display: flex;
+        justify-content: space-between;
+        padding-bottom: 0.3rem;
+        font-size: 0.8rem;
+    }
+    .index_newstime{
+        font-size: 0.7rem;
+        color: #999;
+    }
+    .hui-icons-write:before {
+        color: #6dabfd;
+    }
+</style>
+<body>
+    <header class="hui-header ">
+        <div id="hui-back"></div>
+        <h1 class="bookp_h1">读书笔记</h1>
+        <a href="../note/noteedit.html" class="bookp_reset">新增</a>
+    </header>
+    <div class="main hui-wrap">
+        <div id="refreshContainer" class="hui-refresh">
+            <div class="hui-refresh-icon"></div>
+            <div class="hui-refresh-content ">
+                <div class="hui-media-list index_newsli" style="padding:10px;">
+                    <ul id="noteslist">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="hui-footer">
+        <a href="../index/index.html" id="nav-home">
+            <div class="hui-footer-icons hui-icons-home"></div>
+            <div class="hui-footer-text">首页</div>
+        </a>
+        <a href="../search/searchindex.html" id="nav-search">
+            <div class="hui-footer-icons hui-icons-search"></div>
+            <div class="hui-footer-text">搜索</div>
+        </a>
+        <a href="../news/newsindex.html" id="nav-forum">
+            <div class="hui-footer-icons hui-icons-forum"></div>
+            <div class="hui-footer-text">消息</div>
+        </a>
+        <a href="../note/noteindex.html" id="nav-write">
+            <div class="hui-footer-icons hui-icons-write"></div>
+            <div class="hui-footer-text">笔记</div>
+        </a>
+        <a href="../my/myindex.html" id="nav-my">
+            <div class="hui-footer-icons hui-icons-my"></div>
+            <div class="hui-footer-text">我的</div>
+        </a>
+    </div>
+    </body>
+</html>
+<script>
+    $.ajax({
+        type: "POST",
+        url: "/weixinreadingnotes/findReadingNotesList",
+        data: {token:sessionStorage.token},
+        success: function(result){
+            if(result.code == 200){
+                $.each(result.data,function(index,obj){
+                    var appendhtml = "<li id='"+obj.id+"'><div class=\"text_title\">"+obj.title+"</div><p class=\"text_p\">"+obj.content+"</p></li>"
+                    $("#noteslist").append(appendhtml);
+                });
+            }else{
+                hui.toast(result.resMsg);
+                return;
+            }
+        }
+
+    });
+</script>

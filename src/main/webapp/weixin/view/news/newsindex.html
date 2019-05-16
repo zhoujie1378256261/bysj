@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>消息</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" charset="UTF-8"></script>
+    <script type="text/javascript" src="../../js/hui.js" charset="UTF-8"></script>
+</head>
+<style>
+    .hui-icons-forum:before {
+        color: #6dabfd;
+    }
+    .hui-header {
+        display: flex;
+        width: 100%;
+        height: 44px;
+        text-align: left;
+        top: 0px;
+        left: 0px;
+        text-indent: 1.2rem;
+        position: fixed;
+        z-index: 19;
+        background: #f9f9f9;
+    }
+    .nwesyuan{
+        position: relative;
+        border-radius: 50%;
+        background-color: #4e66a4;
+        width: 35px;
+        height: 35px;
+        margin-left: 0.2rem;
+        margin-right: 15px;
+        font-size: 1rem;
+        color: #fefefe;
+        padding: 0.5rem 0.5rem;
+        text-align: center;
+        word-wrap: break-word;
+        word-break: break-all;
+    }
+    .newslista{
+        justify-content: initial !important;
+    }
+    .news_title{
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.8rem;
+    }
+    .news_lists ul li{
+        border-bottom: 1px solid #dedede;
+    }
+</style>
+<body>
+    <header class="hui-header index_tetile">
+        <h1 class="main_title" >系统消息</h1>
+    </header>
+    <div class="hui-wrap">
+        <div class="hui-media-list news_lists">
+            <ul id="newslist">
+            </ul>
+        </div>
+    </div>
+    <div id="hui-footer">
+        <a href="../index/index.html" id="nav-home">
+            <div class="hui-footer-icons hui-icons-home"></div>
+            <div class="hui-footer-text">首页</div>
+        </a>
+        <a href="../search/searchindex.html" id="nav-search">
+            <div class="hui-footer-icons hui-icons-search"></div>
+            <div class="hui-footer-text">搜索</div>
+        </a>
+        <a href="" id="nav-forum">
+            <div class="hui-footer-icons hui-icons-forum"></div>
+            <div class="hui-footer-text">消息</div>
+        </a>
+        <a href="../note/noteindex.html" id="nav-write">
+            <div class="hui-footer-icons hui-icons-write"></div>
+            <div class="hui-footer-text">笔记</div>
+        </a>
+        <a href="../my/myindex.html" id="nav-my">
+            <div class="hui-footer-icons hui-icons-my"></div>
+            <div class="hui-footer-text">我的</div>
+        </a>
+    </div>
+    <script type="text/javascript">
+        hui('.nwesyuan').pointMsg( null, null, null, '4px');
+    </script>
+</body>
+</html>
+<script>
+    $.ajax({
+        type: "POST",
+        url: "/weixinwode/readerMessage",
+        data: {token:sessionStorage.token},
+        success: function(result){
+            if(result.resCode == 200){
+                $.each(result.resMsg.list,function(index,obj){
+                    var appendhtml = "<li id='"+obj.id+"'>" +
+                        "<a href=\"../news/newsMessage.html?newsid="+obj.id+"\" class=\"newslista\">" +
+                        "<div class=\"nwesyuan\">消息</div>" +
+                        "<div class=\"hui-media-content\">" +
+                        "<div class=\"news_title\"><span>"+obj.title+"</span> <span class=\"index_newstime\">"+obj.date+"</span></div>" +
+                        "<p class=\"text_p\">描述</p>" +
+                        "</div>" +
+                        "</a>" +
+                        "</li>";
+                    $("#newslist").append(appendhtml);
+                });
+            } else {
+                hui.toast(result.resMsg);
+                return;
+            }
+        }
+
+    });
+</script>

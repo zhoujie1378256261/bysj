@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+    <script src="../../js/hui.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+    <header class="hui-header blue">
+        <div id="hui-back"></div>
+        <h1 id="title">活动标题</h1>
+    </header>
+    <div class="hui-wrap">
+        <div class="hui-content" style="padding:10px;">
+            <p id="cont">使用P标记会缩进！你的宿舍简单到只有一张床一套沙发和一个衣柜。我说，你这是一箪食一瓢饮的颜回，你点头，我就喜欢这样安静的生活，人不堪其忧，我也不改其乐。</p>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+
+    var url = location.search; //获取url中"?"符后的字串 ('?modFlag=business&role=1')
+    var theRequest = new Object();
+    if ( url.indexOf( "?" ) != -1 ) {
+        var str = url.substr( 1 ); //substr()方法返回从参数值开始到结束的字符串；
+        var strs = str.split( "&" );
+        for ( var i = 0; i < strs.length; i++ ) {
+            theRequest[ strs[ i ].split( "=" )[ 0 ] ] = ( strs[ i ].split( "=" )[ 1 ] );
+        }
+    }
+
+    $.ajax({
+        url:"/weixinreading/detail",
+        type:"GET",
+        data:{token:sessionStorage.token,orgid:sessionStorage.orgid,id:theRequest.id},
+        success:function (result) {
+            if(result.resCode == 200){
+                $("#title").text(result.resMsg.title);
+                $("#cont").text(result.resMsg.content);
+            }
+        }
+    });
+</script>
+</html>

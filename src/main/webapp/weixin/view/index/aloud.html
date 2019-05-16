@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>首页</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+    <link rel="stylesheet" href="../../css/index.css" />
+    <link rel="stylesheet" href="../../css/borrowBooks.css" />
+    <link rel="stylesheet" href="../../css/media.css" />
+    <script type="text/javascript" src="../../js/jquery-3.1.1.min.js" ></script>
+    <script type="text/javascript" src="../../js/hui.js"></script>
+    <script src="../../js/hui-popover-msg.js" type="text/javascript" charset="utf-8"></script>
+</head>
+    <style>
+        .index_newsli li {
+            display: block;
+        }
+        .index_newslist{
+            height: 1rem;
+            line-height: 1rem;
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 0.3rem;
+            font-size: 0.8rem;
+        }
+        .index_newstime{
+            font-size: 0.7rem;
+            color: #999;
+        }
+        .hui-media-content span{
+            font-size: 13px;
+            line-height: 1.5em;
+            padding: 0px 8px 0px 0px;
+            color: #999999;
+            word-break: break-word;
+        }
+        .shaixuana a{
+            width: 100%;
+            display: flex;
+            height: 30px;
+            line-height: 30px;
+            color: #333;
+            border-bottom:1px solid #999;
+            font-size: 0.8rem;
+        }
+        .alo_title{
+            color: #333;
+            font-size: 0.8rem;
+        }
+        .shaixuana a:last-child{
+            border: none;
+        }
+        #hui-popover-msg{
+            top: 34px;
+            left: 270px;
+        }
+    </style>
+<body>
+    <header class="hui-header ">
+        <div id="hui-back"></div>
+        <h1 class="bookp_h1">朗读作品</h1>
+        <div class="bookp_reset" id="saixuanbtn">筛选</div>
+    </header>
+    <div class="main hui-wrap">
+        <div class="index-search">
+            <img src="../../img/search_11.png" alt=""><input type="text"  placeholder="作品名、姓名">
+        </div>
+        <div id="refreshContainer" class="hui-refresh">
+            <div class="hui-refresh-icon"></div>
+            <div class="hui-refresh-content ">
+                <div class="hui-media-list index_newsli" style="padding:10px;">
+                    <ul id="list">
+                        <li>
+                            <div class="index_newslist">
+                                <div class="alo_title">三字经</div>
+                            </div>
+                            <a href="javascript:;">
+                                <div class="hui-media-list-img"><img src="../../img/newsimg.png" /></div>
+                                <div class="hui-media-content">
+                                    <p>姓名：<span>李丫丫</span></p>
+                                    <p>班级/部门：<span>1503班</span></p>
+                                    <p>围观次数：<span>50</span></p>
+                                    <p>上传日期：<span>2018-01-12 12:30</span></p>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var menu = '<div class="shaixuana" style="border:0px;"><a>近一个月</a><a>近6个月</a><a>6个月以上</a></div>';
+        hui('#saixuanbtn').popoverMsg('right', 'down', menu, 100,{left:200, top:35});
+    </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>检索</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<link rel="stylesheet" type="text/css" href="../../css/hui.css" />
+		<link rel="stylesheet" href="../../css/index.css" />
+		<link rel="stylesheet" href="../../css/media.css" />
+		<script type="text/javascript" src="../../js/jquery-3.1.1.min.js" charset="UTF-8"></script>
+		<script type="text/javascript" src="../../js/hui.js" charset="UTF-8"></script>
+	</head>
+	<style>
+		.hui-header{
+			display: flex;
+		    width: 100%;
+		    height: 44px;
+		    text-align: left;
+		    top: 0px;
+		    left: 0px;
+		    text-indent: 1.2rem;  
+		    position: fixed;
+		    z-index: 19;
+		    background: #f9f9f9;		    
+		}
+		.hui-slide-menu{
+			background: #fff;
+		}
+		.hui-slide-menu li{
+			color: #333333;
+		}
+		.hui-header h1{
+			text-align: left;
+		}
+		.hui-icons-search:before {		   
+		    color: #6dabfd;
+		}
+		.index-search {
+			height: 50px;
+			line-height: 40px;
+		}
+		.index-search img {
+		    position: absolute;		    
+		    top: 12px;
+		    width: 16px;
+		    height: 16px;
+		}
+		.slide-menu_list{
+			padding: 5px;
+		}
+		.slide-menu_list li:nth-child(even){
+			display: flex;
+			flex-wrap: wrap;
+			text-align: center;
+			height: auto;
+		}
+		.slide-menu_list li div{
+			width: 30%;
+			margin: 0.2rem 0.2rem;
+			background: #DDDDDD;
+		}
+		.slide-menu_list li p{
+			margin: 0.2rem 0rem;
+			padding: 0 0.5rem;
+			background: #DDDDDD;
+		}
+		.slide-menu_list li:last-child{
+			text-align: right;
+			color: #fff;
+		}
+		.search_resetbtn{			
+			width: 5rem;
+			height: 2.5rem;
+			background-color: aqua;	
+			border-radius: 50px 0 0 50px;
+			margin: 0 -5px;		
+			border: none;
+		}
+		.qurentbtn{
+			width: 5rem;
+			height: 2.5rem;
+			background-color: #81a3ff;
+			border-radius: 0px 50px 50px 0px;
+			border: none;
+			
+		}		
+		@media only screen and (min-width: 768px) {
+			.index_tetile{
+				text-indent: 2.5rem;  
+			}
+		}
+	</style>
+	<body>
+		<header class="hui-header index_tetile">		    
+		    <h1 style="color: #333;font-size: 1rem;" >书目检索</h1>
+		    <a href="../search/advancedSearch.html" id="hjjians">高级检索&nbsp;<img src="../../img/hjjians.png"/></a>
+		</header>
+		<div class="hui-wrap">
+			<div class="index-search">
+            	<img src="../../img/search_11.png" alt=""><input type="text"  placeholder="ISBN、正题名、著者、分类号、主题词">
+        	</div>
+        	<button id="search_btn">检索</button>
+			<div id="refreshContainer" class="hui-refresh">
+				<div class="hui-refresh-icon"></div>
+				<div class="hui-refresh-content ">
+					<ul class="index_list3 footermgh">
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>05本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>0本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+						<li><a href=""><img src="../../img/fengmian.png" alt=""><p>王阳明传：知行合一</p><p class="book_p2">燕山刀客 著</p></a><span  class="book_news">在馆信息</span>
+							<div class="book_newslist" style="display: none">
+								<div class="book_newslist_title">在馆信息</div>
+								<div class="book_newslists"><span>一楼藏书室</span><span>10本</span></div>
+								<div class="book_newslists"><span>二楼藏书室</span><span>0本</span></div>
+							</div>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<div id="hui-footer">
+		    <a href="../index/index.html" id="nav-home">
+		        <div class="hui-footer-icons hui-icons-home"></div>
+		        <div class="hui-footer-text">首页</div>
+		    </a>
+		    <a href="../search/searchindex.html" id="nav-search">
+		        <div class="hui-footer-icons hui-icons-search"></div>
+		        <div class="hui-footer-text">搜索</div>
+		    </a>
+		     <a href="../news/newsindex.html" id="nav-forum">
+		        <div class="hui-footer-icons hui-icons-forum"></div>
+		        <div class="hui-footer-text">消息</div>
+		    </a>
+		    <a href="../note/noteindex.html" id="nav-write">
+		        <div class="hui-footer-icons hui-icons-write"></div>
+		        <div class="hui-footer-text">笔记</div>
+		    </a>	   
+		    <a href="../my/myindex.html" id="nav-my">
+		        <div class="hui-footer-icons hui-icons-my"></div>
+		        <div class="hui-footer-text">我的</div>
+		    </a>
+		</div>
+	</body>
+</html>
