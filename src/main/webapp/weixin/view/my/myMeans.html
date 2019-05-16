@@ -21,46 +21,28 @@
         <p class="chazhaoluj">基本信息</p>
         <div class="hui-list" style="border: none">
             <ul>
+
                 <li>
-                   <div class="hui-list-text meanslist">证件状态<span id="sfyx" style="color: #7595ff">有效</span></div>
+                    <div class="hui-list-text meanslist">编号<span id="jszh">000001</span></div>
                 </li>
                 <li>
-                    <div class="hui-list-text meanslist">读者证号<span id="jszh">000001</span></div>
+                    <div class="hui-list-text meanslist">姓名<span id="username">黄晓明</span></div>
                 </li>
                 <li>
-                    <div class="hui-list-text meanslist">读者姓名<span id="xm">黄晓明</span></div>
+                    <div class="hui-list-text meanslist">所属部门<span id="dept">13888888888</span></div>
                 </li>
                 <li>
-                    <div class="hui-list-text meanslist">联系电话<span id="lxfs">13888888888</span></div>
+                    <div class="hui-list-text meanslist">职位<span id="position">2018-09-01</span></div>
                 </li>
                 <li>
-                    <div class="hui-list-text meanslist">启用日期<span id="bzrq">2018-09-01</span></div>
+                    <div class="hui-list-text meanslist">联系电话<span id="phone">2018-09-01</span></div>
                 </li>
                 <li>
-                    <div class="hui-list-text meanslist">失效日期<span id="yxjzrq">2019-06-30</span></div>
-                </li>
-            </ul>
-        </div>
-        <p class="chazhaoluj">读者权限</p>
-        <div class="hui-list" style="border: none">
-            <ul>
-                <li>
-                    <div class="hui-list-text meanslist" >允许借阅本数<span id="sl">5</span></div>
-                </li>
-                <li>
-                    <div class="hui-list-text meanslist" >允许借阅天数<span id="ts">30</span></div>
-                </li>
-                <li>
-                    <div class="hui-list-text meanslist" >能否续借<span id="sfxj">是</span></div>
-                </li>
-                <li>
-                    <div class="hui-list-text meanslist" >预约本数<span id="yysl">1</span></div>
-                </li>
-                <li>
-                    <div class="hui-list-text meanslist" >预借本数<span id="yzsl">1</span></div>
+                    <div class="hui-list-text meanslist">email<span id="email">2018-09-01</span></div>
                 </li>
             </ul>
         </div>
+
         <div class="hui-list" style="margin-top:22px;border: none">
             <ul>
                 <li>
@@ -80,29 +62,17 @@
 <script type="text/javascript">
 
     $.ajax({
-       url:"/weixinwode/findUserInfo",
+       url:"/user/findUserInfo",
        type:"GET",
-       data:{token:sessionStorage.token},
+       data:{userid:sessionStorage.userid || 1},
        success:function (result) {
-            if(result.resCode == 200){
-                if(result.resMsg.sfxj == 1){
-                    result.resMsg.sfxj = "是";
-                }else {
-                    result.resMsg.sfxj = "否";
-                }
-                $("#bzrq").text(result.resMsg.bzrq);
-                $("#jszh").text(result.resMsg.jszh);
-                $("#lxfs").text(result.resMsg.lxfs);
-                $("#sfxj").text(result.resMsg.sfxj);
-                $("#sfyx").text(result.resMsg.sfyx);
-                $("#sl").text(result.resMsg.sl);
-                $("#ts").text(result.resMsg.ts);
-                $("#xjcs").text(result.resMsg.xjcs);
-                $("#xm").text(result.resMsg.xm);
-                $("#yxjzrq").text(result.resMsg.yxjzrq);
-                $("#yysl").text(result.resMsg.yysl);
-                $("#yyts").text(result.resMsg.yyts);
-                $("#yzsl").text(result.resMsg.yzsl);
+            if(result.code == 200){
+                $("#jszh").text(result.data.id);
+                $("#username").text(result.data.username);
+                $("#dept").text(result.data.dept);
+                $("#position").text(result.data.position);
+                $("#phone").text(result.data.phone);
+                $("#email").text(result.data.email);
             }
        }
     });
