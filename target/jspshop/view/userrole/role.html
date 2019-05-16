@@ -1,0 +1,177 @@
+#@layout()
+#define main()
+
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <div class="line"></div>
+    <table id="roleTable" lay-filter="roleTable"></table>
+</div>
+<script type="text/html" id="toolbarDemo">
+    <button class="layui-btn layui-btn-sm" lay-event="addRole">添加角色</button>
+</script>
+#end
+
+#define methods()
+<script>
+        var laydate = layui.laydate;
+        //常规用法
+        laydate.render({
+            elem: '#birthday'
+        });
+
+        var table = layui.table;
+        table.render({
+            title:"用户列表",
+            url:"/role/findRole",
+            elem:"#roleTable",
+            toolbar: '#toolbarDemo',
+            cols: [[ //表头
+                {field: 'id', title: 'id',align:'center', edit:'text',hide:true}
+                ,{field: 'rolename', title: '角色名',align:'center'}
+                ,{field: 'memo', title: '说明',align:'center'}
+                ,{fixed: 'right', title:'操作',templet: function(d) {
+                        var html ='';
+                        if (d.id>6){
+                            var edit='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="edit">修改</a>';
+                            html +=edit;
+                            var del ='<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>';
+                            html +=del;
+                        }
+                        return html;
+                    }}
+            ]],response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            }, parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                if(res.code==3){
+                    window.location.href ="/"
+                }
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": 1, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            }
+        })
+
+
+
+    var dialogIndex;
+
+    //头工具栏事件
+    table.on('toolbar(roleTable)', function(obj){
+        switch(obj.event){
+            case 'addRole':
+                addRole();
+                break;
+        };
+    });
+
+
+    table.on('tool(roleTable)', function(obj){
+        //console.log(obj);
+        var data = obj.data;
+        if(obj.event == 'del'){
+            layer.confirm('真的删除行么', function(index){
+                delRole(obj);
+                layer.close(index)
+            });
+        }else if (obj.event=="edit"){
+            editRole(obj);
+          //  console.log(formjson)
+          //  obj.update(formjson);
+        }
+    });
+
+    function delRole(obj){
+        $.post("/role/delRole",
+            {
+                id:obj.data.id
+            },
+            function(data,status){
+                if(data.code==200){
+                    obj.del();
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            }
+        );
+    }
+
+    function editRole(obj){
+        var role = obj.data;
+        layui.form.val('roleform', {
+            "bean.id": role.id,
+            "bean.rolename": role.rolename,
+            "bean.memo": role.memo,
+        });
+
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['360px', '400px'],
+            content: $("#roleform")
+        });
+    }
+
+    function addRole(){
+        $("#roleform")[0].reset();
+        layui.form.render();
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['360px', '400px'],
+            content: $("#roleform")
+        });
+    }
+
+    layui.form.on('submit(addRoleBtn)', function (data) {
+        //console.log(data);
+        $.post("/role/addOrUpdate",
+            data.field,
+            function (data, status) {
+              //  console.log(data);
+                if (data.code == 200) {
+                   // layer.msg('保存成功！', {icon: 1});
+                    table.reload("roleTable",{});
+                    layer.close(dialogIndex);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+
+                }
+            });
+        return false;
+    });
+
+</script>
+
+#end
+
+#define tableForm()
+#end
+
+<form class="layui-form" id="roleform" style="display: none;" lay-filter="roleform" >
+    <div class="layui-form-item" >
+        <label class="layui-form-label">角色名</label>
+        <div class="layui-input-inline">
+            <input type="text"  name="bean.id"  class="layui-input"  style="display: none;"/>
+            <input type="text"  name="bean.rolename"  placeholder="角色名" autocomplete="off" class="layui-input" lay-verify="required" >
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">说明</label>
+            <div class="layui-input-inline">
+                <textarea name="bean.memo" placeholder="说明" class="layui-textarea"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="addRoleBtn">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

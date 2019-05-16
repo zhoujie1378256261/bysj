@@ -1,0 +1,382 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <form lay-filter="queryForm" id="cityFormQuery" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">机构名称</label>
+        <input type="text" name="bean.orgname" class="layui-input-inline layui-input" placeholder="请输入">
+        <input type="text" name="unitorgid" value="1" style="display: none;">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+    <form lay-filter="queryForm" id="schoolFormQuery" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">学校所在地</label>
+        <div class="layui-input-inline">
+            <select name="bean.areatypeid" id="areaoptionView">
+
+            </select>
+        </div>
+        <label for="">学校类别</label>
+        <div class="layui-input-inline">
+            <select name="bean.schoolcategoryid" id="typeoptionView">
+
+            </select>
+        </div>
+        <label for="">审核状态</label>
+        <div class="layui-input-inline">
+            <select name="bean.status">
+                <option value="">全部</option>
+                <option value="0">待审核</option>
+                <option value="1">审核通过</option>
+                <option value="2">审核不通过</option>
+            </select>
+        </div>
+        <label for="">学校名称</label>
+        <input type="text" name="bean.orgname" class="layui-input-inline layui-input" placeholder="请输入">
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'mainTable'}"></table>
+</div>
+#end
+#define methods()
+<script type="text/html" id="tableSetBtn">
+<div class="text-center layui-btn-group">
+    <!--<button onclick="" data-d="{{d}}" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-set-btn.png" alt=""></button>-->
+    <button onclick="myTable.editPrompt('点击单元格，即可修改。注：[ 审核状态 ] 不可修改')" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-set-btn.png" alt=""></button>
+    <button onclick="myTable.resetPassword(this,'org/passWordReset')" data-fid="{{d.fid}}" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-reset-pass.png" alt=""></button>
+    <button onclick="myTable.detele(this,'org/delete')" data-fid="{{d.id}}" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-detale.png" alt=""></button>
+</div>
+</script>
+<script type="text/html" id="tableHeader">
+    <div class="layui-btn-container text-right">
+        <button onclick="myTable.addCell('/org/addOrUpdate','addCityCell')" id="addCityBtn" class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/add.png" alt=""></button>
+        <button onclick="myTable.addCell('/org/addOrUpdate','addProvinceCell')" id="addProvinceBtn" class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/add.png" alt=""></button>
+        <button onclick="myTable.addCell('/org/addOrUpdate')" id="addSchoolBtn" class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/add.png" alt=""></button>
+        <!--<button class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/password-reset.png" alt=""></button>-->
+        <!--<button class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/share.png" alt=""></button>-->
+        <!--<button class="layui-btn layui-btn-danger layui-btn-sm"><img src="/img/detele.png" alt=""></button>-->
+    </div>
+</script>
+<script>
+
+
+    searchForm.submit('submit(searchBtn)',"/org/lists");
+    var tableCol;
+    var userLevel;
+    judgeLevel(JSON.parse(sessionStorage.loginData).orgid);
+    function judgeLevel(userOrgid){
+        myAjax({url:"/org/orgLevel",data:{orgid:userOrgid},async:false},function(result){
+        userLevel = result.data.orgtypeid;
+        switch(result.data.orgtypeid){
+            case 1:
+                tableCol = [ //表头
+                    {type: 'numbers', title: '序号'}
+                    ,{field: 'orgname', title: '市(州)',align:'center',edit:'text'}
+                    ,{field:'number', title: '登录账号', align:'center'}
+                    ,{field: 'address', title: '地址', align:'center'}
+                    ,{field: 'schoolnum', title: '学校数', align:'center',templet:function(d){
+                            return "<a href='javascript:void(0);' onclick='tableReload("+d.orgid+")'>"+d.schoolnum+"</a>";
+                        }}
+                    ,{field: 'students', title: '学生人数', align:'center'}
+                    ,{field: 'linkman', title: '联系人', align:'center',edit:'text'}
+                    ,{field: 'linkphone', title: '联系电话', align:'center',edit:'text'}
+                    ,{field: 'setbtn',title: '操作', align:'center',templet:function(d){
+                            return "<button onclick=\"myTable.resetPassword(this,'org/passWordReset')\" data-fid=\"+d.fid+\" class=\"layui-btn layui-btn-sm table-setbtn\"><img src=\"/img/table-reset-pass.png\" alt=\"\"></button>";
+                        }}
+                ];
+
+                break;
+            case 2:
+                tableCol = [ //表头
+                    {type: 'numbers', title: '序号'}
+                    ,{field: 'orgname', title: '县(区)',align:'center',edit:'text'}
+                    ,{field:'number', title: '登录账号', align:'center'}
+                    ,{field: 'address', title: '地址', align:'center'}
+                    ,{field: 'schoolnum', title: '学校数', align:'center',templet:function(d){
+                            return "<a href='javascript:void(0);' onclick='tableReload("+d.orgid+")'>"+d.schoolnum+"</a>";
+                        }}
+                    ,{field: 'students', title: '学生数', align:'center'}
+                    ,{field: 'linkman', title: '联系人', align:'center',edit:'text'}
+                    ,{field: 'linkphone', title: '联系电话', align:'center',edit:'text'}
+                    ,{field: 'setbtn',title: '操作', align:'center',templet:function(d){
+                            return "<button onclick=\"myTable.resetPassword(this,'org/passWordReset')\" data-fid=\"+d.fid+\" class=\"layui-btn layui-btn-sm table-setbtn\"><img src=\"/img/table-reset-pass.png\" alt=\"\"></button>";
+                        }}
+                ];
+                break;
+            default:
+                tableCol = [ //表头
+                    {type: 'numbers', title: '序号'}
+                    ,{field: 'orgname', title: '学校名称',align:'center',edit:'text'}
+                    ,{field:'category', title: '学校类别', align:'center', event:'dialogCell'}
+                    ,{field: 'areatype', title: '所在地类别', align:'center',event:'dialogCellarea'}
+                    ,{field: 'teachers', title: '教师数', align:'center'}
+                    ,{field: 'students', title: '学生人数', align:'center'}
+                    ,{field: 'linkman', title: '联系人', align:'center',edit:'text'}
+                    ,{field: 'linkphone', title: '联系电话', align:'center',edit:'text'}
+                    ,{field: 'rffectivetime', title: '有效期至', align:'center'}
+                    ,{title: '审核状态', align:'center',templet:function(d){
+                            if(d.status==0){
+                                return '待审核';
+                            }else if(d.status==1){
+                                return '审核通过';
+                            }else {
+                                return '审核不通过';
+                            }
+                        }}
+                    ,{templet: '#tableSetBtn', title: '操作', align:'center'}
+                ];
+                break;
+        }
+    });
+    }
+
+    myTable.list({
+        url:"/org/lists",
+        elem:"#dataTable",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        toolbar:"#tableHeader",
+        cols: [tableCol]
+    });
+
+    //表格跳转下级
+    function tableReload(arg){
+        sessionStorage.unitOrgid = arg;
+        judgeLevel(arg);
+        tableIns.reload({
+            cols:[tableCol],
+            where:{orgid:arg},
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    $(".layui-table-tool-temp").remove();
+                    $(".layui-table").find("th[data-field=\"setbtn\"]").remove();
+                    $(".layui-table").find("td[data-field=\"setbtn\"]").remove();
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg('查询失败：' + result.msg, { icon: 5 });
+                }
+            }
+        });
+
+    };
+    myTable.edit("/org/addOrUpdate");
+    //监听单元格事件
+    table.on('tool(mainTable)', function(obj) {
+        var data = obj.data;
+        layer.closeAll();
+        if (obj.event === 'dialogCell') {
+
+            var selectIndex = layer.open({
+                type: 1,
+                shade: false,
+                title:'学校类别',
+                area: ['500px','500px'],
+                btn: ['确认', '取消'],
+                btnAlign: 'c',
+                content: '<form id="" class="query-form layui-form"><select id="abc" lay-filter="selectOne"></select></form>',
+                success:function(dialogEle){
+                    searchForm.init("abc","/org/schoolcategory");
+                    form.on('select(selectOne)', function(data){
+                        window.Data = data;
+                    });
+                },
+                yes: function yes(index) {
+                    myAjax({
+                        url: "/org/addOrUpdate",
+                        dataType: 'json',
+                        data: {
+                            bean: _defineProperty({
+                                id: obj.data.id,
+                                schoolcategoryid:window.Data.value
+                            })
+                        }
+                    }, function (result) {
+                        if (result.code == 200) {
+                            layer.msg('操作成功', { icon: 1 });
+                            tableIns.reload({
+                                page: {
+                                    curr: 1
+                                }
+                            });
+                        }
+                    });
+                    layer.close(selectIndex);
+
+                }
+            });
+        };
+
+        if (obj.event === 'dialogCellarea') {
+            var selectIndexa = layer.open({
+                type: 1,
+                shade: false,
+                title:'学校类别',
+                area: ['500px','500px'],
+                btn: ['确认', '取消'],
+                btnAlign: 'c',
+                content: '<form id="" class="query-form layui-form"><select id="abcd" lay-filter="selectTwo"></select></form>',
+                success:function(dialogEle){
+                    searchForm.init("abcd","/org/areaType");
+                    form.on('select(selectTwo)', function(data){
+                        window.Data = data;
+                    });
+                },
+                yes: function yes(index) {
+                    myAjax({
+                        url: "/org/addOrUpdate",
+                        dataType: 'json',
+                        data: {
+                            bean: _defineProperty({
+                                id: obj.data.id,
+                                areatypeid:window.Data.value
+                            })
+                        }
+                    }, function (result) {
+                        if (result.code == 200) {
+                            layer.msg('操作成功', { icon: 1 });
+                            tableIns.reload({
+                                page: {
+                                    curr: 1
+                                }
+                            });
+                        }
+                    });
+                    layer.close(selectIndexa);
+                }
+            });
+        };
+    });
+
+    $(function(){
+
+            switch(userLevel){
+                case 1:
+                    $("#addCityBtn").show();
+                    $("#addProvinceBtn").hide();
+                    $("#addSchoolBtn").hide();
+                    $("#schoolFormQuery").remove();
+                    // debugger;
+                    break;
+                case 2:
+                    $("#addCityBtn").hide();
+                    $("#addProvinceBtn").show();
+                    $("#addSchoolBtn").hide();
+                    $("#schoolFormQuery").remove();
+                    break;
+                default:
+                    $("#addCityBtn").hide();
+                    $("#addProvinceBtn").hide();
+                    $("#addSchoolBtn").show();
+                    $("#cityFormQuery").remove();
+                    searchForm.init("areaoptionView","/org/areaType");
+                    searchForm.init("typeoptionView","/org/schoolcategory");
+                    searchForm.init("areaoptionViewAdd","/org/areaType");
+                    searchForm.init("typeoptionViewAdd","/org/schoolcategory");
+                    break;
+            }
+    });
+
+
+</script>
+#end
+#define tableForm()
+<form class="layui-form" id="addCityCell" style="display: none;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">机构名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.orgname"  placeholder="请输入学校名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">联系人</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.linkman"  lay-verify="required" placeholder="请输入联系人" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">联系电话</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.linkphone"  lay-verify="required" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <input type="text" name="bean.orgtypeid" value="2" style="display: none;">
+    <div class="layui-form-item">
+        <div class="layui-input-block text-center">
+            <button class="layui-btn" lay-submit lay-filter="addCityCell">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+<form class="layui-form" id="addProvinceCell" style="display: none;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">机构名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.orgname"  placeholder="请输入学校名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">联系人</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.linkman"  lay-verify="required" placeholder="请输入联系人" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">联系电话</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.linkphone"  lay-verify="required" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <input type="text" name="bean.orgtypeid" value="3" style="display: none;">
+    <div class="layui-form-item">
+        <div class="layui-input-block text-center">
+            <button class="layui-btn" lay-submit lay-filter="addProvinceCell">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+<form class="layui-form" id="addCell" style="display: none;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">学校名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.orgname"  placeholder="请输入学校名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">学校类别</label>
+        <div class="layui-input-inline">
+            <select name="bean.schoolcategoryid" id="typeoptionViewAdd">
+
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">所在地类别</label>
+        <div class="layui-input-inline">
+            <select name="bean.areatypeid" id="areaoptionViewAdd">
+
+            </select>
+        </div>
+    </div>
+    <input type="text" name="bean.orgtypeid" value="5" style="display: none;">
+    <div class="layui-form-item">
+        <div class="layui-input-block text-center">
+            <button class="layui-btn" lay-submit lay-filter="addCell">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+#end

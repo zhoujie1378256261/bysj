@@ -1,0 +1,119 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    </div>
+    <form class="layui-form queryform" lay-filter="queryform">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <input type="text" name="title" id="title" class="layui-input-inline layui-input" style="width: 150px;" placeholder="正题名">
+        <input type="text" name="isbn" id="ISBN" class="layui-input-inline layui-input" style="width: 150px;" placeholder="ISBN">
+        <input type="text" name="bookno" id="bookno" class="layui-input-inline layui-input" style="width: 150px;" placeholder="索书号">
+        <input type="text" name="publisher" id="publisher" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版社">
+        <input type="text" name="typecode" id="typecode" class="layui-input-inline layui-input" style="width: 150px;" placeholder="分类号">
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <button lay-submit lay-filter="priceBtn" class="layui-btn layui-btn-warm layui-btn-sm">书标打印</button>
+    </form>
+
+</div>
+
+
+<script type="text/html" id="tableHeader">
+    <div class="layui-btn-container text-right">
+
+    </div>
+</script>
+<table class="layui-hide" id="dataTable" lay-filter="dataTable"></table>
+#end
+#define methods()
+<script>
+    var d = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        d[pair[0]]=pair[1];
+    };
+    d["orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+    var tableIns = table.render({
+        elem: '#dataTable'
+        ,url:'/print/mulukadayin'
+        ,where:d
+        ,toolbar: '#tableHeader'
+        ,title: '目录卡打印'
+        ,cols: [[
+            {field:'bookno', title:'索书号'}
+            ,{field:'title', title:'正题名'}
+            ,{field:'bltitle', title:'并列题名'}
+            ,{field:'subtitle', title:'副题名'}
+            ,{field:'author', title:'作者'}
+            ,{field:'otherauthor', title:'其他责任者'}
+            ,{field:'publishaddress', title:'出版地'}
+            ,{field:'publisher', title:'出版社'}
+            ,{field:'publishdate', title:'出版时间'}
+            ,{field:'totalpages', title:'页数'}
+            ,{field:'sizeid', title:'尺寸'}
+            ,{field:'congshuming', title:'丛书名'}
+            ,{field:'congshuauthor', title:'丛书责任者'}
+            ,{field:'fuzhu', title:'附注'}
+            ,{field:'isbn', title:'ISBN'}
+            ,{field:'price', title:'价格'}
+            ,{field:'keyword', title:'主题词'}
+            ,{field:'typecode', title:'分类号'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+    searchForm.submit('submit(searchBtn)',"/print/mulukadayin");
+
+
+    form.on('submit(priceBtn)', function(data){
+        console.log(data.field); //当前容器的全部表单字段，名值对形式：{name: value}
+        data.field.orgid= JSON.parse(sessionStorage.loginData).orgid;
+        $.get("/print/mulukadayin_all",data.field,function(result){
+            if(result.code==200){
+                priceBook(result.data);
+            }
+        });
+        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+    //打印
+    function priceBook(arg){
+        layer.open({
+            type: 2,
+            title:"目录卡打印",
+            area:['140mm','100mm'],
+            btn:['打印预览'],
+            content: "/view/print/mulukadayinTemp.html",
+            success:function(layero,index){
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                iframeWin.markList(arg);
+            },
+            yes: function(index, layero){
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                iframeWin.print();
+            }
+        });
+    }
+</script>
+#end

@@ -1,0 +1,41 @@
+#@layout()
+#define main()
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+
+    myTable.list({
+        url:"/bookrecommend/list",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'isbn', title: 'ISBN',align:'center'}
+            ,{field: 'bookname', title: '题名', align:'center'}
+            ,{field: 'author', title: '著者', align:'center'}
+            ,{field: 'press', title: '出版社', align:'center'}
+            ,{field: 'orgname', title: '荐购学校', align:'center'}
+
+        ]]
+    });
+
+    searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+    searchForm.submit('submit(searchBtn)',"/bookrecommend/list");
+</script>
+#end

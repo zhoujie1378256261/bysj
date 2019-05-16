@@ -1,0 +1,132 @@
+#@layout()
+#define main()
+<div>
+        <script type="text/html" id="optionTpl">
+            <option value="">请选择</option>
+            {{#  layui.each(d, function(index, item){ }}
+            <option value="{{item.id}}">{{ item.text }}</option>
+            {{#  }); }}
+        </script>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">编目人员</label>
+        <div class="layui-input-inline">
+            <select name="catalogUserId" id="userList">
+
+            </select>
+        </div>
+        <label for="">馆藏地</label>
+        <div class="layui-input-inline">
+            <select name="guancangId" id="libraryList">
+
+            </select>
+        </div>
+
+        <label for="startDate">时间选择：</label>
+        <input type="text" name="startTime" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+        <label for="endDate">到：</label>
+        <input type="text" name="endTime" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <button type="button" class="layui-btn layui-btn-danger" onclick="upperShelf()">上架</button>
+    </form>
+
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    $.get("/book/initBookList",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#userList").append("<option value=''></option>");
+            $("#libraryList").append("<option value=''></option>");
+            result.data.userList.forEach(function (item) {
+                $("#userList").append("<option value='"+item.id+"'>"+item.realname+"</option>");
+            });
+            result.data.libraryList.forEach(function (item) {
+                $("#libraryList").append("<option value='"+item.id+"'>"+item.library+"</option>");
+            });
+            form.render('select');
+        }
+    });
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate'
+    });
+
+    myTable.list({
+        url:"/book/findBookList",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar:true,
+        cols: [
+            [
+                {type: 'numbers', title: '序号'}
+                ,{field:'isbn', title: 'ISBN', align:'center'}
+                ,{field:'title', title: '正题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'price', title: '定价', align:'center'}
+                ,{field:'bookno', title: '索书号', align:'center'}
+                ,{field:'counts', title: '复本数', align:'center'}
+                ,{field: 'createtime', title: '编目时间', align:'center'}
+                ,{field: 'realname', title: '编目人', align:'center'}
+            ]
+        ]
+    });
+    var queryObj = null;
+    form.on('submit(searchBtn)', function(data){
+
+        data.field.token = sessionStorage.token;
+        queryObj = data.field;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+    function upperShelf (){
+        if(queryObj == null){
+            $.get("/book/upperShelf",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+                if(result.code==200){
+                    layer.msg('操作成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            });
+        }else {
+            $.get("/book/upperShelf",{orgid:JSON.parse(sessionStorage.loginData).orgid,
+                catalogUserId:queryObj.catalogUserId,
+                guancangId:queryObj.guancangId,
+                startTime:queryObj.startTime,
+                endTime:queryObj.endTime},function (result) {
+                if(result.code==200){
+                    layer.msg('操作成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            });
+        }
+
+    }
+
+
+</script>
+#end

@@ -1,0 +1,173 @@
+#@layout()
+#define main()
+<style>
+    .table, th, td
+    {
+
+        align: center;
+        ext-align:right;
+        vertical-align:middle;
+        background-repeat:repeat-x;
+    }
+    .h1{
+        align: center;
+    }
+    table.layui-table td textarea {
+        padding: 5px;
+        resize: none;
+        text-align: center;
+    }
+
+</style>
+<div id="navTitle" class="nav-title"></div>
+<div class="line"></div>
+<div class="layui-tab-item layui-show">
+    <button type="button" onclick="window.location.href='/standardbooktype/standardbookreport'" class="layui-btn layui-btn-warm">藏书量达标情况</button>
+</div>
+<form  class="layui-form">
+<h1 style="text-align:center">图书分类达标情况</h1>
+        <table  class="layui-table" lay-skin="line|row" lay-size="sm" lay-filter="hotbookfrom" >
+            <thead id="thead">
+                <tr>
+                    <th>藏书分类/指标项</th>
+                    <th>应占比</th>
+                    <th>实际占比</th>
+                    <th>占比缺口</th>
+                    <th>应配数（册）</th>
+                    <th>现有数（册）</th>
+                    <th>缺口数（册）</th>
+                </tr>
+                <th colspan="4">合计</th>
+                <th id="TotalTD"></th>
+                <th id="TotalTD1"></th>
+                <th id="TotalTD2"></th>
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+</form>
+#end
+
+#define methods()
+<script>
+
+    var params={};
+    params["bean.id"]=JSON.parse(sessionStorage.loginData).orgid;
+    $.get("/standardbooktype/list",function (booktypedata) {
+        console.log(booktypedata);
+        $.get("/standardbooknum/list",function (booknumdata) {
+            console.log(booknumdata);
+
+            $.get("/book/findBookTypeNum",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (booktypebooknumdata) {
+                console.log(booktypebooknumdata);
+                $.get("/org/getById",params,function (orgdata) {
+
+                    //计算总册数 学生数*人均藏书量 (册)
+                    var booknum;
+                    booknumdata.data.forEach(function (item) {
+                        if (item.booktype == '人均藏书量 (册)  （按在校学生数)') {
+                            if (orgdata.data.schoolcategoryid ==1){
+                                booknum =parseInt(item.schoolD)*orgdata.data.students;
+                            }else if (orgdata.data.schoolcategoryid ==2){
+                                booknum =parseInt(item.schoolC)*orgdata.data.czstudents;
+                            }else if (orgdata.data.schoolcategoryid ==3){
+                                booknum =(item.schoolD * orgdata.data.students) + (item.schoolC*orgdata.data.czstudents);
+                            }else if (orgdata.data.schoolcategoryid ==4){
+                                booknum =item.schoolB * orgdata.data.gzstudents;
+                            }else if (orgdata.data.schoolcategoryid ==5){
+                                booknum =parseInt(item.schoolA)*(orgdata.data.gzstudents+orgdata.data.czstudents);
+                            }else if (orgdata.data.schoolcategoryid ==6){
+                                booknum =(item.schoolD * orgdata.data.students) + (item.schoolC*orgdata.data.czstudents)+ (item.schoolB*orgdata.data.gzstudents);
+                            }
+                        }
+                    });
+
+                    $("#TotalTD").text(booknum);
+                    $("#TotalTD1").text(booktypebooknumdata.data.Total);
+                    $("#TotalTD2").text(booknum-booktypebooknumdata.data.Total);
+
+                    booktypedata.data.forEach(function (item) {
+                        var tr="<tr>"
+                        //1	小学   2	初级中学   3九年一贯制学校   4高级中学   5	完全中学    6	十二年一贯制学校
+                        var temptr1;
+                        var percent;
+                        if (orgdata.data.schoolcategoryid ==1){
+                            temptr1="<td>"+item.percenta+"%</td>";
+                            percent=item.percenta/100;
+                        }else if (orgdata.data.schoolcategoryid ==2){
+                            temptr1="<td>"+item.percentb+"%</td>";
+                            percent=item.percentb/100;
+                        }else if (orgdata.data.schoolcategoryid ==3){
+                            temptr1="<td>"+item.percentb+"%</td>";
+                            percent=item.percentb/100;
+                        }else if (orgdata.data.schoolcategoryid ==4){
+                            temptr1="<td>"+item.percentb+"%</td>";
+                            percent=item.percentb/100;
+                        }else if (orgdata.data.schoolcategoryid ==5){
+                            temptr1="<td>"+item.percentb+"%</td>";
+                            percent=item.percentb/100;
+                        }else if (orgdata.data.schoolcategoryid ==6){
+                            temptr1="<td>"+item.percentb+"%</td>";
+                            percent=item.percentb/100;
+                        }
+
+
+                        if (item.booktypeid==1){
+                            tr+="<td>第一大类<br/>马列主义毛泽东思想</td>";
+                            tr+=temptr1;
+                            tr+="<td>"+(parseInt(booktypebooknumdata.data.T1)/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+((booknum-parseInt(booktypebooknumdata.data.T1))/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+percent *booknum+"</td>";
+                            tr+="<td>"+booktypebooknumdata.data.T1+"</td>";
+                            tr+="<td>"+(percent *booknum-booktypebooknumdata.data.T1)+"</td>";
+                        }else if (item.booktypeid==2){
+                            tr+="<td>第二大类<br/>B哲学、宗教</td>";
+                            tr+=temptr1;
+                            tr+="<td>"+(parseInt(booktypebooknumdata.data.T2)/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+((booknum-parseInt(booktypebooknumdata.data.T2))/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+percent *booknum+"</td>";
+                            tr+="<td>"+booktypebooknumdata.data.T2+"</td>";
+                            tr+="<td>"+(percent *booknum-booktypebooknumdata.data.T2)+"</td>";
+                        }else if (item.booktypeid==3){
+                            tr+="<td>第三大类<br/>C-K社会科学</td>";
+                            tr+=temptr1;
+                            tr+="<td>"+(parseInt(booktypebooknumdata.data.T3)/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+((booknum-parseInt(booktypebooknumdata.data.T3))/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+percent *booknum+"</td>";
+                            tr+="<td>"+booktypebooknumdata.data.T3+"</td>";
+                            tr+="<td>"+(percent *booknum-booktypebooknumdata.data.T3)+"</td>";
+                        }else if (item.booktypeid==4){
+                            tr+="<td>第四大类<br/>N-X自然科学</td>";
+                            tr+=temptr1;
+                            tr+="<td>"+(parseInt(booktypebooknumdata.data.T4)/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+((booknum-parseInt(booktypebooknumdata.data.T4))/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+percent *booknum+"</td>";
+                            tr+="<td>"+booktypebooknumdata.data.T4+"</td>";
+                            tr+="<td>"+(percent *booknum-booktypebooknumdata.data.T4)+"</td>";
+                        }else if (item.booktypeid==5){
+                            tr+="<td>第五大类<br/>Z综合性图书</td>";
+                            tr+=temptr1;
+                            tr+="<td>"+(parseInt(booktypebooknumdata.data.T5)/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+((booknum-parseInt(booktypebooknumdata.data.T5))/booknum).toFixed(2)*100+"%</td>";
+                            tr+="<td>"+percent *booknum+"</td>";
+                            tr+="<td>"+booktypebooknumdata.data.T5+"</td>";
+                            tr+="<td>"+(percent *booknum-booktypebooknumdata.data.T5)+"</td>";
+                        }
+                        tr+="</tr>";
+                        $("#tbody").append(tr);
+
+
+                    });
+                });
+
+            })
+        });
+
+    });
+
+
+</script>
+#end
+
+#define tableForm()
+#end

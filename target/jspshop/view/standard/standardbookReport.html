@@ -1,0 +1,241 @@
+#@layout()
+#define main()
+<style>
+    .table, th, td
+    {
+
+        align: center;
+        ext-align:right;
+        vertical-align:middle;
+        background-repeat:repeat-x;
+    }
+    .h1{
+        align: center;
+    }
+    table.layui-table td textarea {
+        padding: 5px;
+        resize: none;
+        text-align: center;
+    }
+
+</style>
+<div id="navTitle" class="nav-title"></div>
+<div class="line"></div>
+<div class="layui-tab-item layui-show">
+    <button type="button" onclick="window.location.href='/standardbooktype/standardbooktypereport'" class="layui-btn layui-btn-warm">图书分类达标情况</button>
+</div>
+<form  class="layui-form">
+<h1 style="text-align:center">藏书量达标情况</h1>
+        <table  class="layui-table" lay-skin="line|row" lay-size="sm" lay-filter="hotbookfrom" >
+            <thead id="thead">
+            </thead>
+            <tbody id="tbody">
+            </tbody>
+        </table>
+</form>
+#end
+
+#define methods()
+<script>
+
+    var params={};
+    params["bean.id"]=JSON.parse(sessionStorage.loginData).orgid;
+    $.get("/standardbooknum/list",function (booknumdata) {
+        console.log(booknumdata);
+        $.get("/org/getById",params,function (orgdata) {
+            console.log(orgdata);
+            //1	小学   2	初级中学   3九年一贯制学校   4高级中学   5	完全中学    6	十二年一贯制学校
+            var tr="<tr>";
+            tr+="<th rowspan='2'>指标项</th>";
+            if (orgdata.data.schoolcategoryid ==1){
+                tr+="<th rowspan='2'>小学生学生数</th>";
+                tr+="<th colspan='2'>图书</th>";
+            }else if (orgdata.data.schoolcategoryid ==2){
+                tr+="<th rowspan='2'>初中生学生数</th>";
+                tr+="<th colspan='2'>图书</th>";
+            }else if (orgdata.data.schoolcategoryid ==3){
+                tr+="<th rowspan='2'>小学生学生数</th>";
+                tr+="<th rowspan='2'>初中生学生数</th>";
+                tr+="<th colspan='3'>图书</th>";
+            }else if (orgdata.data.schoolcategoryid ==4){
+                tr+="<th rowspan='2'>高中生学生数</th>";
+                tr+="<th colspan='2'>图书</th>";
+            }else if (orgdata.data.schoolcategoryid ==5){
+                tr+="<th rowspan='2'>完全中学学生数</th>";
+                tr+="<th colspan='2'>图书</th>";
+            }else if (orgdata.data.schoolcategoryid ==6){
+                tr+="<th rowspan='2'>小学生学生数</th>";
+                tr+="<th rowspan='2'>初中生学生数</th>";
+                tr+="<th rowspan='2'>高中生学生数</th>";
+                tr+="<th colspan='4'>图书</th>";
+            }
+            tr+="<th rowspan='2'>期刊总数</th>";
+            tr+="<th rowspan='2'>工具书、教学参考书总数（种）</th>";
+            tr+="</tr>";
+            $("#thead").append(tr);
+
+            tr="<tr>";
+            tr+="<td>总数(册)</td>";
+            if (orgdata.data.schoolcategoryid ==1){
+                tr+="<th rowspan='2'>小学生均册数</th>";
+            }else if (orgdata.data.schoolcategoryid ==2){
+                tr+="<th rowspan='2'>初中生均册数</th>";
+            }else if (orgdata.data.schoolcategoryid ==3){
+                tr+="<th rowspan='2'>小学生均册数</th>";
+                tr+="<th rowspan='2'>初中生均册数</th>";
+            }else if (orgdata.data.schoolcategoryid ==4){
+                tr+="<th rowspan='2'>高中生均册数</th>";
+            }else if (orgdata.data.schoolcategoryid ==5){
+                tr+="<th rowspan='2'>完全中学均册数</th>";
+            }else if (orgdata.data.schoolcategoryid ==6){
+                tr+="<th rowspan='2'>小学生均册数</th>";
+                tr+="<th rowspan='2'>初中生均册数</th>";
+                tr+="<th rowspan='2'>高中生均册数</th>";
+            }
+
+            tr+="</tr>";
+            $("#thead").append(tr);
+
+            tr="<tr>";
+            tr+="<td>标准</td>";
+            if (orgdata.data.schoolcategoryid ==1){
+                tr+="<td rowspan='4'>"+orgdata.data.students+"</td>";
+            }else if (orgdata.data.schoolcategoryid ==2){
+                tr+="<td rowspan='4'>"+orgdata.data.czstudents+"</td>";
+            }else if (orgdata.data.schoolcategoryid ==3){
+                tr+="<td rowspan='4'>"+orgdata.data.students+"</td>";
+                tr+="<td rowspan='4'>"+orgdata.data.czstudents+"</td>";
+            }else if (orgdata.data.schoolcategoryid ==4){
+                tr+="<td rowspan='4'>"+orgdata.data.gzstudents+"</td>";
+            }else if (orgdata.data.schoolcategoryid ==5){
+                var num =parseInt(orgdata.data.czstudents)+parseInt(orgdata.data.gzstudents);
+                tr+="<td rowspan='4'>"+num+"</td>";
+            }else if (orgdata.data.schoolcategoryid ==6){
+                tr+="<td rowspan='4'>"+orgdata.data.students+"</td>";
+                tr+="<td rowspan='4'>"+orgdata.data.czstudents+"</td>";
+                tr+="<td rowspan='4'>"+orgdata.data.gzstudents+"</td>";
+            }
+
+            var tr1;
+            var tr2;
+            var tr3;
+            var booknum;
+            var periodicalnum;
+            booknumdata.data.forEach(function (item) {
+                if (item.booktype=='人均藏书量 (册)  （按在校学生数)'){
+                    if (orgdata.data.schoolcategoryid ==1){
+                        booknum =parseInt(item.schoolD)*orgdata.data.students;
+                        tr1="<td>"+item.schoolD+"</td>";
+                    }else if (orgdata.data.schoolcategoryid ==2){
+                        booknum =parseInt(item.schoolC)*orgdata.data.czstudents;
+                        tr1="<td>"+item.schoolC+"</td>";
+                    }else if (orgdata.data.schoolcategoryid ==3){
+                        booknum =(item.schoolD * orgdata.data.students) + (item.schoolC*orgdata.data.czstudents);
+                        tr1="<td>"+item.schoolD+"</td>";
+                        tr1+="<td>"+item.schoolC+"</td>";
+                    }else if (orgdata.data.schoolcategoryid ==4){
+                        booknum =item.schoolB * orgdata.data.gzstudents;
+                        tr1="<td>"+item.schoolB+"</td>";
+                    }else if (orgdata.data.schoolcategoryid ==5){
+                        booknum =parseInt(item.schoolA)*(orgdata.data.gzstudents+orgdata.data.czstudents);
+                        tr1="<td>"+item.schoolA+"</td>";
+                    }else if (orgdata.data.schoolcategoryid ==6){
+                        booknum =(item.schoolD * orgdata.data.students) + (item.schoolC*orgdata.data.czstudents)+ (item.schoolB*orgdata.data.gzstudents);
+                        tr1="<td>"+item.schoolD+"</td>";
+                        tr1+="<td>"+item.schoolC+"</td>";
+                        tr1+="<td>"+item.schoolB+"</td>";
+                    }
+                }else if (item.booktype=='报刊 (种)'){
+                    periodicalnum =parseInt(item.schoolC)+parseInt(item.schoolD);
+                    tr2+="<td>"+periodicalnum+"</td>";
+                }else if (item.booktype=='工具书，教学参考书 (种)'){
+                    var num =parseInt(item.schoolC)+parseInt(item.schoolD);
+                    tr3+="<td>"+num+"</td>";
+                }
+            });
+
+            tr+="<td>"+booknum+"</td>";
+            tr+=tr1+tr2+tr3;
+            tr+="</tr>"
+            $("#tbody").append(tr);
+
+
+            $.get("/standardbooknum/findDayReport",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (dayreport) {
+                console.log(dayreport);
+                var tr="<tr>";
+                tr+="<td>现有</td>";
+                tr+="<td>"+dayreport.data.tszcs+"</td>";
+                if (orgdata.data.schoolcategoryid ==1){
+                    tr+="<td>"+(dayreport.data.tszcs/orgdata.data.students).toFixed(2)+"</td>";
+                }else if (orgdata.data.schoolcategoryid ==2){
+                    tr+="<td>"+(dayreport.data.tszcs/orgdata.data.czstudents).toFixed(2)+"</td>";
+                }else if (orgdata.data.schoolcategoryid ==3){
+                    tr+="<td colspan='2'>"+(dayreport.data.tszcs/(orgdata.data.czstudents+orgdata.data.students)).toFixed(2)+"</td>";
+                }else if (orgdata.data.schoolcategoryid ==4){
+                    tr+="<td>"+(dayreport.data.tszcs/orgdata.data.gzstudents).toFixed(2)+"</td>";
+                }else if (orgdata.data.schoolcategoryid ==5){
+                    tr+="<td>"+(dayreport.data.tszcs/(orgdata.data.czstudents+orgdata.data.gzstudents)).toFixed(2)+"</td>";
+                }else if (orgdata.data.schoolcategoryid ==6){
+                    tr+="<td colspan='3'>"+(dayreport.data.tszcs/(orgdata.data.czstudents+orgdata.data.students+orgdata.data.gzstudents)).toFixed(2)+"</td>";
+                }
+
+                tr+="<td>"+dayreport.data.qkzs+"</td>";
+                tr+="<td></td>";
+                tr+="</tr>"
+                $("#tbody").append(tr);
+
+
+                tr="<tr>";
+                tr+="<td>缺口</td>";
+                tr+="<td>"+(booknum-dayreport.data.tszcs)+"</td>";
+                if (orgdata.data.schoolcategoryid ==1){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==2){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==3){
+                    tr+="<td  colspan='2'>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==4){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==5){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==6){
+                    tr+="<td colspan='3'>/</td>";
+                }
+                tr+="<td>"+(periodicalnum-dayreport.data.qkzs)+"</td>";
+                tr+="<td></td>";
+                tr+="</tr>"
+                $("#tbody").append(tr);
+
+                tr="<tr>";
+                tr+="<td>达标率(%)</td>";
+                tr+="<td>"+(dayreport.data.tszcs/booknum).toFixed(2)*100+"%</td>";
+                if (orgdata.data.schoolcategoryid ==1){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==2){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==3){
+                    tr+="<td  colspan='2'>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==4){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==5){
+                    tr+="<td>/</td>";
+                }else if (orgdata.data.schoolcategoryid ==6){
+                    tr+="<td colspan='3'>/</td>";
+                }
+                tr+="<td>"+(dayreport.data.qkzs/periodicalnum).toFixed(2)*100+"%</td>";
+                tr+="<td></td>";
+                tr+="</tr>"
+                $("#tbody").append(tr);
+            });
+        });
+
+
+
+    });
+
+
+</script>
+#end
+
+#define tableForm()
+#end

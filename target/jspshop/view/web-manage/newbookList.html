@@ -1,0 +1,81 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+
+
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script type="text/html" id="tableHeader">
+    <div class="layui-btn-container text-right">
+        <button onclick="myTable.addCell('/booknew/add')" class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/add.png" alt=""></button>
+        <!--<button class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/password-reset.png" alt=""></button>-->
+        <!--<button class="layui-btn layui-btn-warm layui-btn-sm"><img src="/img/share.png" alt=""></button>-->
+        <!--<button class="layui-btn layui-btn-danger layui-btn-sm"><img src="/img/detele.png" alt=""></button>-->
+    </div>
+</script>
+<script>
+
+
+    myTable.list({
+        url:"/booknew/list",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'isbn', title: 'ISBN',align:'center'}
+            ,{field: 'title', title: '题名', align:'center'}
+            ,{field: 'zhuzhe', title: '著者', align:'center'}
+            ,{field: 'chubanshe', title: '出版社', align:'center'}
+            ,{field: 'tuijianliyou', title: '推荐理由', align:'center'}
+            // ,{field: 'createtime', title: '推荐时间', align:'center', sort:true}
+        ]]
+    });
+    // searchForm.submit('submit(addCell)',"/booknew/addOrUpdate");
+
+</script>
+#end
+#define tableForm()
+<form class="layui-form" id="addCell" style="display: none;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">ISBN</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.isbn" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">题名</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.title"  lay-verify="required" placeholder="必填项" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">著者</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.zhuzhe"  lay-verify="required" placeholder="必填项" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">出版社</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.chubanshe" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">推荐理由</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入内容" name="bean.tuijianliyou" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block text-center">
+            <button class="layui-btn" lay-submit lay-filter="addCell">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+
+#end

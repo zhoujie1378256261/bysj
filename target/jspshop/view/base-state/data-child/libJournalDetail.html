@@ -1,0 +1,58 @@
+#@layout()
+#define main()
+<div>
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 基本概况 > 学校数据统计 > <span>馆藏期刊明细</span>
+    </div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <input type="text" name="bean.orgname" class="layui-input-inline layui-input" placeholder="题名、主题词、编辑部">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    console.log(getUrlParam("orgid"));
+
+    // searchForm.submit('submit(searchBtn)',"selectcount/schoolOmnibusList");
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        data.field.orgid = getUrlParam("orgid");
+        tableIns.reload({
+            where:data.field,
+            page: {
+                curr: 1
+            }
+        });
+        layer.msg('查询成功', { icon: 1 });
+        return false;
+    });
+
+    myTable.list({
+        url:"/selectcount/qBooksNumDetailedList",
+        elem:"#dataTable",
+        postData:{orgid:getUrlParam("orgid")},
+        toolbar:true,
+        cols: [
+            [ //表头
+                {type: 'numbers', title: '序号',rowspan:2}
+                ,{field:'isbn', title: 'ISBN/ISSN', align:'center'}
+                ,{field: 'title', title: '题名/刊名', align:'center'}
+                ,{field: 'qs', title: '期数', align:'center'}
+                ,{field: 'qeditoffice', title: '编辑部', align:'center'}
+                ,{field: 'qtongyikanhao',title: '统一刊号', align:'center'}
+                ,{field: 'qyoufadaihao',title: '邮发代号', align:'center'}
+                ,{field: 'bookno',title: '索刊号', align:'center'}
+                ,{field: 'price',title: '定价（元）', align:'center'}
+            ]
+        ]
+    });
+</script>
+#end

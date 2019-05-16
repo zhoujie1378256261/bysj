@@ -1,0 +1,296 @@
+#@layout()
+#define main()
+<div class="areaSum clearfix" v-cloak>
+    <div class="jswxt">
+        图书管理系统
+    </div>
+    <div class="line"></div>
+    <div class="hztj">
+        汇总统计
+    </div>
+    <ul class="xxs clearfix">
+        <li>
+            <a href="schoolRegister">
+                <div class="clearfix"><span class="pull-left">学校数</span><i class="pull-right">●</i></div>
+                <div>{{summaryList.xxs}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">学生数</span><i class="pull-right">●</i></div>
+            <div>{{summaryList.xss||0}}</div>
+            </a>
+        </li>
+        <li>
+            <a href="readerQuery">
+            <div class="clearfix"><span class="pull-left">读者数</span><i class="pull-right">●</i></div>
+            <div>{{summaryList.dzs||0}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">图书管理员数</span><i class="pull-right">●</i></div>
+            <div>{{summaryList.tsglys||0}}</div>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">图书种数</span><i class="pull-right">●</i></div>
+            <div>{{summaryList.tszs||0}}</div>
+            </a>
+        </li>
+    </ul>
+    <ul class="tszcs clearfix">
+        <li>
+            <a href="libNumberStats">
+                <div>图书总册数：</div>
+                <p>{{summaryList.tszcs||0}}</p>
+            </a>
+        </li>
+        <li>
+            <a href="libNumberStats">
+                <div>期刊种数：</div>
+                <p>{{summaryList.qkzs||0}}</p>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>缺书册数：</div>
+                <p>{{summaryList.qscs||0}}</p>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>平均复本：</div>
+                <p>{{summaryList.pjfb?parseFloat(summaryList.pjfb).toFixed(2):0}}</p>
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>图书保障率：</div>
+                <p>{{summaryList.tsbzl?parseFloat(summaryList.tsbzl).toFixed(2)+"%":0}}</p>
+            </a>
+        </li>
+    </ul>
+    <div class="line"></div>
+    <div class="lttj clearfix">
+        <div class="one-row">流通统计</div>
+        <p class="dateSelect layui-form">
+            筛选时间：从
+            <input type="text" id="startDate" v-model="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 20px;" placeholder="开始日期">
+            到
+            <input type="text" id="endDate" v-model="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 20px;" placeholder="结束时间">
+            <button onclick="queryFlow()" class="layui-btn layui-btn-xs layui-btn-normal" style="height: 18px;font-size: 10px;">查询</button>
+        </p>
+        <ul class="dqjcsl">
+            <li>
+                <p><span></span>&nbsp;&nbsp;当前借出数量：</p>
+                <p>&nbsp;&nbsp;&nbsp;{{flowStatistics.dqjcsl}}</p>
+            </li>
+            <li>
+                <p><span></span>&nbsp;&nbsp;图书借出数量：</p>
+                <p>&nbsp;&nbsp;&nbsp;{{flowStatistics.tsjcsl}}</p>
+            </li>
+            <li>
+                <p><span></span>&nbsp;&nbsp;期刊借出数量：</p>
+                <p>&nbsp;&nbsp;&nbsp;{{flowStatistics.qkjcsl}}</p>
+            </li>
+        </ul>
+        <div class="rjjycs">
+            <p>人均借阅册数：<b>{{flowStatistics.rjjycs?flowStatistics.rjjycs.toFixed(2):0}}</b></p>
+            <div id="pleproNumber" class="rjjycs-echats" style="width: 280px;height:200px;"></div>
+        </div>
+    </div>
+    <div class="jrjb clearfix">
+        <div class="one-row">今日简报</div>
+        <p class="" style="height: 45px;">
+        </p>
+        <div class="rjjycs">
+            <div id="rjjycsChats" class="rjjycs-echats" style="width: 240px;height:200px;"></div>
+        </div>
+        <ul class="xzts">
+            <li><a href="libFlowStats"><i>1</i><b>{{dayBriefingList.jssl}}</b>借书数量</a></li>
+            <li><a href="libFlowStats"><i>2</i><b>{{dayBriefingList.hssl}}</b>还书数量</a></li>
+            <li><a href="libChangeStats"><i>3</i><b>{{dayBriefingList.xzsl}}</b>新增图书</a></li>
+            <li><a href="libChangeStats"><i>4</i><b>{{dayBriefingList.zxsl}}</b>注销图书</a></li>
+        </ul>
+    </div>
+</div>
+#end
+#define methods()
+<!--<script type="text/javascript" src="/lib/echarts-en.common.js"></script>-->
+<script type="text/javascript">
+    var flowStatistics;
+    var dayBriefingList;
+    var section = new Vue({
+        el: "#section",
+        data:{
+            endDate:'',
+            startDate:'',
+            summaryList:{
+                // xxs:1000
+            },
+            flowStatistics:{},
+            dayBriefingList:{},
+            circulationList:{}
+        },
+        methods: {
+
+        },
+        created:function(){
+            var that = this;
+            myAjax({url:"/region/summaryList"},function(result){
+                that.summaryList = result.data;      //汇总统计
+            });
+        },
+        mounted:function(){
+            var that = this;
+            myAjax({url:"/region/circulationList"},function(result){
+                that.flowStatistics = result.data;
+                flowStatistics =  result.data;
+                console.log(flowStatistics,123);
+            });
+            myAjax({url:"/region/dayBriefingList"},function(result){
+
+                that.dayBriefingList = result.data;  //今日简报
+                dayBriefingList = result.data;
+                console.log(dayBriefingList,456);
+            });
+        }
+    });
+
+    function echatsFun(ele,yValue,itemData){
+        var myChart = echarts.init(document.getElementById(ele),"light");
+        var option = {
+            title: {
+                // text: 'ECharts 入门示例'
+            },
+            label:{
+                fontSize:'8px'
+            },
+            grid:{
+                show:true,
+                top: '15px',
+                bottom: '50px',
+                left: '50px',
+                borderColor:"#f8f8f8"
+            },
+            xAxis: {
+                data: yValue,
+                splitLine:{ show:false },
+                axisLine:{
+                    lineStyle:{
+                        color:'#d2d2d2'
+                    }
+                },
+                axisLabel : {
+                    textStyle: {
+                        fontSize: '10px',
+                        color:'#666'
+                    },
+                    formatter : function(params){
+                        var newParamsName = "";// 最终拼接成的字符串
+                        var paramsNameNumber = params.length;// 实际标签的个数
+                        var provideNumber = 2;// 每行能显示的字的个数
+                        var rowNumber = Math.ceil(paramsNameNumber / provideNumber);// 换行的话，需要显示几行，向上取整
+                        if (paramsNameNumber > provideNumber) {
+                            /** 循环每一行,p表示行 */
+                            for (var p = 0; p < rowNumber; p++) {
+                                var tempStr = "";// 表示每一次截取的字符串
+                                var start = p * provideNumber;// 开始截取的位置
+                                var end = start + provideNumber;// 结束截取的位置
+                                // 此处特殊处理最后一行的索引值
+                                if (p == rowNumber - 1) {
+                                    // 最后一次不换行
+                                    tempStr = params.substring(start, paramsNameNumber);
+                                } else {
+                                    // 每一次拼接字符串并换行
+                                    tempStr = params.substring(start, end) + "\n";
+                                }
+                                newParamsName += tempStr;// 最终拼成的字符串
+                            }
+
+                        } else {
+                            // 将旧标签的值赋给新标签
+                            newParamsName = params;
+                        }
+                        //将最终的字符串返回
+                        return newParamsName
+                    }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                splitLine:{ show:false },
+                axisLine:{
+                    lineStyle:{
+                        color:'#d2d2d2'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        fontSize: '10px',
+                        color:'#666'
+                    },
+                    show: true,
+                    interval: 'auto',
+                    formatter: '{value} %'
+                },
+                // show: true
+            },
+            series: [
+                {
+                    barWidth: 20,
+                    type: 'bar',
+                    data: itemData,
+                    itemStyle:{
+                        normal:{
+                            color:'#608df2'
+                        }
+                    },
+                    label:{
+                        normal:{
+                            show:true,            //显示数字
+                            position: 'top'        //这里可以自己选择位置
+                        }
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option);
+    };
+    function queryFlow(){
+        if(!$("#startDate").val()||!$("#endDate").val()) return layer.msg('请输入起始时间');
+        myAjax({url:"/region/circulationList",data:{ksrq:$("#startDate").val(),jsrq:$("#endDate").val()}},function(result){
+
+            flowStatistics = result.data;
+            echatsFun('pleproNumber',["读者到馆率","藏书利用率","文献利用率","读者阅读率"],[flowStatistics.dzdgl?flowStatistics.dzdgl.toFixed(2):0, flowStatistics.cslyl?flowStatistics.cslyl.toFixed(2):0, flowStatistics.wxlyl?flowStatistics.wxlyl.toFixed(2):0, flowStatistics.dzydl?flowStatistics.dzydl.toFixed(2):0]);
+        });
+    }
+    window.onload=function(){
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '/lib/echarts.simple.min.js';     //填自己的js路径
+        $('body').append(script);
+
+        //延时加载
+        setTimeout(function(){
+            console.log(flowStatistics);
+            echatsFun('pleproNumber',["读者到馆率","藏书利用率","文献利用率","读者阅读率"],[flowStatistics.dzdgl?flowStatistics.dzdgl.toFixed(2):0, flowStatistics.cslyl?flowStatistics.cslyl.toFixed(2):0, flowStatistics.wxlyl?flowStatistics.wxlyl.toFixed(2):0, flowStatistics.dzydl?flowStatistics.dzydl.toFixed(2):0]);
+            echatsFun('rjjycsChats',["图书借阅率","读者到馆率"],[dayBriefingList.jyl?dayBriefingList.jyl.toFixed(2):0, dayBriefingList.dgl?dayBriefingList.dgl.toFixed(2):0]);
+        },1500);
+
+        laydate.render({
+            elem: '#startDate' //指定元素
+        });
+        laydate.render({
+            elem: '#endDate' //指定元素
+        });
+
+        //判断所属级别
+        myAjax({url:"/org/orgLevel",data:{orgid:JSON.parse(sessionStorage.loginData).orgid}},function(result){
+            sessionStorage.userLevel = result.data.orgtypeid;
+        });
+    }
+</script>
+#end

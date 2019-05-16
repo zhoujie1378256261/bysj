@@ -1,0 +1,1214 @@
+#@layout()
+#define main()
+<style>
+    .reader-message > li {
+        float: left;
+    }
+    .reader-message > li:nth-of-type(1) {
+        width: 100px;
+        height: 100px;
+        background-color: #c2c2c2;
+    }
+    table.reader-table td{
+        padding: 3px;
+    }
+    table.reader-table td label {
+        text-align: right;
+        width: 82px;
+        display: inline-block;
+    }
+    table.reader-table td textarea {
+        height: 20px;
+        resize: none;
+        width: 120px;
+        vertical-align: middle;
+        line-height: 20px;
+        text-indent: 10px;
+        color: #000;
+    }
+    table.reader-table td input[disabled] {
+        background-color: #e6e6e6!important;
+    }
+
+</style>
+<div>
+    <div id="navTitle" class="nav-title"></div>
+
+    <script type="text/html" id="yuyuebar">
+        <a class="layui-btn layui-btn-xs" lay-event="getbook">预约取书</a>
+        <a class="layui-btn layui-btn-xs" lay-event="canncel">取消预约</a>
+    </script>
+    <script type="text/html" id="yujiebar">
+        <a class="layui-btn layui-btn-xs" lay-event="getbook">预借取书</a>
+        <a class="layui-btn layui-btn-xs" lay-event="canncel">取消预借</a>
+    </script>
+
+    <div class="layui-tab" lay-filter="yujietab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">预约</li>
+            <li>预借</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form" lay-filter="yuyuequeryform" id="yuyuequeryform">
+                    <div>
+                        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                        <label for="">读者证号/姓名：</label>
+                        <div class="layui-input-inline">
+                            <input type="hidden" name="type" value="1">
+                            <input type="text" name="readerinfo" class="layui-input-inline layui-input" placeholder="读者证号/姓名">
+                        </div>
+                        <label for="">正题名/刊名：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bookinfo" class="layui-input-inline layui-input" placeholder="正题名/刊名">
+                        </div>
+                        <label for="">状态：</label>
+                        <div class="layui-input-inline" >
+                            <select name="status" id="yuyuestatus">
+                                <option value=''>全部</option>
+                                <option value='0'>预约中</option>
+                                <option value="1">预约成功</option>
+                                <option value='2'>完成</option>
+                                <option value='3'>失效</option>
+                                <option value='4'>取消</option>
+                            </select>
+                        </div>
+                        <button lay-submit lay-filter="searchyuyueBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+                        <button type="button" onclick="bookReserveBtn(1)" class="layui-btn layui-btn-sm layui-btn-normal">图书预约</button>
+                        <button type="button" onclick="journalReserveBtn(1)" class="layui-btn layui-btn-sm layui-btn-normal">期刊预约</button>
+                        <button type="button" onclick="removeYuyue(1)" class="layui-btn layui-btn-sm layui-btn-normal">清除无效预约</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="yuyuedatatable" lay-filter="yuyuedatatable"></table>
+            </div>
+            <div class="layui-tab-item">
+                <form class="layui-form" lay-filter="yujiequeryform" id="yujiequeryform">
+                    <div>
+                        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                        <label for="">读者证号/姓名：</label>
+                        <div class="layui-input-inline">
+                            <input type="hidden" name="type" value="2">
+                            <input type="text" name="readerinfo" class="layui-input-inline layui-input" placeholder="读者证号/姓名">
+                        </div>
+                        <label for="">正题名/刊名：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bookinfo" class="layui-input-inline layui-input" placeholder="正题名/刊名">
+                        </div>
+                        <label for="">状态：</label>
+                        <div class="layui-input-inline" >
+                            <select name="status" id="yijiestatus">
+                                <option value=''>全部</option>
+                                <option value='0'>预约中</option>
+                                <option value="1">预约成功</option>
+                                <option value='2'>完成</option>
+                                <option value='3'>失效</option>
+                                <option value='4'>取消</option>
+                            </select>
+                        </div>
+                        <button lay-submit lay-filter="searchyujieBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+                        <button type="button" onclick="bookReserveBtn(2)" class="layui-btn layui-btn-sm layui-btn-normal">图书预借</button>
+                        <button type="button" onclick="journalReserveBtn(2)" class="layui-btn layui-btn-sm layui-btn-normal">期刊预借</button>
+                        <button type="button" onclick="removeYuyue(2)" class="layui-btn layui-btn-sm layui-btn-normal">清除无效预借</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="yujiedatatable" lay-filter="yujiedatatable"></table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+#end
+#define methods()
+<script type="text/javascript">
+    function getQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            d[this.name] = this.value;
+        });
+        d["orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        return d;
+    }
+    table.render({
+        elem: '#yuyuedatatable'
+        ,url:'/jieyue/yuyueList'
+        ,where:getQueryCondition("yuyuequeryform")
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'realname', title:'姓名', edit: 'text'}
+            ,{field:'deptname', title:'部门' ,edit: 'text'}
+            ,{field:'cardnumber', title:'读者证号',edit: 'text'}
+            ,{field:'publisher', title:'出版社/编辑部',edit: 'text'}
+            ,{field:'title', title:'正题名/刊名' ,edit: 'text'}
+            ,{field:'bookno', title:'索书号/索刊号',edit: 'text'}
+            ,{field:'createtime', title:'预约日期',edit: 'text'}
+            ,{field:'endtime', title:'失效日期',edit: 'text'}
+            ,{field:'status', title:'状态',templet:function(d){
+                    if(d.status==0){
+                        return "预约中";
+                    }else if(d.status==1) {
+                        return "预约成功";
+                    }else if(d.status==2) {
+                        return "完成";
+                    }else if(d.status==3) {
+                        return "失效";
+                    }else if(d.status==4) {
+                        return "取消";
+                    } else {
+                        return "";
+                    }
+                }}
+            ,{title:'操作',templet:function(d){
+                var html ='';
+                if(d.status==3 || d.status==4) {
+                    html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"delyuyue\">删除</button>";
+                } else if(d.status==1) {
+                    html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"getyuyuebook\" >预约取书</button>";
+                    html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"cancelyuyue\">取消预约</button>";
+                } else{
+
+                }
+                return html;
+            }}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    table.render({
+        elem: '#yujiedatatable'
+        ,url:'/jieyue/yuyueList'
+        ,where:getQueryCondition("yujiequeryform")
+        // ,toolbar:'#yujieToolbar'
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'realname', title:'姓名', edit: 'text'}
+            ,{field:'deptname', title:'部门' ,edit: 'text'}
+            ,{field:'cardnumber', title:'读者证号',edit: 'text'}
+            ,{field:'publisher', title:'出版社/编辑部',edit: 'text'}
+            ,{field:'title', title:'正题名/刊名' ,edit: 'text'}
+            ,{field:'bookno', title:'索书号/索刊号',edit: 'text'}
+            ,{field:'createtime', title:'预借日期',edit: 'text'}
+            ,{field:'endtime', title:'失效日期',edit: 'text'}
+            ,{field:'status', title:'状态',templet:function(d){
+                    if(d.status==0){
+                        return "预约中";
+                    }else if(d.status==1) {
+                        return "预约成功";
+                    }else if(d.status==2) {
+                        return "完成";
+                    }else if(d.status==3) {
+                        return "失效";
+                    }else if(d.status==4) {
+                        return "取消";
+                    } else {
+                        return "";
+                    }
+                }}
+            ,{title:'操作',edit: 'text',templet:function(d){
+                    var html ='';
+                    if(d.status==3 || d.status==4) {
+                        html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"delyujie\">删除</button>";
+                    } else if(d.status==1) {
+                        html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"getyujiebook\" >预借取书</button>";
+                        html +="<button type='button' class=\"layui-btn layui-btn-danger layui-btn-xs\" lay-event=\"cancelyujie\">取消预借</button>";
+                    } else{
+
+                    }
+                    return html;
+                }}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    form.on('submit(searchyujieBtn)', function(data){
+
+        table.reload("yujiedatatable",{
+            where:data.field
+        })
+        return false;
+    });
+
+    form.on('submit(searchyuyueBtn)', function(data){
+        table.reload("yuyuedatatable",{
+            where:data.field
+        })
+        return false;
+    });
+
+
+    element.on('tab(yujietab)', function(data){
+        console.log(data);
+    });
+
+    table.on('tool(yuyuedatatable)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+        var data = obj.data //获得当前行数据
+            ,layEvent = obj.event; //获得 lay-event 对应的值
+        var yuyuebookid = data.bookid;
+        var yuyuereaderid = data.readerid;
+        if ('getyuyuebook' ==layEvent){
+            var suffix = "_book";
+            var divname = "reserveBook";
+            if(data.booktype == 1) {
+                suffix = "_journal";
+                divname = "reserveJournal";
+            }
+
+            layer.open({  //预约取图书
+                type: 1,
+                area:['1200px','350px'],
+                content: $('#'+divname),
+                success:function(){
+                    $("#"+divname).find("#readerNumber"+suffix).focus().on("keydown",function(event){
+                        if(event.keyCode==13){
+                            var param = {
+                                orgid:JSON.parse(sessionStorage.loginData).orgid,
+                                token:JSON.parse(sessionStorage.loginData).token,
+                                cardnumber:$(this).val()
+                            }
+                            $.get("/jieyue/findYuyueReaderInfo",param,function(result){
+                                var readerInfo = result.data["readerInfo"];
+                                if(result.code==200&&null !=readerInfo){
+                                    if(yuyuereaderid != readerInfo.id) {
+                                        alert("用户未预约该书籍");
+                                        return;
+                                    }
+                                    $("#readerid"+suffix).val(readerInfo.id);
+                                    $("#realname"+suffix).val(readerInfo.realname);
+                                    $("#deptname"+suffix).val(readerInfo.deptname);
+                                    $("#kejienum"+suffix).val(readerInfo.jieyueshuliang);
+                                    $("#yijienum"+suffix).val(readerInfo.yijieshuliang);
+                                    $("#status"+suffix).val(readerInfo.status);
+                                    $("#losedate"+suffix).val(readerInfo.losedate);
+                                } else {
+                                    alert("无法查询到用户信息");
+                                }
+                            });
+                        }
+                    });
+                    $("#barcode"+suffix).on("keydown",function(event){
+                        if(event.keyCode==13){
+                            var param = {
+                                orgid:JSON.parse(sessionStorage.loginData).orgid,
+                                token:JSON.parse(sessionStorage.loginData).token,
+                                bookType:data.booktype,
+                                barcode:$(this).val()
+                            }
+                            $.get("/jieyue/findByBarCode",param,function(result){
+                                if(result.code==200 && null != result.data){
+                                    $("#title"+suffix).val(result.data.title);
+                                    $("#bookno"+suffix).val(result.data.bookno);
+                                    $("#author"+suffix).val(result.data.author);
+                                    $("#price"+suffix).val(result.data.price);
+                                    $("#publisher"+suffix).val(result.data.publisher);
+                                    $("#library"+suffix).val(result.data.library);
+                                    if(yuyuebookid != result.data.bookid) {
+                                        alert("预约书籍与该书籍不匹配");
+                                    } else {
+                                        if(yuyuereaderid == $("#readerid"+suffix).val()) {
+                                            param["barcode"] = $("#barcode"+suffix).val();
+                                            param["cardnumber"] = $("#readerNumber"+suffix).val();
+                                            param["type"] = 1;
+                                            $.get("/jieyue/getYuyueBook",param,function(result3){
+                                                layer.msg(result3.data, { icon: 1});
+                                            });
+                                        }else{
+                                            alert("用户未预约该书籍");
+                                            return;
+                                        }
+                                    }
+                                }else{
+                                    alert("无法查询到书籍信息");
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            form.render();
+        }else if ('cancelyuyue' ==layEvent){
+            layer.confirm('确定取消预约？', function(index){
+                $.post("/jieyue/cancelYuyueBook",{yuyueid:data.yuyueid,yuyuetype:1,booktype:data.booktype},function(data) {
+                    layer.close(index);
+                    if (data.code==200){
+                        layer.reload();
+                    }
+                });
+            });
+        }else if ('delyuyue' ==layEvent){
+            layer.confirm('确定删除？', function(index){
+                $.post("/jieyue/deleteYuyueInfo",{yuyueidstr:data.yuyueid,yuyuetype:1},function(data) {
+                    obj.del();
+                    layer.close(index);
+                });
+            });
+        }
+    });
+    table.on('tool(yujiedatatable)', function(obj){
+        var data = obj.data //获得当前行数据
+            ,layEvent = obj.event; //获得 lay-event 对应的值
+        var yuyuebookid = data.bookid;
+        var yuyuereaderid = data.readerid;
+        if ('getyujiebook' ==layEvent){
+            var suffix = "_book";
+            var divname = "reserveBook";
+            if(data.booktype == 1) {
+                suffix = "_journal";
+                divname = "reserveJournal";
+            }
+
+            layer.open({  //预借取图书
+                type: 1,
+                area:['1200px','350px'],
+                content: $('#'+divname),
+                success:function(){
+                    $("#"+divname).find("#readerNumber"+suffix).focus().on("keydown",function(event){
+                        if(event.keyCode==13){
+                            var param = {
+                                orgid:JSON.parse(sessionStorage.loginData).orgid,
+                                token:JSON.parse(sessionStorage.loginData).token,
+                                cardnumber:$(this).val()
+                            }
+                            $.get("/jieyue/findYuyueReaderInfo",param,function(result){
+                                var readerInfo = result.data["readerInfo"];
+                                if(result.code==200&&null !=readerInfo){
+                                    if(yuyuereaderid != readerInfo.id) {
+                                        alert("用户未预借该书籍");
+                                        return;
+                                    }
+                                    $("#readerid"+suffix).val(readerInfo.id);
+                                    $("#realname"+suffix).val(readerInfo.realname);
+                                    $("#deptname"+suffix).val(readerInfo.deptname);
+                                    $("#kejienum"+suffix).val(readerInfo.jieyueshuliang);
+                                    $("#yijienum"+suffix).val(readerInfo.yijieshuliang);
+                                    $("#status"+suffix).val(readerInfo.status);
+                                    $("#losedate"+suffix).val(readerInfo.losedate);
+                                } else {
+                                    alert("无法查询到用户信息");
+                                }
+                            });
+                        }
+                    });
+                    $("#barcode"+suffix).on("keydown",function(event){
+                        if(event.keyCode==13){
+                            var param = {
+                                orgid:JSON.parse(sessionStorage.loginData).orgid,
+                                token:JSON.parse(sessionStorage.loginData).token,
+                                bookType:data.booktype,
+                                barcode:$(this).val()
+                            }
+                            $.get("/jieyue/findByBarCode",param,function(result){
+                                if(result.code==200 && null != result.data){
+                                    $("#title"+suffix).val(result.data.title);
+                                    $("#bookno"+suffix).val(result.data.bookno);
+                                    $("#author"+suffix).val(result.data.author);
+                                    $("#price"+suffix).val(result.data.price);
+                                    $("#publisher"+suffix).val(result.data.publisher);
+                                    $("#library"+suffix).val(result.data.library);
+                                    if(yuyuebookid != result.data.bookid) {
+                                        alert("预借书籍与该书籍不匹配");
+                                    } else {
+                                        if(yuyuereaderid == $("#readerid"+suffix).val()) {
+                                            param["barcode"] = $("#barcode"+suffix).val();
+                                            param["cardnumber"] = $("#readerNumber"+suffix).val();
+                                            param["type"] = 2;
+                                            $.get("/jieyue/getYuyueBook",param,function(result3){
+                                                layer.msg(result3.data, { icon: 1});
+                                            });
+                                        }else{
+                                            alert("用户未预借该书籍");
+                                            return;
+                                        }
+                                    }
+                                }else{
+                                    alert("无法查询到书籍信息");
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            form.render();
+        }else if ('cancelyujie' ==layEvent){
+            layer.confirm('确定取消预借？', function(index){
+                $.post("/jieyue/cancelYuyueBook",{yuyueid:data.yuyueid,yuyuetype:2,booktype:data.booktype},function(data) {
+                    layer.close(index);
+                    if (data.code==200){
+                        layer.reload();
+                    }
+                });
+            });
+        }else if ('delyujie' ==layEvent){
+            layer.confirm('确定删除？', function(index){
+                $.post("/jieyue/deleteYuyueInfo",{yuyueidstr:data.yuyueid,yuyuetype:2},function(data) {
+                    obj.del();
+                    layer.close(index);
+                });
+            });
+        }
+    });
+    function removeYuyue(yuyuetype) {
+        var param = {
+            orgid:JSON.parse(sessionStorage.loginData).orgid,
+            token:JSON.parse(sessionStorage.loginData).token,
+            yuyuetype:yuyuetype
+        };
+        $.get("/jieyue/deleteYuyueInfoByOrgid",param,function(result){
+            location.reload();
+        });
+    }
+
+    //图书预约
+    function bookReserveBtn(yuyuetype){
+        var suffix = "_r_book";
+        layer.open({
+            type: 1,
+            area:['1200px','600px'],
+            content: $('#bookReserve'),
+            success:function(){
+                $("#bookReserve").find("#cardnumber"+suffix).focus().on("keydown",function(event){
+                    if(event.keyCode==13){
+                        var param = {
+                            orgid:JSON.parse(sessionStorage.loginData).orgid,
+                            token:JSON.parse(sessionStorage.loginData).token,
+                            cardnumber:$(this).val()
+                        };
+                        $.get("/jieyue/findYuyueReaderInfo",param,function(result){
+                            var readerInfo = result.data["readerInfo"];
+                            if(result.code==200&&null !=readerInfo){
+                                $("#readerid"+suffix).val(readerInfo.id);
+                                $("#realname"+suffix).val(readerInfo.realname);
+                                $("#deptname"+suffix).val(readerInfo.deptname);
+                                $("#kejienum"+suffix).val(readerInfo.jieyueshuliang);
+                                $("#yijienum"+suffix).val(readerInfo.yijieshuliang);
+                                $("#status"+suffix).val(readerInfo.status);
+                                $("#losedate"+suffix).val(readerInfo.losedate);
+                                form.render();
+                            } else {
+                                alert("无法查询到用户信息");
+                            }
+                        });
+                    }
+                });
+
+                var data = [];
+                table.render({
+                    elem: '#bookReserveTable'
+                    ,data:data
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'isbn', title: 'ISBN', align:'center'}
+                        ,{field: 'title', title: '正题名', align:'center'}
+                        ,{field: 'author', title: '著者', align:'center'}
+                        ,{field: 'publisher', title: '出版社', align:'center'}
+                        ,{field: 'bookno', title: '索书号', align:'center'}
+                        ,{field: 'booknum', title: '复本数', align:'center'}
+                        ,{field: 'availableNum', title: '可借复本', align:'center'}
+                        ,{title: '操作', align:'center',templet:function(d){
+                            d=JSON.stringify(d);
+                                if(yuyuetype ==1){
+                                    return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='reserveBookFun("+d+")'>预约</button>"
+                                }else{
+                                    return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='reserveBookFun("+d+")'>预借</button>"
+                                }
+                            }}
+                    ]],
+                    done:function(){
+                       window.reserveBookFun = function(arg){
+                           var param = {
+                               orgid:JSON.parse(sessionStorage.loginData).orgid,
+                               token:JSON.parse(sessionStorage.loginData).token
+                           };
+                           var bookid = arg.bookid;
+                           var booktype = arg.booktype;
+                           var cardnumber = $("#cardnumber_r_book").val();
+                           if("" == cardnumber || null == cardnumber) {
+                               alert("读者信息未获取到");
+                               return;
+                           }
+                           if(yuyuetype == 1) {
+                               if(arg.availableNum != 0){
+                                   layer.msg("有在馆图书，不能预约", { icon: 5 });
+                                   return;
+                               }
+                           }else{
+                               if(arg.availableNum == 0){
+                                   layer.msg("没有在馆图书，不能预借", { icon: 5 });
+                                   return;
+                               }
+                           }
+                           param["bookid"] = bookid;
+                           param["booktype"] = booktype;
+                           param["cardnumber"] = cardnumber;
+                           param["type"] = yuyuetype;
+                           $.get("/jieyue/saveYuyueInfo",param,function(result){
+                               if("预约成功" == result.data || "预借成功" == result.data){
+                                   layer.msg(result.data, { icon: 1 });
+                               }else{
+                                   layer.msg(result.data, { icon: 5 });
+                               }
+                           });
+                       }
+                    }
+                });
+                // });
+            }
+        });
+    }
+    //书刊预约
+    function journalReserveBtn(yuyuetype){
+        var suffix = "_r_journal";
+        layer.open({
+            type: 1,
+            area:['1200px','600px'],
+            content: $('#journalReserve'),
+            success:function(){
+                $("#journalReserve").find("#cardnumber"+suffix).focus().on("keydown",function(event){
+                    if(event.keyCode==13){
+                        var param = {
+                            orgid:JSON.parse(sessionStorage.loginData).orgid,
+                            token:JSON.parse(sessionStorage.loginData).token,
+                            cardnumber:$(this).val()
+                        }
+                        $.get("/jieyue/findYuyueReaderInfo",param,function(result){
+                            var readerInfo = result.data["readerInfo"];
+                            if(result.code==200&&null !=readerInfo){
+                                $("#readerid"+suffix).val(readerInfo.id);
+                                $("#realname"+suffix).val(readerInfo.realname);
+                                $("#deptname"+suffix).val(readerInfo.deptname);
+                                $("#kejienum"+suffix).val(readerInfo.jieyueshuliang);
+                                $("#yijienum"+suffix).val(readerInfo.yijieshuliang);
+                                $("#status"+suffix).val(readerInfo.status);
+                                $("#losedate"+suffix).val(readerInfo.losedate);
+                                form.render();
+                            } else {
+                                alert("无法查询到用户信息");
+                            }
+                        });
+                    }
+                });
+
+                var data = [];
+                table.render({
+                    elem: '#journalReserveTable'
+                    ,data:data
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'issn', title: 'ISSN', align:'center'}
+                        ,{field: 'kanming', title: '刊名', align:'center'}
+                        ,{field: 'bianjibu', title: '编辑部', align:'center'}
+                        ,{field: 'niandu', title: '年度', align:'center'}
+                        ,{field: 'qizhiqi', title: '起止期', align:'center'}
+                        ,{field: 'booknum', title: '复本数', align:'center'}
+                        ,{field: 'availableNum', title: '可借复本', align:'center'}
+                        ,{title: '操作', align:'center',templet:function(d){
+                                d=JSON.stringify(d);
+                                if(yuyuetype ==1){
+                                    return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='reserveJournalFun("+d+")'>预约</button>"
+                                } else {
+                                    return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='reserveJournalFun("+d+")'>预借</button>"
+                                }
+                            }}
+                    ]],
+                    done:function(){
+                        window.reserveJournalFun = function(arg){
+                            var param = {
+                                orgid:JSON.parse(sessionStorage.loginData).orgid,
+                                token:JSON.parse(sessionStorage.loginData).token
+                            };
+                            var bookid = arg.bookid;
+                            var booktype = arg.booktype;
+                            var cardnumber = $("#cardnumber_r_journal").val();
+                            if("" == cardnumber || null == cardnumber) {
+                                alert("读者信息未获取到");
+                                return;
+                            }
+                            if(yuyuetype == 1) {
+                                if(arg.availableNum != 0){
+                                    layer.msg("有在馆图书，不能预约", { icon: 5 });
+                                    return;
+                                }
+                            }else{
+                                if(arg.availableNum == 0){
+                                    layer.msg("没有在馆图书，不能预借", { icon: 5 });
+                                    return;
+                                }
+                            }
+                            param["bookid"] = bookid;
+                            param["booktype"] = booktype;
+                            param["cardnumber"] = cardnumber;
+                            param["type"] = yuyuetype;
+                            $.get("/jieyue/saveYuyueInfo",param,function(result){
+                                if("预约成功" == result.data || "预借成功" == result.data){
+                                    layer.msg(result.data, { icon: 1 });
+                                }else{
+                                    layer.msg(result.data, { icon: 5 });
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    //分类号选择
+    var bookyuyueData;
+    function sortSelect(arg){
+        layer.open({
+            type: 2,
+            area:['1100px','600px'],
+            title:"选择分类号",
+            content: "/view/list-manage/sortDialog.html",
+            btn:['确认','取消'],
+            btnAlign: 'r',
+            yes: function(index, layero){
+                var param = {
+                    orgid:JSON.parse(sessionStorage.loginData).orgid,
+                    token:JSON.parse(sessionStorage.loginData).token
+                }
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：
+                if(iframeWin.sortValue){
+                    var sortValueId = iframeWin.sortValue.id;
+                    param["bookno"]=sortValueId;
+                    if(arg==0){
+                        $("#sortBookNumber").val(sortValueId)
+                        param["booktype"]=0;
+                        $.get("/jieyue/findYuyueBookInfoByBookno",param,function(result){
+                            if(result.code==200){
+                                table.reload("bookReserveTable",{
+                                    data:result.data.bookList
+                                })
+                            }
+                        });
+                    }else if(arg==1){
+                        $("#sortJournalNumber").val(sortValueId)
+                        param["booktype"]=1;
+                        $.get("/jieyue/findYuyueBookInfoByBookno",param,function(result){
+                            if(result.code==200){
+                                table.reload("journalReserveTable",{
+                                    data:result.data.bookList
+                                })
+                            }
+                        });
+                    }
+                }else {
+                    layer.msg("请选择分类", { icon: 5 });
+                    return;
+                }
+                layer.close(index);
+            },
+            btn2: function(index, layero){
+                layer.close(index);
+            },
+            success:function(layero,index){
+
+
+            }
+        });
+    }
+</script>
+#end
+#define tableForm()
+<!--图书预约-->
+<div id="bookReserve" class="areaSum clearfix dialog-form" style="display: none;">
+    <form class="query-form layui-form clearfix" id="bookReserveForm" lay-filter="bookReserveForm">
+        <div class="lttj clearfix" style="width: 580px; margin-left: 20px;">
+            <div class="one-row">读者信息</div>
+            <ul class="reader-message">
+                <li>读者照片</li>
+                <li>
+                    <table class="reader-table">
+                        <tr>
+                            <td colspan="2">
+                                <label >读者证号</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="text" name="cardnumber" id="cardnumber_r_book" class="layui-input-inline layui-input readerCarNum" style="width: 150px;" placeholder="读者证号">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>姓名:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="realname" id="realname_r_book" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >部门:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="deptname" id="deptname_r_book" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >可借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="kejienum" id="kejienum_r_book" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >已借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="yijienum" id="yijienum_r_book" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >证状态:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="layui-input-inline">
+                                    <select name="status" id="status_r_book" disabled>
+                                        <option value="1">正常</option>
+                                        <option value="2">注销</option>
+                                        <option value="3">停借</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <label >失效日期:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="losedate" id="losedate_r_book" disabled></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div class="jrjb clearfix" style="width: 560px;">
+            <div class="one-row">书本信息</div>
+            <div>
+                <table class="reader-table">
+                    <tr>
+                        <td>
+                            <label >文献类型</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" value="图书" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >正题名:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="title" id="title_r_book" disabled></textarea>
+                        </td>
+                        <td  style="position: relative;">
+                            <label >索书号:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="sortBookNumber" type="text" name="" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                            <button type="button" onclick="sortSelect(0)" class="layui-btn layui-btn-xs" style="position: absolute;left: 230px; top: 6px;">...</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >著者:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="author" id="author_r_book" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >定价:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="price" id="price_r_book" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>出版社:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="publisher" id="publisher_r_book" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >馆藏地:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="library" id="library_r_book" disabled></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div class="line"></div>
+    <table id="bookReserveTable" lay-filter="bookReserveTable"></table>
+</div>
+<!--期刊预约-->
+<div id="journalReserve" class="areaSum clearfix dialog-form" style="display: none;">
+    <form class="query-form layui-form clearfix" id="journalReserveForm" lay-filter="journalReserveForm">
+        <div class="lttj clearfix" style="width: 580px; margin-left: 20px;">
+            <div class="one-row">读者信息</div>
+            <ul class="reader-message">
+                <li>读者照片</li>
+                <li>
+                    <table class="reader-table">
+                        <tr>
+                            <td colspan="2">
+                                <label >读者证号</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="text" name="cardnumber" id="cardnumber_r_journal" class="layui-input-inline layui-input readerCarNum" style="width: 150px;" placeholder="读者证号">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>姓名:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="realname" id="realname_r_journal" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >部门:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="deptname" id="deptname_r_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >可借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="kejienum" id="kejienum_r_journal" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >已借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="yijienum" id="yijienum_r_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >证状态:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="layui-input-inline">
+                                    <select name="status" id="status_r_journal" disabled>
+                                        <option value="1">正常</option>
+                                        <option value="2">注销</option>
+                                        <option value="3">停借</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <label >失效日期:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="losedate" id="losedate_r_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div class="jrjb clearfix" style="width: 560px;">
+            <div class="one-row">书本信息</div>
+            <div>
+                <table class="reader-table">
+                    <tr>
+                        <td>
+                            <label >文献类型</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" name="" value="期刊" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >刊名:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="title" id="title_r_journal" disabled></textarea>
+                        </td>
+                        <td  style="position: relative;">
+                            <label >索书号:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input id="sortJournalNumber" type="text" name="" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                            <button type="button" onclick="sortSelect(1)" class="layui-btn layui-btn-xs" style="position: absolute;left: 230px; top: 6px;">...</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >编辑部:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="author" id="author_r_journal" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >价格/元:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="price" id="price_r_journal" disabled></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div class="line"></div>
+    <table id="journalReserveTable" lay-filter="journalReserveTable"></table>
+</div>
+
+<!--表格中预约图书-->
+<div id="reserveBook" class="areaSum clearfix dialog-form" style="display: none;">
+    <form class="query-form layui-form clearfix" id="readerBookForm" lay-filter="readerBookForm">
+        <div class="lttj clearfix" style="width: 580px; margin-left: 20px;">
+            <div class="one-row">读者信息</div>
+            <ul class="reader-message">
+                <li>读者照片</li>
+                <li>
+                    <table class="reader-table">
+                        <tr>
+                            <td colspan="2">
+                                <label >读者证号</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="hidden" id="readerid_book">
+                                <input type="text" id="readerNumber_book" name="cardnumber" class="layui-input-inline layui-input" style="width: 150px;" placeholder="读者证号">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>姓名:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="realname" id="realname_book" disabled></textarea>
+                                <!--<span>111111</span>-->
+                            </td>
+                            <td>
+                                <label >部门:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="deptname" id="deptname_book" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >可借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="kejienum" id="kejienum_book" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >已借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="yijienum" id="yijienum_book" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >证状态:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="layui-input-inline">
+                                    <select name="status" id="status_book" disabled>
+                                        <option value="1">正常</option>
+                                        <option value="2">注销</option>
+                                        <option value="3">停借</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <label >失效日期:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="losedate" id="losedate_book" disabled></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div class="jrjb clearfix" style="width: 560px;">
+            <div class="one-row">书本信息</div>
+            <div>
+                <table class="reader-table">
+                    <tr>
+                        <td>
+                            <label >图书条码</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" id="barcode_book" name="" class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >正题名:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="title" id="title_book" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >索书号:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="bookno" id="bookno_book" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >著者:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="author" id="author_book" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >定价:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="price" id="price_book" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>出版社:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="publisher" id="publisher_book" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >馆藏地:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="library" id="library_book" disabled></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div class="line"></div>
+</div>
+<!--表格中预约期刊-->
+<div id="reserveJournal" class="areaSum clearfix dialog-form" style="display: none;">
+    <form class="query-form layui-form clearfix" id="readerJournalForm" lay-filter="readerJournalForm">
+        <div class="lttj clearfix" style="width: 580px; margin-left: 20px;">
+            <div class="one-row">读者信息</div>
+            <ul class="reader-message">
+                <li>读者照片</li>
+                <li>
+                    <table class="reader-table">
+                        <tr>
+                            <td colspan="2">
+                                <label >读者证号</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="hidden" id="readerid_journal">
+                                <input type="text" name="cardnumber" id="readerNumber_journal" class="layui-input-inline layui-input" style="width: 150px;" placeholder="读者证号">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>姓名:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="realname" id="realname_journal" disabled></textarea>
+                                <!--<span>111111</span>-->
+                            </td>
+                            <td>
+                                <label >部门:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="deptname" id="deptname_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >可借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="kejienum" id="kejienum_journal" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >已借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="yijienum" id="yijienum_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >证状态:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="layui-input-inline">
+                                    <select name="status" id="status_journal" disabled>
+                                        <option value="1">正常</option>
+                                        <option value="2">注销</option>
+                                        <option value="3">停借</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <label >失效日期:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="losedate" id="losedate_journal" disabled></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div class="jrjb clearfix" style="width: 560px;">
+            <div class="one-row">期刊信息</div>
+            <div>
+                <table class="reader-table">
+                    <tr>
+                        <td>
+                            <label >合订条码</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" name="barcode" id="barcode_journal" class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >刊名:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="title" id="title_journal" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >索书号:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="bookno" id="bookno_journal" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >年度:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="author" id="author_journal" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >起止期:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="publisher" id="publisher_journal" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>价格/元:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="price" id="price_journal" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >馆藏地:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="library" id="library_journal" disabled></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div class="line"></div>
+</div>
+#end

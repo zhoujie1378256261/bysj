@@ -1,0 +1,707 @@
+#@layout()
+#define main()
+<style>
+    .reader-message > li {
+        float: left;
+    }
+    .reader-message > li:nth-of-type(1) {
+        width: 100px;
+        height: 100px;
+        background-color: #c2c2c2;
+    }
+    table.reader-table td{
+        padding: 3px;
+    }
+    table.reader-table td label, .input-dialog label {
+        text-align: right;
+        width: 82px;
+        display: inline-block;
+    }
+    .input-dialog input {
+        height: 30px;
+        line-height: 30px;
+        font-size: 11px;
+    }
+    table.reader-table td textarea, .input-dialog textarea{
+        height: 20px;
+        resize: none;
+        width: 120px;
+        vertical-align: middle;
+        line-height: 20px;
+        text-indent: 10px;
+        color: #000;
+    }
+    table.reader-table td input[disabled] {
+        background-color: #e6e6e6!important;
+    }
+</style>
+<div class="areaSum clearfix">
+    <!--<script type="text/html" id="optionTpl">-->
+        <!--<option value="">请选择</option>-->
+        <!--{{#  layui.each(d, function(index, item){ }}-->
+        <!--<option value="{{item.id}}">{{ item.typename }}</option>-->
+        <!--{{#  }); }}-->
+    <!--</script>-->
+    <div id="navTitle" class="nav-title"></div>
+    <ul class="layui-nav layui-bg-green" lay-filter="flowNavTab">
+        <li class="layui-nav-item layui-this" data-tab-index="0" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">快速流通</a></li>
+        <li class="layui-nav-item" data-tab-index="1" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">借书</a></li>
+        <li class="layui-nav-item" data-tab-index="2" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">还书</a></li>
+        <li class="layui-nav-item" data-tab-index="3" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">续借</a></li>
+        <li class="layui-nav-item" data-tab-index="4" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">丢书</a></li>
+        <li class="layui-nav-item" data-tab-index="5" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">损书</a></li>
+        <li class="layui-nav-item" data-tab-index="6" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">补交</a></li>
+        <li class="layui-nav-item" data-tab-index="7" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">补还</a></li>
+        <li class="layui-nav-item" data-tab-index="8" onclick="navTab(this.dataset.tabIndex)"><a href="javascript:void(0);">赔书</a></li>
+    </ul>
+    <!--<blockquote class="layui-elem-quote" style="font-size: 12px;">说明：快速流通指的是通过扫入书刊条码，系统自动判断是借还是还，从而做出相应的操作（如“借阅成功！”“还书成功！”）。</blockquote>-->
+    <form class="query-form layui-form clearfix" id="readerBookForm" lay-filter="readerBookForm">
+        <div class="lttj clearfix" style="width: 580px;">
+            <div class="one-row">读者信息</div>
+            <ul class="reader-message">
+                <li>读者照片</li>
+                <li>
+                    <table class="reader-table">
+                        <tr>
+                            <td colspan="2">
+                                <label >读者证号</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <input type="text" id="readerNumber" value="" name="cardnumber" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="读者证号">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>姓名:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="realname" disabled></textarea>
+                                <!--<span>111111</span>-->
+                            </td>
+                            <td>
+                                <label >部门:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="deptname" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >可借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="kejienum" disabled></textarea>
+                            </td>
+                            <td>
+                                <label >已借数:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="yijienum" disabled></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label >证状态:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <div class="layui-input-inline">
+                                    <select name="status" id="" disabled>
+                                        <option value="0">无</option>
+                                        <option value="1">正常</option>
+                                        <option value="2">注销</option>
+                                        <option value="3">停借</option>
+                                    </select>
+                                </div>
+                            </td>
+                            <td>
+                                <label >失效日期:</label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <textarea name="losedate" disabled></textarea>
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+        </div>
+        <div class="jrjb clearfix" style="width: 560px;">
+            <div class="one-row">书本信息</div>
+            <div>
+                <table class="reader-table">
+                    <tr>
+                        <td>
+                            <label >图书条码</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" id="bookCode" name="" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="书本条码">
+                        </td>
+                        <td>
+                            <label>文献类型</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <div class="layui-input-inline">
+                                <select disabled name="bookType">
+                                    <option value="">无</option>
+                                    <option value="0">图书</option>
+                                    <option value="1">期刊</option>
+                                </select>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >正题名:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="bookType" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >索书号:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="bookno" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label >著者:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="author" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >定价:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="price" disabled></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>出版社:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="publisher" disabled></textarea>
+                        </td>
+                        <td>
+                            <label >馆藏地:</label>
+                            &nbsp;&nbsp;&nbsp;&nbsp;
+                            <textarea name="library" disabled></textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div class="line"></div>
+    <div id="tableShow">
+        <table id="dataTable" lay-filter="mainTable"></table>
+    </div>
+</div>
+#end
+#define methods()
+
+<script>
+    var dayTabIndex;
+    var tableElem;
+
+    var sendData = {
+        orgid:JSON.parse(sessionStorage.loginData).orgid,
+        operatorid:JSON.parse(sessionStorage.loginData).operatorid,   //操作人ID
+        cardnumber:"",       //读者证号    180132
+        barcode:""         //图书条码  00000001  00000009   t0000013  t0009018
+    }
+    //监听值改变
+    $("#readerNumber").on("input propertychange",function(){
+        sendData.cardnumber = $("#readerNumber").val();
+        if(!sendData.cardnumber) delete sendData.cardnumber;
+        if(!sendData.barcode) delete sendData.barcode;
+    })
+    $("#bookCode").on("input propertychange",function(){
+        sendData.barcode = $("#bookCode").val();
+        if(!sendData.cardnumber) delete sendData.cardnumber;
+        if(!sendData.barcode) delete sendData.barcode;
+    })
+
+    function navTab(_self){
+        dayTabIndex = _self;
+        $("#readerBookForm")[0].reset();
+        $("#readerNumber").attr("disabled","disabled");
+        $("#bookCode").attr("disabled","disabled");
+        form.render(null,"readerBookForm");
+        $("#tableShow").children().detach();
+        dailyBook.initialFun()
+        switch(_self){
+            case "0":
+
+                $("#bookCode").removeAttr("disabled").focus();
+                $("#bookCode").change(function(){
+                    dailyBook.fastBookSet();
+                });
+                ;
+                break;
+            case "1":
+                
+                $("#readerNumber").removeAttr("disabled").focus();
+                $("#readerNumber").change(function(){
+                    dailyBook.borrowing();
+                });
+                break;
+            case "2":
+                
+                $("#bookCode").removeAttr("disabled").focus();
+                $("#bookCode").change(function(){
+                    dailyBook.backBook();
+                });
+                ;
+                break;
+            case "3":
+                
+                sendData.type= "xujie";
+                $("#tableShow").append(tableElem);
+                $("#bookCode").removeAttr("disabled").focus();
+                $("#bookCode").change(function(){
+                    dailyBook.renew();
+                });
+                break;
+            case "4": //丢书
+                
+                $("#readerNumber").removeAttr("disabled").focus();
+                $("#tableShow").append(tableElem);
+                $("#readerNumber").change(function(){
+                    dailyBook.lossBook();
+                });
+                break;
+            case "5":  //损书
+                
+                sendData.type= "sunshu";
+                $("#tableShow").append(tableElem);
+                $("#readerNumber").removeAttr("disabled").focus();
+                $("#readerNumber").change(function(){
+                    dailyBook.damage();
+                });
+                break;
+            case "6":
+                
+                $("#tableShow").append(tableElem);
+                $("#readerNumber").removeAttr("disabled").focus();
+                $("#readerNumber").change(function(){
+                    dailyBook.bujiao();
+                });
+                break;
+            case "7":
+                
+                sendData.type= "buhuan";
+                $("#tableShow").append(tableElem);
+                $("#bookCode").removeAttr("disabled").focus();
+                $("#bookCode").change(function(){
+                    dailyBook.goBackBook();
+                });
+                break;
+            case "8":
+                $("#tableShow").append(tableElem);
+                $("#readerNumber").removeAttr("disabled").focus();
+                $("#readerNumber").change(function(){
+                    dailyBook.payBook();
+                });
+            default:
+                break;
+        }
+    }
+    var dailyBook = {
+        //切换初始
+        initialFun:function(){
+            delete sendData.cardnumber;
+            delete sendData.barcode;
+            delete sendData.type;
+            $("#readerNumber").off("change");
+            $("#bookCode").off("change");
+            tableElem = "<table id=\"dataTable\" lay-filter=\"mainTable\"></table>";
+            
+        },
+        //快速借还
+        fastBookSet:function(){
+            $.get("/jieyue/returnBook",sendData,function(result){
+                if(result.data.type=="借书"){
+                    var formObj = $.extend({},result.data.bookInfo);
+                    form.val("readerBookForm",formObj);
+                    $("#readerNumber").removeAttr("disabled").focus();
+                    $("#readerNumber").change(function(){
+                        $.get("/jieyue/borrowBooks",sendData,function(result){
+                            layer.msg(result.data);
+                        })
+                    });
+                }else {
+                    layer.msg(result.data.type);
+                }
+            })
+        },
+        //借书
+        borrowing:function(){
+            $.get("/jieyue/borrowBooks",sendData,function(result){
+                if(result.data.jieshu=="ok"){
+                    form.val("readerBookForm",result.data.userInfo);
+                    $("#bookCode").removeAttr("disabled").focus();
+                    $("#bookCode").change(function(){
+                        dailyBook.borrowing();
+                    });
+                    var data = result.data.list;
+                    table.render({
+                        elem: '#dataTable'
+                        ,data:data
+                        ,page: true //开启分页
+                        ,cols: [[ //表头
+                            {field: 'bookid', title: '书刊条码',align:'center'}
+                            ,{field: 'title', title: '正题名', align:'center'}
+                            ,{field: 'bookno', title: '索书号', align:'center'}
+                            ,{field: 'createtime', title: '借书日期', align:'center',templet:function(d){
+                                return d.createtime.split(" ")[0]
+                                }}
+                            ,{field: 'huandate', title: '应还日期', align:'center',templet:function(d){
+                                    return d.huandate.split(" ")[0]
+                                }}
+                            ,{field: 'chaoqi', title: '是否超期', align:'center',templet:function(d){
+                                if(d.chaoqi==0){
+                                    return "否";
+                                }else {
+                                    return "是";
+                                }
+                            }}
+                        ]]
+                    });
+                }else {
+                    layer.msg(result.data);
+                }
+            })
+        },
+        //还书
+        backBook:function(){
+            $.get("/jieyue/returnBook",sendData,function(result){
+                if(result.data.type=="还书成功"){
+                    var formObj = $.extend({},result.data.bookInfo,result.data.readerInfo);
+                    formObj.bookType = result.data.bookType||0;
+                    form.val("readerBookForm",formObj);
+                    layer.msg(result.data.type);
+                }else {
+                    layer.msg(result.data.type);
+                }
+                if(result.data.type=="借书成功"){
+                    $("#readerNumber").removeAttr().focus();
+                }
+            })
+        },
+        //续借
+        renew:function(){
+            $.get("/jieyue/bookOther",sendData,function(result){
+                layer.msg(result.data.xujie);
+            });
+        },
+        //丢书
+        lossBook:function(){
+            $.get("/jieyue/diushu",sendData,function(result){
+                var formObj = $.extend({},result.data.userInfo);
+                formObj.bookType = result.data.bookType||0;
+                form.val("readerBookForm",formObj);
+                var data = result.data.list;
+                table.render({
+                    elem: '#dataTable'
+                    ,data:data
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'barcode', title: '书刊条码',align:'center'}
+                        ,{field: 'title', title: '正题名', align:'center'}
+                        ,{field: 'bookno', title: '索书号', align:'center'}
+                        ,{field: 'createtime', title: '借书日期', align:'center'}
+                        ,{field: 'huandate', title: '应还日期', align:'center'}
+                        ,{field: 'chaoqi', title: '是否超期', align:'center'}
+                        ,{title: '操作', align:'center',templet:function(d){
+                                d=JSON.stringify(d);
+                                return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='lostBookFun("+d+")'>丢失</button>";
+                            }}
+                    ]]
+                    ,done:function(){
+
+                    }
+                });
+            })
+        },
+        //损书
+        damage:function(){
+            $.get("/jieyue/sunshu",sendData,function(result){
+                var formObj = $.extend({},result.data.userInfo);
+                formObj.bookType = result.data.bookType||0;
+                form.val("readerBookForm",formObj);
+                var data = result.data.list;
+                table.render({
+                    elem: '#dataTable'
+                    ,data:data
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'barcode', title: '书刊条码',align:'center'}
+                        ,{field: 'title', title: '正题名', align:'center'}
+                        ,{field: 'bookno', title: '索书号', align:'center'}
+                        ,{field: 'createtime', title: '借书日期', align:'center'}
+                        ,{field: 'huandate', title: '应还日期', align:'center'}
+                        ,{field: 'chaoqi', title: '是否超期', align:'center'}
+                        ,{title: '操作', align:'center',templet:function(d){
+                                a=JSON.stringify(result.data);
+                                d=JSON.stringify(d);
+                                return "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='damageBookFun("+a+","+d+")'>损书</button>";
+                            }}
+                    ]]
+                    ,done:function(){
+
+                    }
+                });
+            })
+        },
+        //补交
+        bujiao:function(){
+            delete sendData.operatorid;
+            $.get("/bookPenalty/bujiao",sendData,function(result){
+                var formObj = $.extend({},result.data.bookInfo,result.data.readerInfo);
+                formObj.bookType = result.data.bookType||0;
+                form.val("readerBookForm",formObj);
+                var strbujiao = "应缴罚款："+ result.data.fakuanRecord.allamount+".其中丢书罚款："+result.data.fakuanRecord.diushu+".超期罚款："+result.data.fakuanRecord.chaoqi+".损书罚款："+result.data.fakuanRecord.sunshu;
+
+            })
+        },
+        //补还
+        goBackBook:function(){
+            $.get("/jieyue/bookOther",sendData,function(result){
+                layer.msg(result.msg);
+            });
+        },
+        //赔书
+        payBook:function(){
+            $.get("/jieyue/findpeishuPageInfo",sendData,function(result){
+                var formObj = $.extend({},result.data.bookInfo,result.data.readerInfo);
+                formObj.bookType = result.data.bookType||0;
+                form.val("readerBookForm",formObj);
+                var data = result.data.lostList;
+                table.render({
+                    elem: '#dataTable'
+                    ,data:data
+                    ,page: true //开启分页
+                    ,cols: [[ //表头
+                        {field: 'barcode', title: '书刊条码',align:'center'}
+                        ,{field: 'title', title: '正题名', align:'center'}
+                        ,{field: 'bookno', title: '索书号', align:'center'}
+                        ,{field: 'createtime', title: '借书日期', align:'center'}
+                        ,{field: 'huandate', title: '应还日期', align:'center'}
+                        ,{field: 'chaoqi', title: '是否超期', align:'center'}
+                        ,{title: '操作', align:'center',templet:function(d){
+                                var formObj = $.extend({},sendData,d);
+                                formObj.readerid = result.data.readerInfo.id;
+                                delete formObj.id;
+                                var backVal;
+                                $.ajax({type: "GET",url:"/jieyue/peishuinfo",async: false,data:formObj,success:function(result){
+                                    if(result.data.penaltyRecord){
+                                        backVal=result.data.penaltyRecord.penaltyamount;;
+                                    }else if(result.data.peishu){
+                                        backVal = result.data.peishu;
+                                    } else {
+                                        d=JSON.stringify(d);
+                                        backVal = "<button type='button' class='lostBookFun layui-btn layui-btn-xs' onclick='payBookFun("+d+")'>赔书</button>";
+                                    }
+                                }
+                                })
+                                return backVal;
+                            }}
+                    ]]
+                    ,done:function(){
+
+                    }
+                });
+            })
+        }
+    }
+    navTab("0");
+    //丢书
+    function lostBookFun(arg){
+        layer.open({
+            type: 1,
+            title:"丢失处理",
+            btn:["确定","记账","取消"],
+            area: ['300px', '200px'],
+            content: $('#lossDialog'),
+            success:function(nowElem){
+                nowElem.find("#yuanjia").text(arg.price+"元");
+                nowElem.find("#fakuan").text(arg.price+"元");
+            },
+            btnAlign: 'r',
+            yes: function(index, layero){
+                var sendObj = $.extend({},sendData,arg);
+                sendObj.bookdetailid = arg.detailid;
+                sendObj.penaltystatus = 1;
+                sendObj.flag = $("select[name='bookType']").val();
+                sendObj.type = 0;
+                sendObj.status = 0;
+                sendObj.remarks = 0;
+                $.get("/bookPenalty/save",sendObj,function(result){
+                    if(result.code==200){
+                        layer.msg(result.data.msg,function(){
+                            dailyBook.lossBook();
+                        });
+                    }
+                })
+                layer.close(index);
+            },
+            btn2: function(index, layero){
+                var sendObj = $.extend({},sendData,arg);
+                sendObj.bookdetailid = arg.detailid;
+                sendObj.penaltystatus = 0;
+                sendObj.flag = $("select[name='bookType']").val();
+                sendObj.type = 0;
+                sendObj.status = 0;
+                sendObj.remarks = 0;
+                $.get("/bookPenalty/save",sendObj,function(result){
+                    if(result.code==200){
+                        layer.msg(result.data.msg);
+                        dailyBook.lossBook();
+                    }
+                })
+                layer.close(index);
+            },
+            btn3: function(index, layero){
+
+                layer.close(index);
+            }
+        });
+    }
+    //损书
+    function damageBookFun(arg,rowData){
+        layer.open({
+            type: 1,
+            title:"损坏处理",
+            btn:["确定","记账","取消"],
+            area: ['300px', '200px'],
+            content: $('#damageDialog'),
+            success:function(nowElem){
+                $("#pagePrice").text(arg.sunshumeiyefakuan);
+                $("#sunxiane").text(arg.sunshufakuanxiane);
+                $("#damagePage").on("input",function(){
+                    var priceNum = $("#damagePage").val()*arg.sunshumeiyefakuan;
+                    $("#damagePrice").text(priceNum);
+                    priceNum = priceNum>arg.sunshufakuanxiane?arg.sunshufakuanxiane:priceNum;
+                    $("#fineprice").val(priceNum);
+                });
+
+            },
+            btnAlign: 'r',
+            yes: function(index, layero){
+                var sendObj = $.extend({},sendData,arg.userInfo,rowData);
+                sendObj.bookdetailid = arg.detailid;
+                sendObj.penaltystatus = 1;
+                sendObj.readerid = arg.userInfo.id;
+                delete sendObj.id;
+                sendObj.penaltyamount = $("#fineprice").val();
+                sendObj.flag = $("select[name='bookType']").val();
+                sendObj.type = 1;
+                sendObj.remarks = 0;
+                $.get("/bookPenalty/save",sendObj,function(result){
+                    if(result.code==200){
+                        layer.msg(result.msg,function(){});
+                    }
+                });
+                $("#damageDialog")[0].reset();
+                layer.close(index);
+            },
+            btn2: function(index, layero){
+                var sendObj = $.extend({},sendData,arg.userInfo,rowData);
+                sendObj.bookdetailid = arg.detailid;
+                sendObj.penaltystatus = 0;
+                sendObj.readerid = arg.userInfo.id;
+                delete sendObj.id;
+                sendObj.penaltyamount = $("#fineprice").val();
+                sendObj.flag = $("select[name='bookType']").val();
+                sendObj.type = 1;
+                sendObj.remarks = 0;
+                $.get("/bookPenalty/save",sendObj,function(result){
+                    if(result.code==200){
+                        layer.msg(result.msg);
+                    }
+                });
+                $("#damageDialog")[0].reset();
+                layer.close(index);
+            },
+            btn3: function(index, layero){
+                $("#damageDialog")[0].reset();
+                layer.close(index);
+            }
+        });
+    }
+    //赔书
+    function payBookFun(arg){
+        layer.open({
+            type: 1,
+            title:"赔书",
+            btn:["确定","取消"],
+            area: ['400px', '250px'],
+            content: $('#payBookDialog'),
+            success:function(nowElem){
+
+            },
+            btnAlign: 'r',
+            yes: function(index, layero){
+                $("#newBookBar").val();
+                var sendObj = $.extend({},sendData,arg);
+                sendObj.type = +$("select[name='bookType']").val();
+                sendObj.barcode =$("#newBookBar").val();
+                delete sendObj.id;
+                    $.get("/jieyue/peishuReplaceBarcode",sendObj,function(result){
+                    if(result.code==200){
+                        layer.msg(result.data.msg);
+                    }
+                });
+                layer.close(index);
+            },
+
+            btn2: function(index, layero){
+                layer.close(index);
+            }
+        });
+    }
+</script>
+#end
+#define tableForm()
+<!--丢书-->
+<div id="lossDialog" class="input-dialog">
+        <p>
+            <label>图书原价:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <textarea id="yuanjia" name="realname" disabled></textarea>
+        </p>
+        <p>
+            <label>应交罚款:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <textarea id="fakuan" name="penaltyamount" disabled></textarea>
+        </p>
+        <p>
+            <label>丢失说明:</label>
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" id="remarks" name="remarks" class="layui-input-inline layui-input" style="width: 150px;" placeholder="丢失说明">
+
+        </p>
+    </div>
+<!--损书-->
+<form id="damageDialog" class="input-dialog">
+    <p>
+        <label>损书金额:</label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" type="number" id="damagePage" name="remarks" class="layui-input-inline layui-input" style="width: 50px;" placeholder="页数*每页价格">
+        *<b id="pagePrice"></b>=
+        <span id="damagePrice">0</span>
+    </p>
+    <p>
+        <label>损书限额:</label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <textarea name="penaltyamount" id="sunxiane" disabled></textarea>
+    </p>
+    <p>
+        <label>罚款金额:</label>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" id="fineprice" name="fineprice" disabled class="layui-input-inline layui-input" style="width: 150px;" placeholder="不超过限额">
+
+    </p>
+</form>
+<!--赔书-->
+<form id="payBookDialog" class="input-dialog">
+    <p>赔书指的是读者丢失已借的图书后购买了版本与内容相同的书籍代替
+
+        （注：若读者选择罚款请使用丢书处理）</p>
+<p>
+    <label>新书条码：</label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <input type="text" id="newBookBar" class="layui-input-inline layui-input" style="width: 150px;">
+
+</p>
+
+</form>
+#end

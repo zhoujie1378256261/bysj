@@ -1,0 +1,146 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">学校所在地</label>
+        <div class="layui-input-inline">
+            <select name="areatypeid" id="areaoptionView">
+
+            </select>
+        </div>
+        <label for="">学校类别</label>
+        <div class="layui-input-inline">
+            <select name="schoolcategoryid" id="typeoptionView">
+
+            </select>
+        </div>
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <div style="padding: 10px 0 0 40px;">
+            <label for="startDate">时间选择：</label>
+            <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到：</label>
+            <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        </div>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    var linkuserLevel;
+    if(getUrlParam("orgid")){
+        judgeLevel(getUrlParam("orgid"));
+    }
+    var readerQueryJudge = linkuserLevel||JSON.parse(sessionStorage.userLevel);
+
+    switch(readerQueryJudge){
+        case 1:
+            window.location.href = "addStatsState";
+            break;
+        case 2:
+            window.location.href = "addStatsCity";
+            break;
+        default:
+            break;
+    };
+
+    searchForm.init("areaoptionView","/org/areaType");
+    searchForm.init("typeoptionView","/org/schoolcategory");
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+    //合计赋值
+    function totalValue(sendData){
+        myAjax({url:"/selectcount/incrementSummarylTotalList",data:sendData},function(result){
+            $(".layui-table-total").find("td[data-field='students']").children().text(result.data.students||0);
+            $(".layui-table-total").find("td[data-field='dzs']").children().text(result.data.dzs||0);
+            $(".layui-table-total").find("td[data-field='tssl']").children().text(result.data.tssl||0);
+            $(".layui-table-total").find("td[data-field='jcsl']").children().text(result.data.jcsl||0);
+            $(".layui-table-total").find("td[data-field='sjcs']").children().text(result.data.sjcs?result.data.sjcs.toFixed(2):0);
+            $(".layui-table-total").find("td[data-field='rjjycs']").children().text(result.data.rjjycs||0);
+            $(".layui-table-total").find("td[data-field='nddz']").children().text(result.data.nddz?result.data.nddz.toFixed(2):0);
+        });
+    };
+    myTable.list({
+        url:"/selectcount/incrementSummarylListProvinces",
+        postData:{orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        totalRow: true,
+        done:function(){
+            totalValue({orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid});
+        },
+        cols: [
+            [ //表头
+                {type: 'numbers', title: '序号',rowspan:2}
+                ,{field: 'orgname', title: '学校名称',align:'center'}
+                ,{field:'category', title: '学校类别', align:'center',totalRowText:"合计"}
+                ,{field: 'students', title: '学生数', align:'center',templet:function(d){
+                    return d.students||0;
+                }}
+                ,{field: 'dzs', title: '读者数', align:'center',templet:function(d){
+                    return d.students||0;
+                }}
+                ,{field: 'tssl', title: '图书数量（册）', align:'center',templet:function(d){
+                    return d.tssl||0;
+                }}
+                ,{field: 'jcsl', title: '借出数量（册）', align:'center',templet:function(d){
+                    return d.jcsl||0;
+                }}
+                ,{field: 'sjcs',title: '生均册数', align:'center',templet:function(d){
+                    return d.sjcs?d.sjcs.toFixed(2):0;
+                }}
+                ,{field: 'rjjycs', title: '人均借阅册数', align:'center',templet:function(d){
+                    return d.rjjycs||0;
+                }}
+                ,{field: 'nddz', title: '生均年递增量(较上一年比较)', align:'center',templet:function(d){
+                    return d.nddz?d.nddz.toFixed(2):0;
+                }}
+
+            ]
+        ]
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            // url:"/selectcount/collectionSearch",
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    totalValue(data.field);
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+    searchForm.linkage(getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid);
+</script>
+#end

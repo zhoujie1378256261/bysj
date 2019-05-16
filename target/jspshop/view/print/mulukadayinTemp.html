@@ -1,0 +1,109 @@
+<style>
+    body ,ul ,li ,div ,p  {
+        margin: 0;
+        padding: 0;
+    }
+    ul#view {
+
+        /*margin-top: 5mm;*/
+        width: 125mm;
+    }
+    ul#view >li {
+        /*white-space: nowrap;*/
+        /*overflow: hidden;*/
+        width: 125mm;
+        height: 75mm;
+        text-align: center;
+        box-sizing: border-box;
+        padding: 20mm 5mm 5mm 5mm;
+
+    }
+    .clearfix:after {
+        clear: both;
+    }
+    .clearfix:after,
+    .clearfix:before {
+        display: table;
+        content: " ";
+    }
+    .clearfix {
+        zoom: 1;
+    }
+    .lf {
+        float: left;
+        width: 20mm;
+    }
+    .lf> p ,.rg> p{
+        font-size: 4mm;
+        text-align: left;
+    }
+    .rg {
+        float: right;
+        width: 85mm;
+    }
+</style>
+<ul id="view">
+    <!--<li class="clearfix">-->
+        <!--<div class="lf">-->
+            <!--<p>G624</p>-->
+            <!--<p>1</p>-->
+            <!--<p>1(1)</p>-->
+        <!--</div>-->
+        <!--<div class="rg">-->
+            <!--<p>直播语文</p>-->
+            <!--<p>低年级语文学习必备</p>-->
+            <!--<p>ISBN978</p>-->
+            <!--<p>I.直...II</p>-->
+            <!--<p>000777</p>-->
+        <!--</div>-->
+    <!--</li>-->
+    <!--<div style="page-break-after:always;"></div>-->
+    <!--<li class="clearfix">-->
+        <!--<div class="lf">-->
+            <!--<p>G624</p>-->
+            <!--<p>1</p>-->
+            <!--<p>1(1)</p>-->
+        <!--</div>-->
+        <!--<div class="rg">-->
+            <!--<p>直播语文</p>-->
+            <!--<p>低年级语文学习必备</p>-->
+            <!--<p>ISBN978</p>-->
+            <!--<p>I.直...II</p>-->
+            <!--<p>000777</p>-->
+        <!--</div>-->
+    <!--</li>-->
+</ul>
+<script id="bookMarkTemp" type="text/html">
+    {{#  layui.each(d, function(index, item){ }}
+    <li class="clearfix">
+        <div class="lf">
+            <p>{{item.typecode}}</p>
+            <p>{{item.shucihao||""}}</p>
+            <p>{{item.sizeid||""}}{{item.ceci?"("+item.ceci+")":""}}</p>
+        </div>
+        <div class="rg">
+            <p>{{item.title||""}}{{item.bltitle?"="+item.bltitle:""}}{{item.subtitle?":"+item.subtitle:""}}
+                {{item.author?"/"+item.author:""}}{{item.otherauthor?";"+item.otherauthor:""}}{{item.publishaddress?"·—"+item.publishaddress:""}}{{item.publisher?":"+item.publisher:""}}
+                {{item.publishdate?","+item.publishdate:""}}
+            </p>
+            <p>{{item.totalpages?item.totalpages+"页;":""}}{{item.sizeid?item.sizeid+"开":""}}{{item.congshuming?"·—("+item.congshuming+item.congshuauthor+")":""}}</p>
+            <p>{{item.fuzhu||""}}</p>
+            <p>{{item.isbn||""}}{{item.price?":¥"+item.price+"元":""}}</p>
+            <p>{{item.title?"I."+item.title.split("")[0]+"...":""}}{{item.author?"II."+item.author.split("")[0]+"...":""}}{{item.author?"III."+item.fuzhu:""}}{{item.typecode?"IV."+item.typecode:""}}</p>
+            <p>{{item.barcodeList?item.barcodeList.join(","):""}}</p>
+        </div>
+    </li>
+    <div style="page-break-after:always;"></div>
+    {{#  }); }}
+</script>
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<script>
+    var $ = layui.$;
+    var laytpl = layui.laytpl;
+    function markList(res){
+        console.log(res,123);
+        laytpl(bookMarkTemp.innerHTML).render(res, function(html){
+            document.getElementById('view').innerHTML = html;
+        });
+    }
+</script>

@@ -1,0 +1,517 @@
+#@layout()
+#define main()
+<style>
+    .table-d table{ background:#F00}
+    .table-d table td{ background:#FFF}
+</style>
+<div>
+    <div id="navTitle" class="nav-title"></div>
+
+
+    <form lay-filter="periodicalform" class="query-form layui-form" id="periodicalform">
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">期刊信息</label>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">ISSN</label>
+                <div class="layui-input-inline">
+                    <input type="hidden" name="bean.id"  id="periodicalid" >
+                    <input type="text"  name="bean.issn"   id="issn" placeholder="ISSN" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">刊名</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.kanming"  placeholder="刊名" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">副题名</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.futiming"  placeholder="副题名" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">编辑部</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.bianjibu"  placeholder="编辑部" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">统一刊号</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.tongyikanhao"  placeholder="统一刊号" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">邮发代码</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.youfadaihao"  placeholder="邮发代码" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">出版频率</label>
+                <div class="layui-input-inline">
+                    <select name="bean.chubanpinlv" id="chubanpinlv">
+                        <option value=''></option>
+                        <option value='1'>季刊</option>
+                        <option value='2'>月刊</option>
+                        <option value='3'>半月刊</option>
+                        <option value='4'>旬刊</option>
+                        <option value='5'>周刊</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">分类号</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.typecode"  id="typecode" laceholder="分类号" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">种次号</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.zhongcihao"   id="zhongcihao" placeholder="种次号" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">版本</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.banben"  placeholder="版本" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">尺寸</label>
+                <div class="layui-input-inline">
+                    <select name="bean.chicunid" id="chicunid">
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item" >
+                <label class="layui-form-label">合订次数</label>
+                <div class="layui-input-inline">
+                    <input type="text"  name="bean.hedingcishu"  placeholder="合订次数" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" >
+                <label class="layui-form-label">合订信息</label>
+            </div>
+        </div>
+    </form>
+
+    <button class="layui-btn layui-btn-sm" onclick="addPeriodicalDetail()" id="addPeriodicalDetail">增加合订本</button>
+    <button class="layui-btn layui-btn-sm" onclick="delPeriodicalDetail()" id="delPeriodicalDetail">删除合订本</button>
+
+</div>
+<table class="layui-table">
+    <thead>
+        <tr>
+            <th>选择</th>
+            <th>合订条码</th>
+            <th>馆藏地点</th>
+            <th>年度</th>
+            <th>起止期</th>
+            <th>缺期</th>
+            <th>价格（元）</th>
+            <th>索刊号</th>
+            <th>合订批次</th>
+            <th>合订时间</th>
+            <th style="display: none">id</th>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+    </tbody>
+</table>
+
+
+<button class="layui-btn layui-btn-sm" onclick="savePeriodicalDetail('save')" id="saveButton">保存</button>
+<button class="layui-btn layui-btn-sm" onclick="savePeriodicalDetail('saveandclear')" id="saveButtonOrNext">保存并继续</button>
+#end
+
+#define methods()
+<script type="text/javascript">
+    var params = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        params[pair[0]]=pair[1];
+    }
+
+    $.get("/sysconfig/findSysConfig",function (data) {
+        console.log(data);
+        localStorage.setItem("sysconfig",data);
+    });
+
+    $.get("/dict/list",{type:3},function (data) {
+        if (data.code==200){
+            $("#chicunid").append("<option value=''></option>");
+            data.data.forEach(function (item) {
+                $("#chicunid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+        }
+        form.render('select', 'periodicalform');
+    });
+
+    function getNowFormatDate() {
+        var date = new Date();
+        var seperator1 = "-";
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        if (month >= 1 && month <= 9) {
+            month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+            strDate = "0" + strDate;
+        }
+        var currentdate = year + seperator1 + month + seperator1 + strDate;
+        return currentdate;
+    }
+
+    var librayselect="";
+    var postdata={}
+    postdata["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+    $.get("/library/ajaxlibrarylist",postdata,function (data) {
+        if (data.code==200){
+            librayselect="<select>"
+            librayselect+="<option value=''></option>";
+            data.data.forEach(function (item) {
+                librayselect +="<option value='"+item.id+"'>"+item.text+"</option>";
+            });
+            librayselect+="</select>"
+        }
+    });
+
+    function initPeriodicalDetail(periodicalid) {
+        $("#tbody tr").remove();
+        if (periodicalid!="") {
+            $.get('/periodicaldetail/findPeriodicalDetail', {periodicalid:periodicalid},function (data) {
+                console.log(data);
+                if (data.data.length > 0){
+                    data.data.forEach(function (item) {
+                        var trhtml ="<tr>";
+                        trhtml+="<td><input type='checkbox'></td>";
+                        if (params.type=='libraryedit'){
+                            trhtml+="<td>"+item.barcode+"</td>";
+                            trhtml+="<td>"+librayselect+"</td>";
+                        }else {
+                            trhtml+="<td><input type='text' onkeydown='EnterPress(this)' value='"+item.barcode+"'/></td>";
+                            trhtml+="<td>"+librayselect+"</td>";
+                        }
+
+
+                        trhtml+="<td><input type='text' value='"+item.niandu+"'/></td>";
+                        trhtml+="<td><input type='text' value='"+item.qizhiqi+"'/></td>";
+                        trhtml+="<td><input type='text' value='"+item.queqi+"'/></td>";
+                        trhtml+="<td><input type='text' value='"+item.price+"'/></td>";
+                        trhtml+="<td>"+item.bookno+"</td>";
+                        trhtml+="<td><input type='text' value='"+item.hedingpiciid+"'/></td>";
+                        trhtml+="<td><input type='text' value='"+item.hedingtime+"'/></td>";
+                        trhtml+="<td style='display: none'>"+item.id+"</td>";
+                        trhtml+="</tr>";
+                        $("#tbody").append(trhtml);
+                        $("#tbody tr:last").children('td').eq(2).children('select').val(item.libraryid);
+                        $("#tbody tr:last").children('td').eq(2).children('select').attr("disabled",true);
+                    });
+                }else {
+                    addEmptyTr();
+                }
+            })
+        }else {
+            addEmptyTr();
+        }
+
+
+    }
+
+    function  addEmptyTr() {
+        var bookno=$("#typecode").val()+"/"+$("#zhongcihao").val();
+        if (bookno=="/"){
+            layer.msg('请先录入期刊信息！', { icon: 1 });
+            return;
+        }
+        var trhtml ="<tr>";
+        trhtml+="<td><input type='checkbox'></td>";
+        trhtml+="<td><input type='text' onkeydown='EnterPress()'/></td>";
+        trhtml+="<td>"+librayselect+"</td>";
+        trhtml+="<td><input type='text' /></td>";
+        trhtml+="<td><input type='text' /></td>";
+        trhtml+="<td><input type='text' /></td>";
+        trhtml+="<td><input type='text' /></td>";
+        trhtml+="<td>"+bookno+"</td>";
+        trhtml+="<td><input type='text' /></td>";
+        trhtml+="<td><input type='text' value='"+getNowFormatDate()+"' /></td>";
+        trhtml+="<td style='display: none'></td>";
+        trhtml+="</tr>";
+        $("#tbody").append(trhtml);
+    }
+
+    function EnterPress(){
+        if (event.keyCode == 13) {//event是html的内置对象
+            addPeriodicalDetail('enter');
+        }
+    }
+    
+
+    function addPeriodicalDetail(barcodeflag){
+        var bookno=$("#typecode").val()+"/"+$("#zhongcihao").val();
+        if (bookno=="/"){
+            layer.msg('请先录入期刊信息！', { icon: 1 });
+            return;
+        }
+        var lasttr =$("#tbody tr:last");
+        var lasttrbak =$("#tbody tr:last").clone();
+        if (barcodeflag=='enter'){
+            lasttrbak.children('td').eq(1).children('input').val('');
+        }else{
+            var barcode= lasttrbak.children('td').eq(1).children('input').val();
+            if (barcode !=''){
+                var newbarcode=parseInt(barcode)+1;
+                lasttrbak.children('td').eq(1).children('input').val(newbarcode);
+            }
+        }
+        var libray= lasttr.children('td').eq(2).children('select').val();
+        lasttrbak.children('td').eq(2).children('select').val(libray);
+        lasttrbak.children('td').eq(10).html('');
+        $("#tbody").append(lasttrbak);
+        lasttrbak.children('td').eq(1).children('input').focus();
+    }
+
+    var dialogIndex;
+
+    $("#issn").keydown(function() {
+        if(event.keyCode == "13") {
+            var value = $(this).val();
+            if (value == "") {
+                return;
+            }
+            clearPage();
+            dialogIndex=  layer.open({
+                type: 1,
+                area: ['960px', '800px'],
+                content: $("#periodicalListDialog"),
+                success: function(layero, index){
+                    datasourcetype=0;
+                    table.render({
+                        url:"/periodical/findPeriodicalListByISBNOrZTM",
+                        where:{orgid:JSON.parse(sessionStorage.loginData).orgid,queryType:1,queryStr:value},
+                        elem:"#dataTableOne",
+                        toolbar:"#toolbarDemo",
+                        cols: [[
+                                {type:'radio'}
+                                ,{field:'id', title: 'id', align:'center',hide:true}
+                                ,{field:'kanming', title: '刊名', align:'center'}
+                                ,{field:'futiming', title: '副题名', align:'center'}
+                                ,{field: 'bianjibu', title: '编辑部', align:'center'}
+                                ,{field: 'issn', title: 'ISSN', align:'center'}
+                                ,{field: 'tongyikanhao', title: '统一刊号', align:'center'}
+                                ,{field:'youfadaihao', title: '邮发代号', align:'center'}
+                                ,{field:'chubanpinlv', title: '出版频率', align:'center'}
+                            ]
+                        ]
+                        ,request: {
+                            pageName: 'pageNumber' //页码的参数名称，默认：page
+                            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        }
+                        ,page: false
+                        ,response: {
+                            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+                        },
+                        parseData: function(result) {
+                            console.log(result);
+                            if(result.code==200){
+                                localStorage.setItem("periodicaldata",JSON.stringify(result));
+                                return {
+                                    "code": result.code, //解析接口状态
+                                    "msg": result.msg, //解析提示文本
+                                    "count": result.data.guancangList.length, //解析数据长度
+                                    "data": result.data.guancangList //解析数据列表
+                                };
+                            }else {
+                                layer.msg(result.msg, { icon: 5 });
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    function savePeriodicalDetail(flag) {
+        var params= {};
+        var t = $('#periodicalform').serializeArray();
+        $.each(t, function () {
+            params[this.name] = this.value;
+        });
+
+        var objArr=[];
+        $('#tbody').find('tr').each(function(i){
+                var row={};
+                var idx=1;
+                row['barcode']=$(this).children('td').eq(idx++).children('input').val();
+                row['libraryid']=$(this).children('td').eq(idx++).children('select').val();
+                row['niandu']=$(this).children('td').eq(idx++).children('input').val();
+                row['qizhiqi']=$(this).children('td').eq(idx++).children('input').val();
+                row['queqi']=$(this).children('td').eq(idx++).children('input').val();
+                row['price']=$(this).children('td').eq(idx++).children('input').val();
+                row['bookno']=$(this).children('td').eq(idx++).text();
+                row['hedingpiciid']=$(this).children('td').eq(idx++).children('input').val();
+                row['hedingtime']=$(this).children('td').eq(idx++).children('input').val();
+                row['id']=$(this).children('td').eq(idx++).text();
+                row['periodicalid']=$("#periodicalid").val();
+                objArr.push(row);
+        });
+        if (objArr.length>0){
+            params['token']=JSON.parse(sessionStorage.loginData).token;
+            params['JSONStr']=JSON.stringify(objArr);
+            params['bean.orgid']=JSON.parse(sessionStorage.loginData).orgid;
+            $.post("/periodicaldetail/addOrUpdate",params,function (data) {
+                if("save"==flag){
+                    initPeriodicalDetail($("#periodicalid").val());
+                    layer.msg('保存成功！', { icon: 1 });
+                }else {
+                    clearPage();
+                }
+
+            });
+        }
+    }
+
+    var datasourcetype=0;
+
+    function tableQuery(type) {
+        datasourcetype=type;
+        var periodicaldata=JSON.parse(localStorage.getItem("periodicaldata"));
+        console.log(periodicaldata);
+        var data;
+        if (type==0){
+            data=periodicaldata.data.guancangList;
+        }else if (type==1){
+            data=periodicaldata.data.yubianList;
+        }else if (type==2){
+            data=periodicaldata.data.zList;
+        }
+        console.log(data);
+        table.reload('dataTableOne',{
+            url:'',
+            data:data
+        });
+    }
+
+
+    table.on('toolbar(dataTableOne)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+        switch(obj.event){
+            case 'getCheckData':
+                var data = checkStatus.data;  //获取选中行数据
+                var d ={};
+                for (var attr in data[0]) {
+                    if (datasourcetype!=0 && attr=='id'){
+                        continue;
+                    }
+                    d["bean."+attr]=data[0][attr];
+                }
+                form.val("periodicalform",d);
+                initPeriodicalDetail($("#periodicalid").val());
+                layer.close(dialogIndex);
+                break;
+        };
+    });
+
+    if (params.type=='detail'){
+        fillPeriodical(params.id);
+        $("#saveButtonOrNext").hide();
+        $("#saveButton").hide();
+        $("#addPeriodicalDetail").hide();
+        $("#delPeriodicalDetail").hide();
+    }else if (params.type=='edit') {
+        fillPeriodical(params.id);
+    }else if (params.type=='libraryedit') {
+        fillPeriodical(params.id);
+
+        $("#delPeriodicalDetail").hide();
+        $("#addPeriodicalDetail").hide();
+    }
+
+    
+
+
+
+    function fillPeriodical(id) {
+        $.get("/periodical/findByID",{id:id},function (data) {
+            console.log(data);
+            var d ={};
+            for (var attr in data.data[0]) {
+                d["bean."+attr]=data.data[0][attr];
+            }
+            form.val("periodicalform",d);
+            initPeriodicalDetail($("#periodicalid").val());
+        });
+    }
+
+    
+    function clearPage(){
+        $("#periodicalform")[0].reset();
+        $("#tbody tr").remove();
+        $("#periodicalid").val('');
+    }
+    
+    function delPeriodicalDetail() {
+        var ids="";
+        $('#tbody').find('tr').each(function(i){
+            var checked=$(this).children('td').eq(0).children('input').is(':checked');
+            if (checked){
+                var id=$(this).children('td').eq(10).text()
+                if (id!=''){
+                    ids+= id+",";
+                }
+                $(this).remove();
+            }
+        });
+        ids+="-1";
+      //  console.log(ids);
+        if (ids!="-1"){
+            $.post("/periodicaldetail/delete",{ids:ids},function (data) {
+                layer.msg('删除成功！', { icon: 1 });
+            });
+        }
+    }
+    
+    function barcode(code) {
+        var len=JSON.parse(localStorage.getItem("sysconfig")).data.OrgSetting.qktiaoxingmaweishu;
+        var perfix=JSON.parse(localStorage.getItem("sysconfig")).data.OrgSetting.qktiaoxingmaqianzhui;
+        if(code.length +perfix.length < parseInt(len)){
+            code+='0';
+        }
+    }
+
+</script>
+#end
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">下载</button>
+    </div>
+</script>
+
+<div class="layui-form" id="periodicalListDialog" style="display: none;" lay-filter="periodicalListDialog" >
+    <button class="layui-btn"  onclick="tableQuery(0)">本校馆藏</button>
+    <button class="layui-btn"  onclick="tableQuery(1)">回溯数据</button>
+    <button class="layui-btn"  onclick="tableQuery(2)">Z39.50服务</button>
+    <table id="dataTableOne" lay-filter="dataTableOne"></table>
+</div>

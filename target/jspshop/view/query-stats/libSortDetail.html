@@ -1,0 +1,170 @@
+#@layout()
+#define main()
+<div>
+
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 查询统计 > 藏书分类统计 > <span>二十二大类</span>
+    </div>
+    <!--<form lay-filter="queryForm" class="query-form layui-form">-->
+        <!--<b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>-->
+        <!--<label for="">学校所在地</label>-->
+        <!--<div class="layui-input-inline">-->
+            <!--<select name="areatypeid" id="areaoptionView">-->
+
+            <!--</select>-->
+        <!--</div>-->
+        <!--<label for="">学校类别</label>-->
+        <!--<div class="layui-input-inline">-->
+            <!--<select name="schoolcategoryid" id="typeoptionView">-->
+
+            <!--</select>-->
+        <!--</div>-->
+        <!--<label for="">学校</label>-->
+        <!--<div style="display: inline-block;" id="linkDiv"></div>-->
+        <!--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+        <!--<button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>-->
+    <!--</form>-->
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}">
+        <thead>
+            <tr>
+                <th lay-data="{field:'a'}">五大分类</th>
+                <th lay-data="{field:'b'}">22个基本部类</th>
+                <th lay-data="{field:'c'}">种数</th>
+                <th lay-data="{field:'d'}">册数</th>
+                <th lay-data="{field:'e'}">金额（元）</th>
+            </tr>
+        </thead>
+        <tbody>
+        <tr data-sort="A">
+            <td>第一大类</td><td>A马/列主义、毛泽东思想、邓小平理论</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="B">
+            <td>第二大类</td><td>B哲学、宗教</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="C">
+            <td>第三大类</td><td>C社会科学总论</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="D">
+            <td>第三大类</td><td>D政治法律</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="E">
+            <td>第三大类</td><td>E军事</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="F">
+            <td>第三大类</td><td>F经济</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="G">
+            <td>第三大类</td><td>G文化、科学、教育、体育</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="H">
+            <td>第三大类</td><td>H语言、文字</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="I">
+            <td>第三大类</td><td>I文学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="J">
+            <td>第三大类</td><td>J艺术</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="K">
+            <td>第三大类</td><td>K历史、地理</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="N">
+            <td>第四大类</td><td>N自然科学总论</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="O">
+            <td>第四大类</td><td>O数理科学和化学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="P">
+            <td>第四大类</td><td>P天文学、地球科学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="Q">
+            <td>第四大类</td><td>Q生物科学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="R">
+            <td>第四大类</td><td>R医药、卫生</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="S">
+            <td>第四大类</td><td>S农业科学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="T">
+            <td>第四大类</td><td>T工业技术</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="U">
+            <td>第四大类</td><td>U交通运输</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="V">
+            <td>第四大类</td><td>V航空、航天</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="X">
+            <td>第四大类</td><td>X环境科学、安全科学</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-sort="Z">
+            <td>第五大类</td><td>Z综合性图书</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        <tr data-total="A">
+            <td></td><td>合计</td><td>0</td><td>0</td><td>0</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+#end
+#define methods()
+
+<script>
+    // searchForm.init("areaoptionView","/org/areaType");
+    // searchForm.init("typeoptionView","/org/schoolcategory");
+
+    function pageTable(data){
+        var allTd = $("#dataTable tbody").find("tr");
+        // debugger;
+        console.log($(allTd[0]).children()[2]);
+        console.log(typeof allTd);
+        allTd.map(function(index,item,arr){
+            $($(item).children()[2]).text("0");
+            $($(item).children()[3]).text("0");
+            $($(item).children()[4]).text("0");
+
+        });
+        myAjax({url:"/selectcount/bookTypeSmallList",data:data,async:false},function(result){
+            if(result.code==200){
+
+                result.data.forEach(function(item,index,arr){
+                    for(var i = 65; i<91; i++){
+                        var strName = String.fromCharCode(i);
+                        strName = "tr[data-sort="+strName+"]";
+                        if(item.gname.charCodeAt(0)==i){
+                            var elem = $("#dataTable").find(strName).children();
+                            $(elem[2]).text(item.zs);
+                            $(elem[3]).text(item.zcs);
+                            $(elem[4]).text(item.price);
+                        }
+                    }
+                });
+            }
+        });
+        myAjax({url:"/selectcount/bookTypeSmallTotalList",data:data,async:false},function(result){
+            if(result.code==200){
+                var elem = $("#dataTable").find("tr[data-total='A']").children();
+                    $(elem[2]).text(result.data.zs);
+                    $(elem[3]).text(result.data.zcs);
+                    $(elem[4]).text(result.data.price);
+            }
+        });
+        table.init('mainTable',{
+            limit: 24,
+            toolbar:true
+        });
+    }
+    pageTable({orgid:getUrlParam("orgid")});
+    form.on('submit(searchBtn)', function(data){
+        // table.reload('dataTable');
+        pageTable(data.field);
+
+        return false;
+    });
+
+    searchForm.linkage(getUrlParam("orgid"));
+</script>
+#end

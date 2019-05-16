@@ -1,0 +1,156 @@
+<link rel="stylesheet" href="/lib/layui/css/layui.css">
+<link href="/css/main.css" rel="stylesheet">
+
+<script type="text/javascript" src="/lib/vue2.js"></script>
+<!--<script type="text/javascript" src="/lib/iview.js"></script>-->
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+
+<div>
+    <div class="line"></div>
+    未拥有角色列表
+    <table id="noOwnerRoleTable" lay-filter="noOwnerRoleTable"></table>
+
+    已经拥有角色列表
+    <table id="roleTable" lay-filter="roleTable"></table>
+
+    <input type="hidden" id="userid">
+</div>
+<script type="text/html" id="toolbarDemo">
+    <button class="layui-btn layui-btn-sm" lay-event="saveRoleBtn">保存</button>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script>
+
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+    var $ = layui.$;
+    $("#userid").val(getQueryVariable("userid"));
+
+
+    layui.use('table', function() {
+        var table = layui.table;
+        table.render({
+            title: "角色列表",
+            url: "/role/findRoleByUser?userid="+$("#userid").val(),
+            elem: "#roleTable",
+            cols: [[ //表头
+                  {type:'checkbox'}
+                , {field: 'id', title: 'id', align: 'center', edit: 'text' ,hide:true}
+                , {field: 'rolename', title: '角色名称', align: 'center', edit: 'text'}
+                , {field: 'memo', title: '描述', align: 'center', edit: 'text'}
+                , {fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+            ]],response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                if(res.code==3){
+                    window.location.href ="/"
+                }
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": 1, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            }
+        })
+
+        //监听行工具事件
+        table.on('tool(roleTable)', function(obj) {
+            if (obj.event === 'del') {
+                layer.confirm('真的删除行么', function (index) {
+                    //alert(JSON.stringify(obj.data));
+                    $.post("/role/delUserRole",
+                        {
+                           id:obj.data.id
+                        },
+                        function(data,status){
+                            if(data.code==200){
+                                obj.del();
+                                layer.close(index);
+                            }else {
+                                if(data.code==3){
+                                    window.location.href ="/"
+                                }
+                                layer.msg(data.msg, {icon: 1});
+                            }
+                        });
+
+
+                });
+            }
+        });
+
+    })
+
+    layui.use('table', function() {
+        var table = layui.table;
+        table.render({
+            title: "角色列表",
+            url: "/role/findNoOwnerRoleByUser?userid="+$("#userid").val(),
+            elem: "#noOwnerRoleTable",
+            toolbar: '#toolbarDemo',
+            cols: [[ //表头
+                {type:'checkbox'}
+                , {field: 'id', title: 'id', align: 'center', edit: 'text' ,hide:true}
+                , {field: 'rolename', title: '角色名称', align: 'center', edit: 'text'}
+                , {field: 'memo', title: '描述', align: 'center', edit: 'text'}
+            ]],response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            },
+            parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": 1, //解析数据长度
+                    "data": res.data //解析数据列表
+                };
+            }
+        })
+
+        //头工具栏事件
+        table.on('toolbar(noOwnerRoleTable)', function(obj){
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data;
+            if(JSON.stringify(data) =='[]'){
+                layer.msg("请选择角色！")
+                return;
+            }
+            switch(obj.event){
+                case 'saveRoleBtn':
+                    //通过这种方式弹出的层，每当它被选择，就会置顶。
+                    $.post("/role/addUserRole",
+                        {
+                            userid:$("#userid").val(),
+                            role:JSON.stringify(data)
+                        },
+                        function(data,status){
+                            if(data.code==200){
+                                layer.msg('操作成功', { icon: 1 });
+                            }else {
+                                if(data.code==3){
+                                    window.location.href ="/"
+                                }
+                                layer.msg(data.msg, {icon: 1});
+                            }
+                        });
+                    break;
+
+            };
+        });
+    })
+
+</script>
+
+
+

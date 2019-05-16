@@ -1,0 +1,109 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <form class="layui-form query-form" action="" lay-filter="roleselect">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label>角色</label>
+        <div class="layui-input-inline" >
+            <select id="roleselect" name="modules" lay-verify="required" lay-search=""  lay-filter="roleselect">
+            </select>
+        </div>
+    </form>
+    <div class="line"></div>
+    <div>
+        <button class="layui-btn layui-btn-primary get-checked" onclick="addMenu()">配置角色菜单</button>
+        <button class="layui-btn layui-btn-primary get-checked" onclick="delMenu()">删除角色菜单</button>
+        <table id="menuTable"  lay-filter="menuTable" class="layui-table layui-form"  ></table>
+    </div>
+</div>
+#end
+
+#define methods()
+<script type="text/javascript">
+    layui.config({
+        base: '/lib/layui/lay/modules/',
+    })
+
+    $.get("/role/findRole",function (data) {
+      // alert(JSON.stringify(data))
+        $.each(data.data,function(index,obj){
+            $("#roleselect").append("<option value='"+obj.id+"'>"+obj.rolename+"</option>");
+        });
+        form.render('select', 'roleselect');
+        render( $("#roleselect").val());
+    });
+
+    var treetable;
+
+    form.on('select(roleselect)', function(data){
+       // alert(JSON.stringify(data));
+       // console.log(data);
+        var roleid =data.value;
+        render(roleid);
+    });
+
+
+    function render(roleid) {
+        layui.use(['treetable'],function(){
+            $.get("/menu/findMenuByRole",
+                {
+                    roleid:roleid
+                },function (d) {
+                    treetable = layui.treetable;
+                    treetable.render({
+                        elem: '#menuTable',
+                        data: d.data,
+                        width:300,
+                        field: 'menuname',
+                        is_checkbox: true,
+                        cols: [
+                            {
+                                field: 'menuname',
+                                title: '菜单名称',
+                                width: '70%',
+                            }
+                        ]
+                    });
+                    treetable.all('down');
+                }
+            );
+
+        })
+
+    }
+
+    function delMenu() {
+        //alert(JSON.stringify(treetable.all('checked')));
+        $.post("/menu/deleteRoleMenu",
+            {
+                roleid:$("#roleselect").val(),
+                menu:JSON.stringify(treetable.all('checked').data)
+            },
+            function(data,status){
+                if(data.code==200){
+                    layer.msg('操作成功', { icon: 1 });
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            });
+    }
+
+    function addMenu() {
+        var url ="/view/userrole/selectmenu.html?roleid="+$("#roleselect").val();
+        layer.open({
+            type: 2,
+            area: ['600px', '800px'],
+            content:url
+        });
+    }
+</script>
+#end
+
+
+#define tableForm()
+#end
+

@@ -1,0 +1,276 @@
+#@layout()
+#define main()
+<script type="text/html" id="toolbarDemo">
+    <button class="layui-btn layui-btn-sm" lay-event="addReader">添加借阅规则</button>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<table class="layui-hide" id="datatable" lay-filter="datatable"></table>
+#end
+#define methods()
+<script>
+
+    var postdata={}
+    postdata["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+
+    table.render({
+        elem: '#datatable'
+        ,url:'/readerauth/list'
+        ,where:postdata
+        ,toolbar: '#toolbarDemo'
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'name', title:'权限名称', }
+            ,{field:'jieyuetianshu', title:'借阅天数'}
+            ,{field:'jieyueshuliang', title:'借阅数量'}
+            ,{field:'xujiecishu', title:'续借次数'}
+            ,{field:'xujietianshu', title:'续借天数'}
+            ,{field:'yuyueshuliang', title:'预约数量'}
+            ,{field:'yuyueyouxiaotianshu', title:'预约有效天数'}
+            ,{field:'yujieshuliang', title:'预借数量'}
+            ,{field:'yujieyouxiaotianshu', title:'预借有效天数'}
+            ,{field:'shifounengchaoqijieshu', title:'是否能超期借书'}
+            ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: false
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+</script>
+#end
+
+#define tableForm()
+
+
+<script>
+    //头工具栏事件
+    table.on('toolbar(datatable)', function(obj){
+        switch(obj.event){
+            case 'addReader':
+                addReader();
+                break;
+        };
+    });
+
+    table.on('tool(datatable)', function(obj){
+        var data = obj.data;
+        if(obj.event == 'del'){
+            layer.confirm('真的删除行么', function(index){
+                delReader(obj);
+                layer.close(index)
+            });
+        }else if (obj.event=="edit"){
+            editReader(obj);
+        }
+    });
+
+
+
+
+    var dialogIndex=-1;
+    function addReader(){
+        $("#readerfrom")[0].reset();
+        form.render();
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#readerfrom")
+        });
+    }
+
+    function editReader(obj){
+        //  alert(JSON.stringify(obj.data));
+        var d ={};
+        for (var attr in obj.data) {
+            if (attr=='shifounengchaoqijieshu' ){
+                $("input[name='bean.shifounengchaoqijieshu'][value="+obj.data[attr]+"]").attr("checked",true);
+            }
+            d["bean."+attr]=obj.data[attr];
+        }
+        // alert(JSON.stringify(d));
+        form.val("readerfrom",d);
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#readerfrom")
+        });
+    }
+
+    function delReader(obj){
+        $.post("/readerauth/delete",
+            {
+                id:obj.data.id
+            },
+            function(data,status){
+                if(data.code==200){
+                    obj.del();
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, { icon: 1 });
+                }
+            }
+        );
+    }
+
+    form.on('submit(addReader)', function(data){
+        data.field.token=JSON.parse(sessionStorage.loginData).token;
+        data.field["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        $.post("/readerauth/addOrUpdate",
+            data.field,
+            function (data, status) {
+                if (data.code == 200) {
+                    layer.msg("保存成功");
+                    layer.close(dialogIndex);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            }
+        );
+        return false;
+    });
+
+
+
+</script>
+
+#end
+
+<form class="layui-form" id="readerfrom" style="display: none;" lay-filter="readerfrom" >
+    <div class="layui-form-item" >
+        <label class="layui-form-label">权限名称</label>
+        <div class="layui-input-inline">
+            <input type="hidden" name="bean.id"/>
+            <input type="text"  name="bean.name"  placeholder="权限名称" autocomplete="off" class="layui-input" lay-verify="required">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">借阅天数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.jieyuetianshu"  lay-verify="required" placeholder="借阅天数" autocomplete="off" class="layui-input" lay-verify="required|number">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">借阅数量</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.jieyueshuliang"  lay-verify="required" placeholder="借阅数量" autocomplete="off" class="layui-input" lay-verify="required|number">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">续借次数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.xujiecishu" placeholder="续借次数" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">续借天数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.xujietianshu" placeholder="续借天数" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预约数量</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.yuyueshuliang" placeholder="预约数量" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预约有效天数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.yuyueyouxiaotianshu" placeholder="预约有效天数" autocomplete="off" class="layui-input"  lay-verify="required|number"</textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预借数量</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.yujieshuliang" placeholder="预借数量" autocomplete="off" class="layui-input"  lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">预借有效天数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.yujieyouxiaotianshu" placeholder="预借有效天数" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item" pane="">
+        <label class="layui-form-label">是否能超期借书</label>
+        <div class="layui-input-block">
+            <input type="radio" name="bean.shifounengchaoqijieshu" value="0" title="能" >
+            <input type="radio" name="bean.shifounengchaoqijieshu" value="1" title="否" >
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">损书每页罚款（元）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.sunshumeiyefakuan" placeholder="损书每页罚款（元）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">损书还款限额</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.sunshufakuanxiane" placeholder="损书还款限额" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">超期罚款（元/天）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.chaoqifakuan" placeholder="超期罚款（元/天）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">超期罚款限（元）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.chaoqifakuanxiane" placeholder="超期罚款限（元）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">丢书罚款倍数</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.diushufakuanbeishu" placeholder="丢书罚款倍数" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">丢书补还期限（天）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.diushubuhuaiqixian" placeholder="丢书补还期限（天）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">默认借阅证有效期（年）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.jieyuezhenyouxiaoqi" placeholder="默认借阅证有效期（年）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="addReader">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

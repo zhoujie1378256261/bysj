@@ -1,0 +1,79 @@
+#@layout()
+#define main()
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+    <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+    <label for="">学校</label>
+    <div style="display: inline-block;" id="linkDiv"></div>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+</form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+    var linkuserLevel;
+
+    myTable.list({
+        url:"/selectcount/readerSearchProvinces",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        postData:{orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid},
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'orgname', title: '单位名称',align:'center'}
+            ,{field: 'dzs', title: '读者数', align:'center',templet:function(d){
+                    return "<a href='readerQuerySchool?orgid="+d.orgid+"'>"+d.dzs+"</a>";
+                }}
+        ]]
+    });
+
+    searchForm.linkage(getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid);
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        judgeLevel(data.field.orgid);
+        switch(linkuserLevel){
+            case 1:
+                // window.location.href = "readerQueryState?orgid="+linkuserLevel;
+                break;
+            case 2:
+                // window.location.href = "readerQueryCity?orgid="+data.field.orgid;
+                break;
+            case 3:
+                window.location.href = "readerQuerySchool?orgid="+data.field.orgid;
+                break;
+            default:
+                window.location.href = "readerQuery?orgid="+data.field.orgid;
+                break;
+        };
+
+
+        table.reload("dataTable",{
+            // url:"/selectcount/collectionSearch",
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    totalValue(data.field);
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+
+        return false;
+    });
+    // searchForm.submit("submit(searchBtn)","/selectcount/readerSearchProvinces")
+</script>
+#end

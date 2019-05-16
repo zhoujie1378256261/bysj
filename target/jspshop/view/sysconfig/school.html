@@ -1,0 +1,186 @@
+#@layout()
+#define main()
+
+
+<form class="layui-form" id="schoolfrom" lay-filter="schoolfrom" >
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学校名称</label>
+            <div class="layui-input-inline">
+                <input type="hidden" name="bean.id"/>
+                <input type="text"  name="bean.orgname"  placeholder="学校名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学校地址</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.address"  lay-verify="required" placeholder="学校地址" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">学校类别</label>
+            <div class="layui-input-inline">
+                <select name="bean.schoolcategoryid" id="schoolcategoryid" lay-filter="schoolcategoryid" lay-verify="required">
+                </select>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">教师数</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.teachers" placeholder="教师数" autocomplete="off" class="layui-input" lay-verify="required|number"></input>
+            </div>
+        </div>
+    </div>
+
+        <div>
+            <div class="layui-form-item" id="studentsDiv">
+                <label class="layui-form-label">小学学生数</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="students" name="bean.students" placeholder="小学学生数" autocomplete="off" class="layui-input" ></textarea>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" id="czstudentsDiv">
+                <label class="layui-form-label">初中学生数</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="czstudents" name="bean.czstudents" placeholder="初中学生数" autocomplete="off" class="layui-input" ></textarea>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item" id="gzstudentsDiv">
+                <label class="layui-form-label">高中学生数</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="gzstudents" name="bean.gzstudents" placeholder="高中学生数" autocomplete="off" class="layui-input" ></textarea>
+                </div>
+            </div>
+        </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系人</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.linkman" placeholder="联系人" autocomplete="off" class="layui-input" lay-verify="required"></textarea>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">联系电话</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.linkphone" placeholder="联系电话" autocomplete="off" class="layui-input" lay-verify="required|phone"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="addlibrary">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+
+#end
+#define methods()
+    <script>
+
+        $.get("/org/schoolcategory",function (data) {
+            //alert(JSON.stringify(data));
+            if (data.code==200){
+                $("#schoolcategoryid").append("<option value=''></option>");
+                $.each(data.data,function(index,obj){
+                    $("#schoolcategoryid").append("<option value='"+obj.id+"'>"+obj.text+"</option>");
+                });
+                form.render();
+
+                var orgid=JSON.parse(sessionStorage.loginData).id;
+                var bean={};
+                bean['bean.id']=orgid;
+                // alert(JSON.stringify(bean));
+                $.get("/org/getById",bean,function(data) {
+                    if (data.code == 200) {
+                        var d ={};
+                        for (var attr in data.data) {
+                            d["bean."+attr]=data.data[attr];
+                        }
+                        form.val("schoolfrom",d);
+                        form.render();
+                    }
+                });
+            }
+        });
+
+        form.on('select(schoolcategoryid)', function(data){
+            if(data.value==1){
+                $("#studentsDiv").show();
+                $("#czstudentsDiv").hide();
+                $("#gzstudentsDiv").hide();
+                $("#students").attr("lay-verify","required|number");
+                $("#czstudents").removeAttr("lay-verify");
+                $("#gzstudents").removeAttr("lay-verify");
+            }else if (data.value==2){
+                $("#studentsDiv").hide();
+                $("#czstudentsDiv").show();
+                $("#gzstudentsDiv").hide();
+                $("#students").removeAttr("lay-verify");
+                $("#czstudents").attr("lay-verify","required|number");
+                $("#gzstudents").removeAttr("lay-verify");
+            }else if (data.value==3){
+                $("#studentsDiv").show();
+                $("#czstudentsDiv").show();
+                $("#gzstudentsDiv").hide();
+                $("#students").attr("lay-verify","required|number");
+                $("#czstudents").attr("lay-verify","required|number");
+                $("#gzstudents").removeAttr("lay-verify");
+            }else if (data.value==4){
+                $("#studentsDiv").hide();
+                $("#czstudentsDiv").hide();
+                $("#gzstudentsDiv").show();
+                $("#students").removeAttr("lay-verify");
+                $("#czstudents").removeAttr("lay-verify");
+                $("#gzstudents").attr("lay-verify","required|number");
+            }else if (data.value==5){
+                $("#studentsDiv").hide();
+                $("#czstudentsDiv").show();
+                $("#gzstudentsDiv").show();
+                $("#students").removeAttr("lay-verify");
+                $("#czstudents").attr("lay-verify","required|number");
+                $("#gzstudents").attr("lay-verify","required|number");
+            }else {
+                $("#studentsDiv").show();
+                $("#czstudentsDiv").show();
+                $("#gzstudentsDiv").show();
+                $("#students").attr("lay-verify","required|number");
+                $("#czstudents").attr("lay-verify","required|number");
+                $("#gzstudents").attr("lay-verify","required|number");
+            }
+        });
+
+
+
+        form.on('submit(addlibrary)', function(data){
+            data.field.token=JSON.parse(sessionStorage.loginData).token;
+            $.post("/org/addOrUpdate",
+                data.field,
+                function (data, status) {
+                    if (data.code == 200) {
+                        layer.msg("保存成功");
+                    } else {
+                        if(data.code==3){
+                            window.location.href ="/"
+                        }
+                        layer.msg(data.msg, {icon: 1});
+                    }
+                }
+            );
+            return false;
+        });
+    </script>
+#end
+#define tableForm()
+#end

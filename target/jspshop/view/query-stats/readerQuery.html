@@ -1,0 +1,89 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.typename }}</option>
+        {{#  }); }}
+    </script>
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 查询统计 > <span>读者查询</span>
+    </div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <div style="padding: 5px 0px 5px 50px;">
+            <label for="">读者姓名：</label>
+            <input type="text" name="bean.realname" class="layui-input-inline layui-input" placeholder="请输入">
+            <label for="">读者证号：</label>
+            <input type="text" name="bean.cardnumber" class="layui-input-inline layui-input" placeholder="请输入">
+            <label for="">读者类型：</label>
+            <div class="layui-input-inline">
+                <select name="bean.readertypeid" id="readerType">
+
+                </select>
+            </div>
+        </div>
+        <div style="padding: 5px 0px 5px 70px;">
+            <label for="">学校：</label>
+            <div style="display: inline-block;" id="linkDiv"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        </div>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    var linkuserLevel;
+        if(getUrlParam("orgid")) {
+            judgeLevel(getUrlParam("orgid"));
+        }
+    var readerQueryJudge = linkuserLevel||JSON.parse(sessionStorage.userLevel);
+    switch(readerQueryJudge){
+        case 1:
+            window.location.href = "readerQueryState";
+            break;
+        case 2:
+            window.location.href = "readerQueryCity";
+            break;
+        case 3:
+            window.location.href = "readerQuerySchool";
+            break;
+        default:
+            // window.location.href = "readerQuery";
+            break;
+    };
+    searchForm.init("readerType","/selectcount/readertypeList");
+    // debugger;
+    searchForm.linkage(getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid);
+
+    myTable.list({
+        url:"/selectcount/readerSearch",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        postData:{orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid},
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'realname', title: '读者姓名',align:'center'}
+            ,{field: 'cardnumber', title: '读者证号', align:'center'}
+            ,{field: 'typename', title: '读者类型', align:'center'}
+            ,{field: 'orgname', title: '所在学校', align:'center'}
+            ,{title: '借阅记录', align:'center',templet:function(d){
+                    d.createtime = d.createtime?d.createtime.split(" ")[0]:"";
+                    d.title=d.title||"";
+                return "<a href='readerDetail?readerid="+d.readerid+"'>"+d.createtime+"/"+d.title+"</a>"
+                }}
+        ]]
+    });
+
+
+    searchForm.submit('submit(searchBtn)',"selectcount/readerSearch");
+
+
+</script>
+#end

@@ -1,0 +1,91 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+            <label for="">学校所在地</label>
+            <div class="layui-input-inline">
+                <select name="bean.areatypeid" id="areaoptionView">
+
+                </select>
+            </div>
+            <label for="">学校类别</label>
+            <div class="layui-input-inline">
+                <select name="bean.schoolcategoryid" id="typeoptionView">
+
+                </select>
+            </div>
+
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    searchForm.init("areaoptionView","/org/areaType");
+    searchForm.init("typeoptionView","/org/schoolcategory");
+
+    myTable.list({
+        url:"/selectcount/booksNumReportList",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        cols: [[ //表头
+            {field: 'orgname', title: '单位名称', align: 'center'}
+            , {field: 'xss', title: '学生数', align: 'center'}
+            , {field: 'dzs', title: '读者数', align: 'center'}
+            , {
+                title: '图书数量（册）', align: 'center', templet: function (d) {
+                    return '<a href="javascript:showChild('+d.orgid +',' + d.orgtypeid+')">' + d.tszcs + '</a>';
+                }
+            }
+            , {
+                title: '生均册数', align: 'center', templet: function (d) {
+                    return d.tssjcs * 100 + "%";
+                }
+            }
+            , {
+                title: '期刊数量（种）', align: 'center', templet: function (d) {
+                    return '<a href="javascript:showChild('+d.orgid +',' + d.orgtypeid+')">' + d.qkzs + '</a>';
+                }
+            }
+        ]]
+    });
+
+    function showChild( corgid,orgtypeid){
+        //alert(orgtypeid)
+        if (3==orgtypeid) {
+            window.location.href="libNumberStats?orgid="+corgid;
+            return;
+        }
+        table.reload('dataTable',{
+            where:{
+                orgid:corgid
+            }
+            ,page: {
+                pageNumber: 1 //重新从第 1 页开始
+            }
+        });
+    }
+
+    searchForm.submit('submit(searchBtn)',"/selectcount/booksNumReportList");
+
+    searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+</script>
+#end

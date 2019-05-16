@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商户首页</title>
+    <link rel="shortcut icon" type="image/x-icon" href="../img/jsw-logo.ico">
+    <link href="../../lib/layui/css/layui.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../css/merchant.css">
+
+    <!--[if lt IE 9]>
+    <script src="../../lib/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="clearfix">
+    <header class="clearfix">
+        <span class="pull-left"><img src="../../img/merchant-logo.png" alt=""> 供应商装备推荐平台</span>
+        <a class="uer-name pull-right" href=""><i>&nbsp;&nbsp;</i> Jane Pearson ( 管理员 ) </a>
+        <a class="pull-right">&nbsp;&nbsp;<img src="../../img/exit.png" alt="">&nbsp;&nbsp;</a>
+        <a class="link-index pull-right" href="">进入平台首页</a>
+    </header>
+    <aside class="pull-left">
+        <div><i>&nbsp;&nbsp;</i> Jane Pearson</div>
+        <ul id="menu">
+            <li>
+                店铺设置<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a href="goodsType.html"> <img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品分类</a>
+                    </li>
+                    <li>
+                        <a href="shopNotices.html"><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;店铺公告</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                商品管理<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a href="releasegoods.html"><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品发布</a>
+                    </li>
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品管理</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                账户管理<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;企业信息</a>
+                    </li>
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;修改密码</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+    <section>
+        <p>我的位置：&nbsp;&nbsp;&nbsp;&nbsp;店铺设置 >
+            <font color="#ff9900">商品分类</font>
+        </p>
+        <div class="search">
+            <div class="clearfix" style="height: 30px;padding-top: 10px;"><b>|&nbsp;&nbsp;&nbsp;&nbsp;商品分类</b> <button onclick="addNewSort(null,0)" class="layui-btn layui-btn-sm pull-right">添加新分类</button></div>
+            <table class="layui-table layui-form" id="test-tree-table"></table>
+        </div>
+        </article>
+    </section>
+    <script type="text/javascript" src="../../lib/layui/layui.all.js"></script>
+    <script src="../../lib/layui/treetable.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript">
+        $("#menu").find("li").on("click", function() {
+            $(this).siblings().find(".children").slideUp();
+            $(this).find(".children").slideToggle();
+        })
+        var treetable = layui.treetable;
+        var jsonStr = "";
+        var data = [];
+        var fatherNode="";
+        var params={};
+        params["token"]=JSON.parse(sessionStorage.loginData).token;
+        alert(JSON.stringify(params));
+        $.get("/goodsType/findGoodsTypeList",params,function (result) {
+            if (result.code==200){
+                for(var i = 0; i < result.data.length; i ++) {
+                    if(i != 0) {
+                        jsonStr +=",";
+                    }
+                    jsonStr +="{'id':'"+result.data[i].id+"',";
+                    jsonStr +="'sort':'"+result.data[i].sort+"',";
+                    jsonStr +="'pid':'"+result.data[i].parentid+"',";
+                    jsonStr +="'title':'"+result.data[i].typename+"'}";
+                    if(0 == result.data[i].parentid) {
+                        fatherNode += "<option value='"+result.data[i].id+"'>"+result.data[i].typename+"</option>";
+                    }
+                }
+                data = eval("["+jsonStr+"]");
+                treetable.render({
+                    elem: '#test-tree-table',
+                    data: data,
+                    field: 'title',
+                    // is_checkbox: true,
+                    // checked: [1, 2, 3, 4],
+                    /*icon_val: {
+                        open: "&#xe619;",
+                        close: "&#xe61a;"
+                    },
+                    space: 4,*/
+                    cols: [{
+                        field: 'title',
+                        title: '标题',
+                        width: '30%',
+                        template: function(item) {
+                            if (item.level == 1) {
+                                return '<span style="color:red;">' + item.title + '</span>';
+                            }
+                            if (item.level == 2) {
+                                return '<span style="color:green;">' + item.title + '</span>';
+                            }
+                            return item.title;
+                        }
+                    },{
+                        field: 'sort',
+                        title: '显示优先级',
+                        width: '20%'
+                    }, {
+                        field: 'actions',
+                        title: '操作',
+                        width: '30%',
+                        template: function(item) {
+                            var tem = [];
+                            if (item.pid == 0) {
+                                tem.push('<a class="add-child layui-btn layui-btn-xs" onclick="javascript:addNewSort(null,'+item.id+')">添加子级</a>');
+                            }
+                            var item2 = JSON.stringify(item);
+
+                            tem.push(`<a onclick='javascript:addNewSort(`+item2+`,`+item.pid+`);' class="layui-btn layui-btn-xs" >编辑</a>`);
+                            return tem.join(" ");
+                            form.render();
+                        },
+                    }, ]
+                });
+            }
+        });
+
+
+        treetable.on('treetable(add)', function(data) {
+            layer.msg('添加操作');
+        })
+
+        treetable.on('treetable(edit)', function(data) {
+            layer.msg(JSON.stringify(data));
+        })
+
+        form.on('switch(status)', function(data) {
+            layer.msg('监听状态操作');
+            console.dir(data);
+        })
+        //添加新分类
+        function addNewSort(obj,parentid){
+            if(null == obj) {
+                obj = {
+                    id: "",
+                    typename: "",
+                    sort: ""
+                }
+            }
+            var showhtml="<form class=\"layui-form\"><div>";
+            showhtml+= "<label>添加分类</label><input type=\"text\" id=\"ftypename\" lay-verify=\"required\" value=\""+obj.title+"\" class=\"layui-input-inline layui-input\" style=\"width: 315px;height: 30px;\" placeholder=\"名称    \">";
+            if(parentid != 0) {
+                showhtml+="<label>所属一级分类</label><select id=\"parentselect\" lay-verify=\"required\" lay-search=\"\"  lay-filter=\"twentyTwo\"></select>";
+            }
+            showhtml+="<label>显示优先级</label><input type=\"text\" id=\"fsort\" lay-verify=\"required\"  value='"+obj.sort+"' class=\"layui-input-inline layui-input\" style=\"width: 315px;height: 30px;\" placeholder=\"优先级    \">";
+            showhtml+="</div></form>";
+            layer.open({
+                type: 1,
+                title: "添加分类",
+                area: ['400px', '200px'],
+                btn:["确认","取消"],
+                content: showhtml,
+                success: function(layero, index) {
+                    $("#parentselect").append(fatherNode);
+                    $("#parentselect").val(parentid);
+                    $("#parentselect").attr("disabled","disabled");
+                    form.render('select');
+                },
+                yes:function(){
+                    var params={};
+                    params["token"]=JSON.parse(sessionStorage.loginData).token;
+                    params["bean.typename"]=$("#ftypename").val();
+                    params["bean.sort"]=$("#fsort").val();
+                    params["bean.parentid"]=parentid;
+                    params["bean.id"]=obj.id;
+                    $.get("/goodsType/addGoodsType",params,function (result) {
+                        if (result.code==200){
+                            layer.msg("操作成功");
+                            setTimeout(function(){location.reload();},1500);
+                        } else {
+                            layer.msg(result.msg);
+                        }
+                    });
+                },
+                btn2:function(){}
+            });
+        }
+    </script>
+</body>
+
+</html>

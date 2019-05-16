@@ -1,0 +1,114 @@
+#@layout()
+#define main()
+<style>
+    div.layui-table-page {
+        display: none;
+    }
+</style>
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" name="starttime" id="starttime" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+        <label for="endtime">到：</label>
+        <input type="text" name="endtime" id="endtime" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <button lay-submit type="button" class="layui-btn layui-btn-warm" lay-filter="exportExcel">导出</button>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+</div>
+#end
+#define methods()
+<script>
+    var linkuserLevel;
+    // var readerQueryJudge = linkuserLevel||JSON.parse(sessionStorage.userLevel);
+    var laydate = layui.laydate;
+    //常规用法
+    laydate.render({
+        elem: '#starttime',
+        done: function(value, date, endDate){
+            //console.log(value); //得到日期生成的值，如：2017-08-18
+            //console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+            //console.log(endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+        }
+    });
+    laydate.render({
+        elem: '#endtime',
+        done: function(value, date, endDate){
+
+        }
+    });
+
+
+    myTable.list({
+        url:"/print/tushuzongkuodengjibu_list",
+        postData:{},
+        elem:"#dataTable",
+        totalRow: true,
+
+        done:function(){
+
+        },
+        cols: [
+            [ //表头
+                {field: 'createtime', title: '日期',rowspan:2}
+                ,{field:'batchname', title: '登记号', align:'center',rowspan:2}
+                ,{field: 'zongzhongshu', title: '总种数',rowspan:2}
+                ,{field: 'zongceshu', title: '总册数', align:'center',rowspan:2}
+                ,{field: 'totalprice', title: '金额',rowspan:2}
+                ,{ title: 'A 马列主义毛泽东思想', align:'center',colspan:2,width:200}
+                ,{ title: 'B 哲学、宗教', align:'center',colspan:2}
+                ,{ title: 'C-K 社会科学', align:'center',colspan:2}
+                ,{title: 'N-X 自然科学', align:'center',colspan:2}
+                ,{ title: 'Z 综合性图书', align:'center',colspan:2}
+            ],
+            [ //表头
+                {field: 'type1_cs', title: 'A册数', align:'center',width:100}
+                ,{field: 'type1_zs',title: 'A种数', align:'center',width:100}
+                ,{field: 'type2_cs', title: 'B册数', align:'center'}
+                ,{field: 'type2_zs',title: 'B种数', align:'center'}
+                ,{field: 'type3_cs', title: 'C-K册数', align:'center'}
+                ,{field: 'type3_zs',title: 'C-K种数', align:'center'}
+                ,{field: 'type4_cs', title: 'N-X册数', align:'center'}
+                ,{field: 'type4_zs',title: 'N-X种数', align:'center'}
+                ,{field: 'type5_cs', title: 'Z册数', align:'center'}
+                ,{field: 'type5_zs',title: 'Z种数', align:'center'}
+            ]
+        ]
+    });
+    form.on('submit(exportExcel)', function(data){
+        var starttime = data.field.starttime;
+        var endtime = data.field.endtime;
+        var url = "/print/tushuzongkuodengjibu_export?orgid="+JSON.parse(sessionStorage.loginData).orgid;
+        if("" != starttime) {
+            url += "&starttime="+starttime;
+        }
+        if("" != endtime) {
+            url += "&endtime="+endtime;
+        }
+        window.open(url)
+    });
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+</script>
+#end

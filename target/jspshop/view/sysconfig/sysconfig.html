@@ -1,0 +1,179 @@
+#@layout()
+#define main()
+
+<form class="layui-form" lay-filter="formSysConfig">
+    <div>
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">分类法</label>
+            <div class="layui-input-block">
+                <input type="radio" name="bean.fenleifa" value="0" title="使用中图法" >
+                <input type="radio" name="bean.fenleifa" value="1" title="使用科图法" >
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">书次号</label>
+            <div class="layui-input-block">
+                <input type="radio" name="bean.shucihao" value="0" title="使用种次号" >
+                <input type="radio" name="bean.shucihao" value="1" title="其他书次号">
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-inline">图书编目显示项（勾选的项将显示在图书编目界面) </label>
+        <div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="bean.keyword" title="主题词"  lay-skin="primary" value="1" >
+                <input type="checkbox" name="bean.edition" title="版本版次" lay-skin="primary"  value="1">
+                <input type="checkbox" name="bean.otherauthor" title="其他责任人" lay-skin="primary" value="1" >
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="bean.newsource" title="图书新增来源" lay-skin="primary"  value="1">
+                <input type="checkbox" name="bean.bltitle" title="并列题名" lay-skin="primary"  value="1">
+                <input type="checkbox" name="bean.subtitle" title="副题名" lay-skin="primary" value="1">
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="workmode" title="著作方式" lay-skin="primary" value="1" >
+                <input type="checkbox" name="guobie" title="国别、朝代" lay-skin="primary" value="1">
+                <input type="checkbox" name="size" title="尺寸" lay-skin="primary" value="1" >
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="bean.language" title="语种" lay-skin="primary" value="1">
+                <input type="checkbox" name="bean.binding" title="装订形式" lay-skin="primary" value="1">
+                <input type="checkbox" name="bean.congshuming" title="丛书名" lay-skin="primary" value="1">
+            </div>
+        </div>
+        <div>
+            <div class="layui-form-item">
+                <input type="checkbox" name="bean.congshuauthor" title="丛书责任人" lay-skin="primary"  value="1">
+                <input type="checkbox" name="bean.fuzhu" title="附注" lay-skin="primary" value="1">
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">位数</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.tstiaoxinmaweishu" lay-verify="title" autocomplete="off" placeholder="请输条形码位数" class="layui-input" lay-verify="required|number">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">前缀</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.tstiaoxingmaqianzhui" lay-verify="title" autocomplete="off" placeholder="请输入条形码前缀" class="layui-input">
+                </div>
+            </div>
+            <div>
+                <label>说明：若用户输入1（编目或查询时），系统自动按8位数补充为0000001，节省操作时间</label>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">位数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="bean.qktiaoxingmaweishu" lay-verify="title" autocomplete="off" placeholder="请输条期刊形码位数" class="layui-input" lay-verify="required|number">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">前缀</label>
+                <div class="layui-input-block">
+                    <input type="text" name="bean.qktiaoxingmaqianzhui" lay-verify="title" autocomplete="off" placeholder="请输入期刊条形码前缀" class="layui-input" lay-verify="required|number">
+                </div>
+            </div>
+            <div>
+                <label>说明：若用户输入1（编目或查询时），系统自动按6位数补充为Q000001，节省操作时间 </label>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-form-item">
+            <div class="layui-inline">
+                <label class="layui-form-label">位数</label>
+                <div class="layui-input-block">
+                    <input type="text" name="bean.jieshuzhengweishu" lay-verify="title" autocomplete="off" placeholder="请输条借书证位数" class="layui-input" lay-verify="required|number">
+                </div>
+            </div>
+            <div class="layui-inline">
+                <label class="layui-form-label">前缀</label>
+                <div class="layui-input-block">
+                    <input type="text" name="bean.jieshuzhengqianzhui" lay-verify="title" autocomplete="off" placeholder="请输入借书证前缀" class="layui-input">
+                </div>
+            </div>
+            <div>
+                <label>说明：若用户输入1（流通或查询时），系统自动按7位数补充为000001，节省操作时间</label>
+            </div>
+        </div>
+    </div>
+    <div>
+        <div class="layui-input-block">
+            <input type="checkbox" name="bean.idcard" title="使用磁卡、身份证、IC卡等设备"  lay-skin="primary" value="1">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formSysconfig">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+#end
+#define methods()
+
+<script>
+
+    $.post("/sysconfig/findSysConfig",function (data) {
+        if (data.code==200){
+            var d ={};
+            for (var attr in data.data.OrgBookField) {
+                d["bean."+attr]=data.data.OrgBookField[attr];
+            }
+            form.val("formSysConfig",d);
+            var d ={};
+            for (var attr in data.data.OrgSetting) {
+                if (attr=='fenleifa' && data.data.OrgSetting[attr]==1){
+                    $("input[name='bean.fenleifa'][value=1]").attr("checked",true);
+                }else  if (attr=='shucihao' && data.data.OrgSetting[attr]==1){
+                    $("input[name='bean.shucihao'][value=1]").attr("checked",true);
+                }else {
+                    d["bean."+attr]=data.data.OrgSetting[attr];
+                }
+            }
+
+            form.val("formSysConfig",d);
+            form.render();
+        }
+    });
+
+    form.on('submit(formSysconfig)', function(data){
+        $.post("/sysconfig/addOrUpdate",
+            data.field,
+            function (data, status) {
+                if (data.code == 200) {
+                    layer.msg("保存成功");
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            }
+        );
+        return false;
+    });
+</script>
+#end
+
+#define tableForm()
+#end

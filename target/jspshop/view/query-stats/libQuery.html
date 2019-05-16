@@ -1,0 +1,115 @@
+#@layout()
+#define main()
+<div>
+    <div class="query-form layui-form">
+    <div id="navTitle" class="nav-title"></div>
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">检索</li>
+            <li>高级检索</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b> &nbsp;&nbsp;
+                <input type="text" name="countent" style="width: 200px;" class="layui-input-inline layui-input" placeholder="题名，作者，出版社，ISBN">
+            </div>
+            <div class="layui-tab-item">
+                <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+                    <label for="" style="padding-left: 12px;">题名：</label>
+                    <input type="text" name="bean.title" class="layui-input-inline layui-input" placeholder="请输入">
+                    <label for="">作者：</label>
+                    <input type="text" name="bean.author" class="layui-input-inline layui-input" placeholder="请输入">
+                    <label for="">出版社：</label>
+                    <input type="text" name="bean.publisher" class="layui-input-inline layui-input" placeholder="请输入">
+                    <label for="">ISBN：</label>
+                    <input type="text" name="bean.isbn" class="layui-input-inline layui-input" placeholder="请输入">
+
+            </div>
+        </div>
+    </div>
+    <div style="padding-left: 35px;">
+        <label for="">机构：</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </div>
+    </div>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+
+
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    layer.msg("请输入检索条件开始查询");
+
+    myTable.list({
+        url:"",
+        elem:"#dataTable",
+        data:[],
+        // postData:{orgid:1000000000},
+        text:{none:"请输入检索条件"},
+        toolbar:"#tableHeader",
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'isbn', title: 'ISBN/ISSN',align:'center'}
+            ,{field: 'title', title: '题名/刊名', align:'center'}
+            ,{field: 'author', title: '著者', align:'center'}
+            ,{field: 'publisher', title: '出版社', align:'center'}
+            ,{field: 'orgname', title: '所在图书馆', align:'center'}
+            ,{title: '馆藏情况', align:'center',templet:function(d){
+                return '馆藏数：'+d.gcs+'&nbsp;&nbsp;可借数：'+d.kjs;
+                }}
+        ]]
+    });
+    searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+    // searchForm.submit('submit(searchBtn)',"/org/list");
+
+    var tabIndex = 0;
+    element.on('tab', function(data){
+        tabIndex = data.index;
+    });
+    form.on('submit(searchBtn)', function(data){
+
+        data.field.token = sessionStorage.token;
+        // data.field.orgid = data.field.orgid||JSON.parse(sessionStorage.loginData).orgid;
+        if(tabIndex==0){
+            data.field["bean.title"]='';
+            data.field["bean.author"]='';
+            data.field["bean.publisher"]='';
+            data.field["bean.isbn"]='';
+            table.reload("dataTable",{
+                url:"/selectcount/collectionSearch",
+                where:data.field,
+                page: {
+                    curr: 1
+                },
+                done:function(result){
+                    if(result.code==200){
+                        layer.msg('查询成功', { icon: 1 });
+                    }
+                }
+            });
+        }else {
+            data.field.countent='';
+            table.reload("dataTable",{
+                url:"/selectcount/collectionSenSearch",
+                where:data.field,
+                page: {
+                    curr: 1
+                },
+                done:function(result){
+                    if(result.code==200){
+                        layer.msg('查询成功', { icon: 1 });
+                    }
+                }
+            });
+        }
+        return false;
+    });
+</script>
+#end

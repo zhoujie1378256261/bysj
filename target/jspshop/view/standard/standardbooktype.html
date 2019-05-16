@@ -1,0 +1,220 @@
+#@layout()
+#define main()
+<style>
+    .table, th, td
+    {
+
+        align: center;
+        ext-align:right;
+        vertical-align:middle;
+        background-repeat:repeat-x;
+    }
+    .h1{
+        align: center;
+    }
+    table.layui-table td textarea {
+        padding: 5px;
+        resize: none;
+        text-align: center;
+    }
+
+</style>
+<div id="navTitle" class="nav-title"></div>
+<div class="line"></div>
+<form  class="layui-form">
+<h1 style="text-align:center">中小学图书馆(室)藏书分类比例表</h1>
+        <table  class="layui-table" lay-skin="line|row" lay-size="sm" lay-filter="hotbookfrom" >
+            <thead>
+                <tr width="75%">
+                    <th colspan="2" >部类</th>
+                    <th colspan="2" >分类比例 (百分比%)</th>
+                </tr>
+                <tr width="25%">
+                    <th>五大部类</th>
+                    <th>22个基本部类</th>
+                    <th>小学</th>
+                    <th>中学</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>第一大类</td>
+                    <td>马克思马克思主义、列宁主义、毛泽东思想、邓小平理论</td>
+                    <td><textarea type="text" id="percenta1"  style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+                    <td><textarea type="text" id="percentb1"  style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+                </tr>
+                <tr>
+                    <td>第二大类</td>
+                    <td>哲学、宗教</td>
+                    <td><textarea type="text" id="percenta2"  style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+                    <td><textarea type="text" id="percentb2"  style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+                </tr>
+                <tr>
+                    <td rowspan="9" >第三大类</td>
+                    <td>社会科学总论</td>
+                    <td rowspan="9"><textarea type="text" id="percenta3"  style="width: 100%" rows="9"  lay-verify="required|number"></textarea></td>
+                    <td rowspan="9"><textarea type="text" id="percentb3"  style="width: 100%" rows="9"  lay-verify="required|number"></textarea></td>
+                </tr>
+                <tr>
+
+                    <td>政治、法律</td>
+                </tr>
+                <tr>
+
+                    <td>军事</td>
+
+                </tr>
+                <tr>
+
+                    <td>经济</td>
+
+                </tr>
+                <tr>
+
+                    <td>文化、科学、教育、体育</td>
+
+                </tr>
+                <tr>
+
+                    <td>语言、文字</td>
+
+                </tr>
+                <tr>
+
+                    <td>文学</td>
+
+                </tr>
+                <tr>
+
+                    <td>艺术</td>
+
+                </tr>
+                <tr>
+                    <td>历史、地理</td>
+
+                </tr>
+
+                <tr>
+                    <td rowspan="10">第四大类</td>
+                    <td>自然科学总论</td>
+                    <td rowspan="10"><textarea type="text" id="percenta4"  style="width: 100%" rows="10" lay-verify="required|number"></textarea></td>
+                    <td rowspan="10"><textarea type="text" id="percentb4"  style="width: 100%" rows="10" lay-verify="required|number"></textarea></td>
+                </tr>
+                <tr>
+
+                    <td>数理科学和化学</td>
+
+                </tr>
+                <tr>
+
+                    <td>天文学、地球科学</td>
+
+                </tr>
+                <tr>
+
+                    <td>生物科学</td>
+
+                </tr>
+                <tr>
+
+                    <td>医药、卫生</td>
+
+                </tr>
+
+                <tr>
+
+                    <td>农业科学</td>
+
+                </tr>
+                <tr>
+
+                    <td>工业技术</td>
+
+                </tr>
+                <tr>
+
+                    <td>交通运输</td>
+
+                </tr>
+                <tr>
+
+                    <td>航空、航天</td>
+
+                </tr>
+                <tr>
+
+                    <td>环境科学、安全科学</td>
+
+                </tr>
+                <tr>
+                    <td>第五大类</td>
+                    <td>综合性图书</td>
+                    <td><textarea type="text" id="percenta5"  style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+                    <td><textarea type="text" id="percentb5"   style="width: 100%" rows="2" lay-verify="required|number"></textarea></td>
+
+                </tr>
+            </tbody>
+            <tfoot>
+                <td colspan="5">
+                    <div class="layui-form-item">
+                        <div class="layui-input-block text-center">
+                            <button class="layui-btn" lay-submit lay-filter="save">提交</button>
+                        </div>
+                    </div>
+                </td>
+            </tfoot>
+        </table>
+</form>
+#end
+
+#define methods()
+<script>
+
+    $.get("/standardbooktype/list",function (data) {
+        $.each(data.data,function(index,obj){
+            $("#percenta"+obj.booktypeid).val(obj.percenta);
+            $("#percentb"+obj.booktypeid).val(obj.percentb);
+        });
+    });
+
+    layui.form.on('submit(save)', function (data) {
+        var data =[];
+        var suma=0,sumb=0;
+        for (var i=1;i<=5;i++){
+            var json ={};
+            json.percenta= $("#percenta"+i).val();
+            json.percentb= $("#percentb"+i).val();
+
+            var a =parseFloat($("#percenta"+i).val());
+            var b =parseFloat($("#percentb"+i).val());
+
+            suma=suma+a;
+            sumb +=b;
+            json.booktypeid=i;
+            data.push(json);
+        }
+
+        if (suma >100 || sumb >100){
+            layer.msg('五大部类百分比不能超过100%', { icon: 1 });
+            return false;
+        }
+
+        //alert(JSON.stringify(data));
+        $.post("/standardbooktype/addOrUpdate",{jsonStr:JSON.stringify(data)},
+            function(data,status){
+                if(data.code==200){
+                    layer.msg('操作成功', { icon: 1 });
+                }else {
+                    layer.msg('保存失败', { icon: 1 });
+                }
+            }
+        );
+       return false;
+    });
+
+
+</script>
+#end
+
+#define tableForm()
+#end

@@ -1,0 +1,190 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">学校所在地</label>
+        <div class="layui-input-inline">
+            <select name="areatypeid" id="areaoptionView">
+
+            </select>
+        </div>
+        <label for="">学校类别</label>
+        <div class="layui-input-inline">
+            <select name="schoolcategoryid" id="typeoptionView">
+
+            </select>
+        </div>
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <div style="padding: 10px 0 0 50px;">
+            <label for="startDate">时间选择：</label>
+            <input type="radio" name="month" value="1" title="近1个月" checked>
+            <input type="radio" name="month" value="6" title="近6个月">
+            <input type="radio" name="month" value="12" title="近1年">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="month" value="" title="选择时间段">
+            <input type="text" name="kssj" id="startDate" disabled class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到：</label>
+            <input type="text" name="jssj" id="endDate" disabled class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="text" name="countent" class="layui-input-inline layui-input" style="width: 150px;" placeholder="输入题名或作者搜索">
+        </div>
+    </form>
+
+    <div class="line"></div>
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">学校汇总统计</li>
+            <li>新增记录</li>
+            <li>注销记录</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <table id="oneTable" lay-filter="oneTable"></table>
+            </div>
+            <div class="layui-tab-item">
+                <table id="twoTable" lay-filter="twoTable"></table>
+            </div>
+            <div class="layui-tab-item">
+                <table id="threeTable" lay-filter="threeTable"></table>
+            </div>
+        </div>
+    </div>
+
+</div>
+#end
+#define methods()
+
+<script>
+    searchForm.init("areaoptionView","/org/areaType");
+    searchForm.init("typeoptionView","/org/schoolcategory");
+
+    form.on('radio()', function(data){
+        console.log(data.elem); //得到radio原始DOM对象
+        console.log(data.value); //被点击的radio的value值
+        if(!data.value){
+            $("#startDate").removeAttr("disabled");
+            $("#endDate").removeAttr("disabled");
+        }else {
+            $("#startDate").attr("disabled","disabled");
+            $("#endDate").attr("disabled","disabled");
+        }
+    });
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+    function totalValue(sendData){
+        myAjax({url:"/selectcount/booksChangeSummaryTotalList",data:sendData},function(result){
+            $(".layui-table-total").find("td[data-field='qcs']").children().text(result.data.qcs);
+            $(".layui-table-total").find("td[data-field='xzs']").children().text(result.data.xzs);
+            $(".layui-table-total").find("td[data-field='zxs']").children().text(result.data.zxs);
+            $(".layui-table-total").find("td[data-field='qms']").children().text(result.data.qms);
+        });
+    };
+    myTable.list({
+        url:"/selectcount/booksChangeSummaryList",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#oneTable",
+        toolbar:true,
+        done:function(){
+            totalValue();
+        },
+        cols: [
+            [ //表头
+                {type: 'numbers', title: '序号'}
+                ,{field:'orgname', title: '学校名称', align:'center',totalRowText:"合计"}
+                ,{field:'qcs', title: '期初数（册）', align:'center'}
+                ,{field: 'xzs', title: '新增（册）', align:'center'}
+                ,{field: 'zxs', title: '注销（册）', align:'center'}
+                ,{field: 'qms', title: '期末数（册）', align:'center'}
+            ]
+        ]
+    });
+    myTable.list({
+        url:"/selectcount/booksNewlyAddedList",
+        elem:"#twoTable",
+        toolbar:true,
+        cols: [
+            [ //表头新增
+                {type: 'numbers', title: '序号'}
+                ,{field:'isbn', title: 'ISBN', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'booknum',title: '数量', align:'center'}
+                ,{field: 'price',title: '金额（元）', align:'center'}
+                ,{field: 'createtime',title: '新增日期', align:'center',templet:function(d){
+                    return d.createtime.split(" ")[0];
+                }}
+            ]
+        ]
+    });
+    myTable.list({
+        url:"/selectcount/booksCancelList",
+        elem:"#threeTable",
+        toolbar:true,
+        cols: [
+            [ //表头 注销
+                {type: 'numbers', title: '序号'}
+                ,{field:'isbn', title: 'ISBN', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'booknum',title: '数量', align:'center'}
+                ,{field: 'destroytime',title: '注销日期', align:'center',templet:function(d){
+                    return d.destroytime.split(" ")[0];
+                }}
+                ,{field: 'destroyreason',title: '注销原因', align:'center'}
+            ]
+        ]
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+
+
+        table.reload("oneTable",{
+            // url:"/selectcount/collectionSearch",
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    totalValue(data.field);
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        table.reload("twoTable",{
+            where:data.field,
+        });
+        table.reload("threeTable",{
+            where:data.field,
+        });
+        return false;
+    });
+
+
+    searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+</script>
+#end

@@ -1,0 +1,83 @@
+#@layout()
+#define main()
+<div>
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 基本概况 > 学校数据统计 > <span>图书新增记录</span>
+    </div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="startDate">时间选择：</label>
+        <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 20px;" placeholder="开始日期">
+        <label for="endDate">到：</label>
+        <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 20px;" placeholder="结束时间">
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" name="countent" class="layui-input-inline layui-input" placeholder="请输入">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    console.log(getUrlParam("orgid"));
+    laydate.render({
+        elem: '#startDate',
+        ready:function(){
+            console.log('时间')
+        },
+        done: function(value, date, endDate){
+            console.log(value); //得到日期生成的值，如：2017-08-18
+            console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+            console.log(endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+        }
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date(),
+        done: function(value, date, endDate){
+
+        }
+    });
+    // searchForm.submit('submit(searchBtn)',"selectcount/schoolOmnibusList");
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        data.field.orgid = getUrlParam("orgid");
+        tableIns.reload({
+            where:data.field,
+            page: {
+                curr: 1
+            }
+        });
+        layer.msg('查询成功', { icon: 1 });
+        return false;
+    });
+
+    myTable.list({
+        url:"/selectcount/bookNewlyAddedList",
+        elem:"#dataTable",
+        postData:{orgid:getUrlParam("orgid")},
+        toolbar:true,
+        cols: [
+            [ //表头新增
+                {type: 'numbers', title: '序号'}
+                ,{field:'isbn', title: 'ISBN', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'booknum',title: '数量', align:'center'}
+                ,{field: 'price',title: '金额（元）', align:'center'}
+                ,{field: 'createtime',title: '新增日期', align:'center',templet:function(d){
+                    return d.createtime.split(" ")[0];
+                }}
+                ,{field: 'newsource',title: '新增来源', align:'center'}
+            ]
+        ]
+    });
+</script>
+#end

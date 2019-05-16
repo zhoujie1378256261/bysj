@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>学校图书管理系统</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/img/jsw-logo.ico">
+    <link rel="stylesheet" href="/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="/css/cssreste.css">
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+        body {
+            background: url("/img/school-bg.jpg") no-repeat center center;
+            background-size: cover;
+        }
+        form {
+            padding-left: 120px;
+            width: 400px;
+        }
+        .tab-link {
+            padding-top: 70px;
+            font-size: 18px;
+        }
+        .tab-link a {
+            color: #333333;
+        }
+        .tab-link span {
+            color: #3b77e3;
+        }
+        h4 {
+            font-size: 40px;
+            color: #000000;
+            margin-top: 120px;
+        }
+        h6 {
+            font-size: 20px;
+            color: #333333;
+            margin-top: 35px;
+            margin-bottom: 40px;
+        }
+        input {
+            display: inline-block;
+            border-radius: 15px;
+            background-color: rgb(246, 245, 251);
+            height: 54px;
+            line-height: 54px;
+            width: 100%;
+            padding: 0 30px;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+        button {
+            margin-top: 30px;
+            font-size: 20px;
+            color: #fff;
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgb(255, 255, 255);
+            border-radius: 15px;
+            background-image: -moz-linear-gradient( 0deg, rgb(59,119,227) 0%, rgb(104,177,255) 100%);
+            background-image: -webkit-linear-gradient( 0deg, rgb(59,119,227) 0%, rgb(104,177,255) 100%);
+            background-image: -ms-linear-gradient( 0deg, rgb(59,119,227) 0%, rgb(104,177,255) 100%);
+            width: 227px;
+            height: 54px;
+        }
+
+    </style>
+    <!--[if lt IE 9]>
+    <script src="/lib/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+<form class="layui-form" id="loginForm">
+    <div class="tab-link">
+        <span>中小学图书馆</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <a href="teachLogin">教育局</a>
+    </div>
+    <h4>Hello!</h4>
+    <h6>Welcome to library management system！</h6>
+    <input type="text" name="loginname" lay-verify="required" placeholder="账号">
+    <input type="password" name="password" lay-verify="required" placeholder="密码">
+    <button lay-submit lay-filter="*">登录</button>
+</form>
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+<script type="text/javascript">
+    form.on('submit(*)', function(data){
+        console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+        console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+        console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+        $.ajax("/auth/login",{
+            // type:"POST",
+            data:data.field,
+            success:function(result){
+                if(result.code==200){
+                    sessionStorage.token = result.data.token;
+                    sessionStorage.loginData = result.data;
+                    layer.msg('登录成功', { icon: 1,time: 300 }, function(){
+                        form.val("*",{"loginname":"","password":""});
+                        window.location.href = "page/areaSum";
+                    });
+                }else {
+                    layer.msg('登录失败', { icon: 1,time: 2000 });
+                }
+            },
+            error:function(result){
+                layer.msg('登录出错'+result.msg, { icon: 6,time: 2000 });
+            }
+        });
+        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+
+</script>
+</body>
+
+</html>

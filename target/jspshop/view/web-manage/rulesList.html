@@ -1,0 +1,145 @@
+#@layout()
+#define main()
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">图书馆制度列表</li>
+            <li>发布制度</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div id="searchFormView"></div>
+                <table id="dataTable" lay-filter="dataTable" lay-data="{id: 'dataTable'}"></table></div>
+            <div class="layui-tab-item">
+                <form class="layui-form layui-form-pane">
+                    <div>
+                        <label class="layui-form-label">标题</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="title" lay-verify="required" autocomplete="off" placeholder="主题" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-text">
+                        <label class="layui-form-label">内容</label>
+                        <div class="layui-input-block">
+                            <textarea name="content" id="sendContent" placeholder="请输入内容" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <button class="layui-btn" id="sendNoticeBtn" lay-submit lay-filter="searchBtn">发布</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+#end
+#define methods()
+<script type="text/html" id="tableSetBtn">
+    <div class="text-center layui-btn-group">
+        <button onclick="myTable.detele(this,'/rules/delete')" data-id="{{d.id}}" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-detale.png" alt=""></button>
+
+    </div>
+    <div class="text-center layui-btn-group">
+        <button onclick="myTable.detele(this,'/rules/delete')" data-id="{{d.id}}" class="layui-btn layui-btn-sm table-setbtn">修改</button>
+    </div>
+</script>
+<script type="text/html" id="tableHeader">
+
+</script>
+
+<script>
+    form.on('submit(searchBtn)',function(data){
+        data.field["content"] = layedit.getContent(textEdit);
+        $.ajax({
+            url: "/rules/addOrUpdate",
+            type: "POST",
+            data: data.field,
+            traditional: true,//这里设置为true
+            success: function(result) {
+                if(result.code==200){
+                    table.reload('dataTable');
+                    layer.msg(result.msg, { icon: 1,time:1000 },function(){
+                        location.reload();
+                    });
+                }
+            }
+        });
+        return false;
+    });
+
+    myTable.list({
+        url:"/rules/list",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        postData:{},
+        cols: [[ //表头
+            {type: 'numbers', title: '序号'}
+            ,{field: 'title', title: '标题',align:'center', event:'openMessage' ,style:'text-decoration-line: underline;color: #199ED8; cursor: pointer;'}
+            ,{field: 'createtime', title: '发布时间', align:'center',templet:function(d){
+                    return d.createtime.split(" ")[0];
+                }}
+            ,{templet: '#tableSetBtn', title: '操作', align:'center'}
+        ]],
+        done:function(result){
+            arrDetele = [];
+            table.on('checkbox()', function(obj){
+                if(obj.checked){
+                    arrDetele.push(obj.data.id);
+                    if(obj.type=="all"){
+                        arrDetele = [];
+                        result.data.map(function(item,index){
+                            arrDetele.push(item.id);
+                        })
+                    }
+                }else {
+                    arrDetele.map(function(item,index){
+                        if(item==obj.data.id){
+                            arrDetele.splice(index,1);
+                        }
+                    })
+                    if(obj.type=="all"){
+                        arrDetele = [];
+                    }
+                }
+            });
+        }
+    });
+    //公告内容
+    table.on('tool(dataTable)', function(obj){ //注：edit是固定事件名，test是table原始容器的属性 lay-filter="对应的值"
+        if(obj.event === 'openMessage'){
+            console.log(obj.data); //所在行的所有相关数据
+
+            var noticeStr = '<div id="noticeContent">\n' +
+                '    <h5>{{d.title}}</h5>\n' +
+                '    <div class="noticeContentText">{{d.content}}</div>\n' +
+                '    <footer style="margin-bottom: 0;"><div>{{d.createtime.split(" ")[0]}}</div></footer>\n' +
+                '</div>';
+            laytpl(noticeStr).render(obj.data, function(string){
+                noticeStr = string;
+            });
+
+            layer.open({
+                title: "查看",
+                type: 1,
+                area: ['1000px', '500px'],
+                skin: 'noticeStr',
+                content: noticeStr
+            });
+        }
+    });
+    //富文本编辑框
+    var textEdit = layedit.build('sendContent',{
+        uploadImage: {
+            url: '/file/uploadImage' //接口url
+        }
+    });
+
+
+
+
+</script>
+#end

@@ -1,0 +1,938 @@
+#@layout()
+#define main()
+<style>
+    .addBookList {
+        /*border-top: 5px solid transparent;*/
+        /*border-bottom: 5px solid transparent;*/
+    }
+    .book-message {
+        min-width: 1100px;
+    }
+    .book-message > li {
+        float: left;
+        width: 32%;
+    }
+    .book-message > li label {
+        width: 90px;
+    }
+    div.layui-form-switch {
+        margin-top: 0;
+    }
+    /*#appendflag {*/
+        /*display: none;*/
+    /*}*/
+</style>
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 编目管理 > 图书编目 > <span>新增图书编目</span>
+    </div>
+    <form lay-filter="queryForm" id="queryForm" class="query-form layui-form">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div>
+            <b>书目信息&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        </div>
+        <ul class="book-message clearfix">
+
+                <li>
+                    <label>ISBN</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" name="bean.id" >
+                    <input type="hidden" name="beanPlus.id"  >
+                    <input type="text" name="bean.isbn" value="978-7-80680-798-9" id="isbn" class="layui-input-inline layui-input" style="width: 150px;" placeholder="输入ISBN搜索">
+                </li>
+                <li>
+                    <label >正题名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.title" id="title" class="layui-input-inline layui-input" style="width: 150px;" placeholder="输入正题名搜索">
+                </li>
+
+                <li id="bltitletd">
+                    <label >并列提名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.bltitle" class="layui-input-inline layui-input" style="width: 150px;" placeholder="并列提名">
+                </li>
+                <li id="subtitletd">
+                    <label >副题名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.subtitle" class="layui-input-inline layui-input" style="width: 150px;" placeholder="副题名">
+                </li>
+
+                <li>
+                    <label >第一责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.author" class="layui-input-inline layui-input" style="width: 150px;" placeholder="第一责任者">
+                </li>
+                <li id="authorworkmodetd">
+                    <label >著作方式</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.authorworkmodeid" id="authorworkmodeid">
+
+                        </select>
+                    </div>
+                </li>
+                <li id="authorguobietd">
+                    <label >国别或朝代</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.authorguobieid" id="authorguobieid">
+
+                        </select>
+                    </div>
+                </li>
+
+                <li id="otherauthortd">
+                    <label >其他责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.otherauthor" class="layui-input-inline layui-input" style="width: 150px;" placeholder="其他责任者">
+                </li>
+                <li id="workmodetd">
+                    <label >著作方式</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.workmodeid" id="workmodeid">
+
+                        </select>
+                    </div>
+                </li>
+                <li id="guobietd">
+                    <label >国别或朝代</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.guobieid" id="guobieid">
+
+                        </select>
+                    </div>
+                </li>
+
+                <li>
+                    <label >出版社</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publisher" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版社">
+                </li>
+                <li>
+                    <label >出版地</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publishaddress" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版地">
+                </li>
+                <li>
+                    <label >出版年月</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publishdate" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版年月">
+                </li>
+                <li id="editiontd">
+                    <label >版本版次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.edition" class="layui-input-inline layui-input" style="width: 150px;" placeholder="版本版次">
+                </li>
+
+                <li>
+                    <label >价格</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.price" id="price" class="layui-input-inline layui-input" style="width: 150px;" placeholder="价格">
+                </li>
+                <li id="sizetd">
+                    <label >尺寸</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.sizeid" id="sizeid">
+
+                        </select>
+                    </div>
+                </li>
+                <li>
+                    <label >附件</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.filesurl" class="layui-input-inline layui-input" style="width: 150px;" placeholder="附件">
+                </li>
+
+                <li id="languagetd">
+                    <label >语种</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.languageid" id="languageid">
+
+                        </select>
+                    </div>
+                </li>
+                <li>
+                    <label >页数</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.totalpages" class="layui-input-inline layui-input" style="width: 150px;" placeholder="页数">
+                </li>
+                <li id="bindingtd">
+                    <label >装订</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="beanPlus.bindingid" id="bindingid">
+
+                        </select>
+                    </div>
+                </li>
+
+                <li id="congshumingtd">
+                    <label >丛书名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.congshuming" class="layui-input-inline layui-input" style="width: 150px;" placeholder="丛书名">
+                </li>
+                <li id="congshuauthortd">
+                    <label >丛书责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.congshuauthor" class="layui-input-inline layui-input" style="width: 150px;" placeholder="丛书责任者">
+                </li>
+                <li id="newsourcetd">
+                    <label >图书来源</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="bean.newsource" id="newsource">
+
+                        </select>
+                    </div>
+                </li>
+
+                <li>
+                    <label >文献类型</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="booktype" id="booktype">
+
+                        </select>
+                    </div>
+                </li>
+                <li id="keywordtd">
+                    <label >主题词</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.keyword" class="layui-input-inline layui-input" style="width: 150px;" placeholder="主题词">
+                </li>
+                <li id="fuzhudt">
+                    <label >附注</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.fuzhu" class="layui-input-inline layui-input" style="width: 150px;" placeholder="附注">
+                </li>
+
+                <li style="position: relative;">
+                    <label >分类号</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="hidden" id="sortNumberHide" name="bean.typeid" >
+                    <input type="text" name="bean.typecode" id="sortNumber" class="layui-input-inline layui-input" style="width: 150px;" placeholder="分类号">
+                    <button type="button" onclick="sortSelect()" class="layui-btn layui-btn-xs" style="position: absolute;left: 235px; top: 5px;">...</button>
+                </li>
+                <li style="position: relative;">
+                    <label >书次号</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.shucihao" id="bookNumberValue" class="layui-input-inline layui-input" style="width: 150px;" placeholder="书次号">
+                    <button type="button" onclick="bookNumberFun()" class="layui-btn layui-btn-xs" style="position: absolute;left: 235px; top: 5px;">...</button>
+                </li>
+                <li>
+                    <label >卷次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.juanci" id="juanci" class="layui-input-inline layui-input" style="width: 150px;" placeholder="卷次">
+                </li>
+                <li>
+                    <label >册次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.ceci" id="ceci" class="layui-input-inline layui-input" style="width: 150px;" placeholder="册次">
+                </li>
+
+        </ul>
+        <fieldset class="layui-elem-field">
+            <div class="layui-field-box">
+                <label >电子资源：<span>1111111</span></label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label >索书号：<span id="bookno" name="bean.bookno"></span></label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label >复本数量：<span id="fubennum">0</span></label>
+            </div>
+        </fieldset>
+    </form>
+    <form class="query-form layui-form" id="detailform">
+        <div id="adddetaildiv">
+            <b>馆藏情况&nbsp;&nbsp;&nbsp;&nbsp;</b>
+            <input type="checkbox" name="switch" lay-skin="switch" lay-text="ON|OFF" lay-filter="switchCheckbox" value="1">
+            <div class="layui-unselect layui-form-switch layui-form-onswitch" lay-skin="_switch"><em>ON</em><i></i></div>
+
+
+            <div style="padding: 10px 0 0 50px; display: none;" id="barCodeInput">
+                <label>条码起止号：</label>
+                <input type="text" name="startserial" id="startserial" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="起始序号">
+                <input type="text" name="endserial" id="endserial" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束序号">
+                <label>馆藏地点</label>
+                <div class="layui-input-inline">
+                    <select name="libraryid" id="libraryList">
+
+                    </select>
+                </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>图书批次&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <div class="layui-input-inline">
+                    <select name="piciid" id="bookpiciselect">
+
+                    </select>
+                </div>
+                <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" id="addbarcode">确 定</button>
+            </div>
+        </div>
+        <table class="layui-table">
+            <colgroup>
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>图书条码</th>
+                <th>馆藏地点</th>
+                <th>图书批次</th>
+                <th>操 作</th>
+            </tr>
+            </thead>
+            <tbody id="appendflag">
+            </tbody>
+        </table>
+
+        <div class="text-center">
+            <button type="button" class="layui-btn" lay-submit lay-filter="" typestr="saveandhref" name="saveinfo">保 存</button>
+            <button type="button" class="layui-btn" lay-submit lay-filter="" typestr="saveandrefresh" name="saveinfo">保存并继续</button>
+            <button type="button" class="layui-btn" lay-submit lay-filter="" typestr="saveandcopy" name="saveinfo">保存并复制</button>
+        </div>
+    </form>
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+    var params = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        params[pair[0]]=pair[1];
+    }
+    var orgid = JSON.parse(sessionStorage.loginData).orgid;
+    var tstiaoxinmaweishu = 0;
+    var tstiaoxingmaqianzhui = 0;
+    var qianzhuilength = 0;
+    $.get("/book/initBookList",{orgid:orgid},function (result) {
+        if (result.code==200){
+            result.data.piciList.forEach(function (item) {
+                $("#bookpiciselect").append("<option value='"+item.id+"'>"+item.batchname+"</option>");
+            });
+            result.data.libraryList.forEach(function (item) {
+                $("#libraryList").append("<option value='"+item.id+"'>"+item.library+"</option>");
+            });
+            if(nullbarcodeflag == ""){
+                addatr();
+            }
+            form.render('select');
+            $("#isbn").focus();
+        }
+    });
+
+    $.get("/book/orgSetting",{orgid:orgid},function (result) {
+        if (result.code==200){
+            tstiaoxinmaweishu = result.data.tstiaoxinmaweishu;
+            tstiaoxingmaqianzhui = result.data.tstiaoxingmaqianzhui;
+            if(tstiaoxingmaqianzhui == null){
+                tstiaoxingmaqianzhui = "";
+            }else{
+                qianzhuilength = tstiaoxingmaqianzhui.length;
+            }
+            if(tstiaoxinmaweishu != "" && tstiaoxingmaqianzhui.length>tstiaoxinmaweishu){
+                tstiaoxinmaweishu = 0;
+                alert("条形码设置你异常!前缀长度超出总长度");
+                return;
+            }
+            $("#isbn").focus();
+        }
+    });
+
+    $.get("/dict/findDict",function (result) {
+        if (result.code==200){
+            result.data.list0.forEach(function (item) {
+                $("#authorguobieid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+                $("#authorworkmodeid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list1.forEach(function (item) {
+                $("#guobieid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+                $("#workmodeid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list2.forEach(function (item) {
+                $("#booktype").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list3.forEach(function (item) {
+                $("#sizeid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list4.forEach(function (item) {
+                $("#languageid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list5.forEach(function (item) {
+                $("#bindingid").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            result.data.list6.forEach(function (item) {
+                $("#newsource").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            form.render('select');
+        }
+    });
+
+    $.get("/orgBookField/getById",{orgid:orgid},function (result) {
+        if (result.code==200){
+            if(result.data.keyword != 1) {
+                $("#keywordtd").html("");
+            }
+            if(result.data.edition != 1) {
+                $("#editiontd").html("");
+            }
+            if(result.data.otherauthor != 1) {
+                $("#otherauthortd").html("");
+            }
+            if(result.data.newsource != 1) {
+                $("#newsourcetd").html("");
+            }
+            if(result.data.bltitle != 1) {
+                $("#bltitletd").html("");
+            }
+            if(result.data.subtitle != 1) {
+                $("#subtitletd").html("");
+            }
+//            if(result.data.authorworkmode != 1) {
+//                $("#authorworkmodetd").html("");
+//            }
+//            if(result.data.authorguobie != 1) {
+//                $("#authorguobietd").html("");
+//            }
+            if(result.data.workmode != 1) {
+                $("#workmodetd").html("");
+            }
+            if(result.data.guobie != 1) {
+                $("#guobietd").html("");
+            }
+            if(result.data.size != 1) {
+                $("#sizetd").html("");
+            }
+            if(result.data.language != 1) {
+                $("#languagetd").html("");
+            }
+            if(result.data.binding != 1) {
+                $("#bindingtd").html("");
+            }
+            if(result.data.congshuming != 1) {
+                $("#congshumingtd").html("");
+            }
+            if(result.data.congshuauthor != 1) {
+                $("#congshuauthortd").html("");
+            }
+            if(result.data.fuzhu != 1) {
+                $("#fuzhudt").html("");
+            }
+        }
+    });
+    $("#isbn,#title").keydown(function() {
+        if(event.keyCode == "13") {
+            var value = $(this).val();
+            if(value=="") {
+                return;
+            }
+            var type = 1;
+            if($(this).attr("name")=="bean.title"){
+                type = 2;
+            }
+
+            layer.open({
+                type: 1,
+                area:['1100px','600px'],
+                title:"选择",
+                content: $('#bookListDialog'),
+                yes: function(index, layero){
+                    //do something
+                    layer.close(index); //如果设定了yes回调，需进行手工关闭
+                },
+                btn:['取消'],
+                btnAlign: 'r',
+                success:function(dom,index){
+                    $.get("/book/findBookListByISBNOrZTM",{orgid:orgid,queryStr:value,queryType:type},function (result) {
+                            bookMessageGetVal(result.data.guancangList,'dataTableOne','toolbarOne','radioOne');
+                            bookMessageGetVal(result.data.yubianList,'dataTableTwo','toolbarTwo','radioTwo');
+                            bookMessageGetVal(result.data.zList,'dataTableThree','toolbarThree','radioThree');
+                            function bookMessageGetVal(data,elem,toolbar,keydownEvent){
+                                table.render({
+                                    elem: '#'+elem
+                                    ,toolbar: '#'+toolbar
+                                    ,data:data
+                                    ,page: true //开启分页
+                                    ,cols: [[ //表头
+                                        {type: 'radio', title: '选择'}
+                                        ,{field: 'bean.isbn', title: 'ISBN',align:'center'}
+                                        ,{field: 'bean.title', title: '正题名', align:'center'}
+                                        ,{field: 'bean.author', title: '著者', align:'center'}
+                                        ,{field: 'bean.publisher', title: '出版社', align:'center'}
+                                        ,{field: 'bean.publishdate', title: '出版年月', align:'center'}
+                                        ,{field: 'beanPlus.totalpages', title: '页数', align:'center'}
+                                        ,{field: 'beanPlus.sizeid', title: '尺寸', align:'center'}
+                                        ,{field: 'bean.typecode', title: '分类号', align:'center'}
+                                        ,{field: 'bean.price', title: '定价(元)', align:'center'}
+
+                                    ]]
+                                });
+                                table.on('toolbar('+elem+')', function(obj){
+                                    var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+                                    switch(obj.event) {
+                                        case keydownEvent:
+                                            var data = checkStatus.data;  //获取选中行数据
+                                            layer.close(index);
+                                            findDetailListById(data[0]["id"]);
+                                            setTimeout(function(){
+                                                $(".table-removetd-btn").on("click",removetd);
+                                                $(".table-removetoDB-btn").on("click",removetoDB);
+                                            },2000)
+                                            form.val("queryForm", data[0]);
+                                            getbookNumberFun();
+                                            initselect(data[0]);
+                                            $("#isbn").change();
+                                            break;
+                                    };
+                                });
+                            }
+                    });
+                }
+            });
+        }
+    });
+    function initselect(data){
+        if (null != data["beanPlus.sizeid"] && undefined != data["beanPlus.sizeid"] && "" != data["beanPlus.sizeid"]) {
+            $("#sizeid").val(data["beanPlus.sizeid"]);
+        }
+        if (null != data["beanPlus.bindingid"] && undefined != data["beanPlus.bindingid"] && "" != data["beanPlus.bindingid"]) {
+            $("#bindingid").val(data["beanPlus.bindingid"]);
+        }
+        if (null != data["beanPlus.languageid"] && undefined != data["beanPlus.languageid"] && "" != data["beanPlus.languageid"]) {
+            $("#languageid").val(data["beanPlus.languageid"]);
+        }
+        if (null != data["bean.newsource"] && undefined != data["bean.newsource"] && "" != data["bean.newsource"]) {
+            $("#newsource").val(data["bean.newsource"]);
+        }
+        if (null != data["beanPlus.workmodeid"] && undefined != data["beanPlus.workmodeid"] && "" != data["beanPlus.workmodeid"]) {
+            $("#workmodeid").val(data["beanPlus.workmodeid"]);
+        }
+        if (null != data["beanPlus.guobieid"] && undefined != data["beanPlus.guobieid"] && "" != data["beanPlus.guobieid"]) {
+            $("#guobieid").val(data["beanPlus.guobieid"]);
+        }
+        if (null != data["bean.authorworkmodeid"] && undefined != data["bean.authorworkmodeid"] && "" != data["bean.authorworkmodeid"]) {
+            $("#authorworkmodeid").val(data["bean.authorworkmodeid"]);
+        }
+        if (null != data["bean.authorguobieid"] && undefined != data["bean.authorguobieid"] && "" != data["bean.authorguobieid"]) {
+            $("#authorguobieid").val(data["bean.authorguobieid"]);
+        }
+//
+
+    }
+    //索书号的值
+    $("#queryForm").find("input").on("change",function(){
+        var bookNumberValue = $("#bookNumberValue").val()?"/"+$("#bookNumberValue").val():"";
+        var juanci = $("#juanci").val()?":"+$("#juanci").val():"";
+        var ceci = $("#ceci").val()?"("+$("#ceci").val()+")":"";
+        var bookno = $("#sortNumber").val()+bookNumberValue+juanci+ceci;
+        $("#bookno").text(bookno);
+    });
+    function getBeanPlusQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            var namestr = this.name;
+            if(namestr.indexOf("beanPlus")>-1 && "" != this.value && "null" != this.value){
+                d[namestr.substr(9)] = this.value;
+            }
+        });
+        return d;
+    }
+    function getBeanQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            var namestr = this.name;
+            if(namestr.indexOf("bean") > -1 && namestr.indexOf("beanPlus")==-1 && "" != this.value && "null" != this.value) {
+                d[namestr.substr(5)] = this.value;
+            }
+        });
+        d["bookno"]=$("#bookno").html();
+        return d;
+    }
+    $("[name='saveinfo']").click(function () {
+        var jsonstr = "[";
+        $("[name='bookdetailinfo']").each(function () {
+            var barcodeindex = $(this).attr("barcode");
+            var barcode = $("#barcode"+barcodeindex).val();
+            if("" != $.trim(barcode)){
+                var library = $("#libraryList"+barcodeindex).val();
+                var pici = $("#bookpiciselect"+barcodeindex).val();
+                jsonstr += "{\"libraryid\":"+library+",\"piciid\":"+pici+",\"barcode\":"+barcode+"},";
+            }
+        });
+        jsonstr = jsonstr.substr(0,jsonstr.length-1);
+        jsonstr+="]";
+        if($("#price").val()>400){
+            alert("金额大于400");
+        }
+        var beanstr = JSON.stringify(getBeanQueryCondition("queryForm"));
+        var beanPlusstr = JSON.stringify(getBeanPlusQueryCondition("queryForm"));
+        $.post("/book/saveBookInfo",{bookDetailJsonStr:jsonstr,bean:beanstr,beanPlus:beanPlusstr},
+            function (data, status) {
+                if (data.code == 200) {
+                    //alert(123);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            });
+        if("saveandhref" == $(this).attr("typestr")) {
+            location.href="/list-manage/bookList";
+        } else if("saveandrefresh" == $(this).attr("typestr")){
+            location.reload();
+        } else if("saveandcopy" == $(this).attr("typestr")){
+            $("#detailform")[0].reset();
+            $("#appendflag").remove();
+        }
+        return false;
+    });
+
+    $("#addbarcode").click(function () {
+        var startserial = $("#startserial").val();
+        var endserial = $("#endserial").val();
+        var reg = /^\+?[1-9][0-9]*$/;
+        if (!reg.test(startserial) || !reg.test(endserial)) {
+            layer.msg("请输入正确条码序号", { icon: 2 });
+            return false;
+        }
+        var barcodenum = endserial-startserial;
+        if(barcodenum <= 0) {
+            layer.msg("结束序号必须大于开始序号", { icon: 2 });
+            return;
+        }
+        if(barcodenum > 100) {
+            layer.msg("一次最多生成100条数据", { icon: 2 });
+            return;
+        }
+        if(tstiaoxinmaweishu == 0) {
+            layer.msg("条形码配置异常", { icon: 2 });
+            return;
+        }
+        var libraryListselect = $("#libraryList  option:selected").val();
+        var bookpiciselectselect = $("#bookpiciselect  option:selected").val();
+        var libraryListhtml = $("#libraryList").html();
+        var bookpiciselecthtml = $("#bookpiciselect").html();
+        var bulingstr = "00000000000000000000000000000";
+        var erorrbarcode="";
+        for(var i = +startserial; i <= +endserial; i ++) {
+            var startseriallegnth = (i+"").length;
+            var bulinggeshu = tstiaoxinmaweishu - startseriallegnth - qianzhuilength;
+            if(bulinggeshu < 0) {
+                layer.msg("条形码配置异常", { icon: 2 });
+                return;
+            }
+            var barcode = tstiaoxingmaqianzhui+bulingstr.substr(0,bulinggeshu)+i;
+            $("#appendflag").append(zuzhuang(i,barcode,libraryListhtml,bookpiciselecthtml,2));
+
+            $("#libraryList"+i).val(libraryListselect);
+            $("#bookpiciselect"+i).val(bookpiciselectselect);
+        }
+        if(erorrbarcode != ""){
+            layer.msg(erorrbarcode.substr(0,erorrbarcode.length-1)+"条码重复", { icon: 2 });
+        }
+        $(".table-removetd-btn").on("click",removetd);
+        $(".table-removetoDB-btn").on("click",removetoDB);
+        form.render();
+        return false;
+    });
+
+    var nullbarcodeflag = "";
+    function addatr() {
+        var timestamp =(new Date()).valueOf()+Math.ceil(Math.random()*1000);
+        nullbarcodeflag = timestamp;
+        var libraryListhtml = $("#libraryList").html();
+        var bookpiciselecthtml = $("#bookpiciselect").html();
+        $("#appendflag").append(zuzhuang(timestamp,"",libraryListhtml,bookpiciselecthtml,2));
+        $("#barcode"+nullbarcodeflag).focus();
+        $("#barcode"+timestamp).keydown(function() {
+            if(event.keyCode == "13") {
+                var inputbarcodestr = $(this).val();
+                var checkstr = "";
+                $("[name='barcodestr']").each(function () {
+                    var barcodestr = $(this).val();
+                    if(barcodestr == inputbarcodestr) {
+                        checkstr += barcodestr+",";
+                    }
+                });
+                if(checkstr.length <= inputbarcodestr.length+1){
+                    addatr();
+                } else {
+                    layer.msg(checkstr.substring(inputbarcodestr.length+1,checkstr.length-1)+"条码重复", { icon: 2 });
+                }
+            }
+        });
+        var libraryListselect = $("#libraryList  option:selected").val();
+        var bookpiciselectselect = $("#bookpiciselect  option:selected").val();
+        $("#libraryList"+timestamp).val(libraryListselect);
+        $("#bookpiciselect"+timestamp).val(bookpiciselectselect);
+        $(".table-removetd-btn").on("click",removetd);
+        $(".table-removetoDB-btn").on("click",removetoDB);
+        form.render();
+    }
+
+    function zuzhuang(i,barcode,libraryListhtml,bookpiciselecthtml,type) { // type 0未上架 1 已上架 2 新增
+        var addhtmlstr = "";
+        if(type != 2) { //如果不是新增 则只需要显示
+            addhtmlstr += "<tr name='' barcode='"+i+"' id='DB"+i+"'>";
+        } else {
+            addhtmlstr += "<tr name='bookdetailinfo' barcode='"+i+"' type='"+type+"' id='td"+i+"'>";
+        }
+        if(type != 2) { //如果已上架
+            addhtmlstr += "<td><input type=\"text\" name='barcodestr' id=\"barcode"+i+"\" value='"+barcode+"' class=\"layui-input-inline layui-input\" style=\"width: 150px;\" disabled></td>";
+        } else {
+            addhtmlstr += "<td><input type=\"text\" name='barcodestr' id=\"barcode"+i+"\" value='"+barcode+"' class=\"layui-input-inline layui-input\" style=\"width: 150px;\"></td>";
+        }
+        addhtmlstr += "<td><select id=\"libraryList"+i+"\">" + libraryListhtml + "</select></td>";
+        addhtmlstr += "<td><select id=\"bookpiciselect"+i+"\">" + bookpiciselecthtml + "</select></td>";
+        if(type != 2) { //如果不是新增的
+            addhtmlstr += "<td><button type=\"button\" data-i="+i+" data-type="+type+" class=\"layui-btn layui-btn-sm layui-btn-normal table-removetoDB-btn\" name=\"removetd\">删除</button></td></tr>";
+        } else {
+            addhtmlstr += "<td><button type=\"button\" data-table-indexbtn="+i+" class=\"layui-btn layui-btn-sm layui-btn-normal table-removetd-btn\" name=\"removetd\">删除</button></td></tr>";
+        }
+        return addhtmlstr;
+    }
+
+
+    function removetd(){
+        if(params.type == 1){
+            alert("查看状态，不能删除！");
+            return;
+        }
+        $("#td"+this.dataset.tableIndexbtn).remove();
+    }
+
+    function removetoDB(){// type 0未上架 1 已上架 2 新增
+
+        var startserial = this.dataset.i;
+        var type = this.dataset.type;
+        if(type == 1) {
+            alert("已上架，不能删除！");
+        } else {
+            $.get("/bookDetail/deleteById",{orgid:orgid,id:startserial},function (result) {
+                if (result.code==200){
+                    $("#td"+startserial).remove();
+                } else {
+                    alert("删除失败！");
+                }
+            });
+        }
+    }
+
+    function findDetailListById(id) {
+        var libraryListhtml = $("#libraryList").html();
+        var bookpiciselecthtml = $("#bookpiciselect").html();
+        $.get("/bookDetail/findDetailListById",{orgid:orgid,id:id},function (result) {
+            if (result.code==200){
+                $("#fubennum").html(result.data.length);
+                result.data.forEach(function (item) {
+                    $("#appendflag").prepend(zuzhuang(item.id,item.barcode,libraryListhtml,bookpiciselecthtml,item.bookstatus));
+                    $("#libraryList"+item.id).val(item.libraryid);
+                    $("#bookpiciselect"+item.id).val(item.piciid);
+                });
+                form.render();
+            }
+        });
+    }
+
+    laydate.render({
+        elem: '#startDate',
+        value:new Date()
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+    //监听开关
+    form.on('switch(switchCheckbox)', function(data){
+        console.log(data.elem.checked); //开关是否开启，true或者false
+        if(data.elem.checked){
+            $("#barCodeInput").show();
+            // $("#appendflag").show();
+        } else {
+            $("#barCodeInput").hide();
+            // $("#appendflag").hide();
+        }
+    });
+    //分类号选择
+    function sortSelect(){
+        layer.open({
+            type: 2,
+            area:['1100px','600px'],
+            title:"选择分类号",
+            content: "/view/list-manage/sortDialog.html",
+            btn:['确认','取消'],
+            btnAlign: 'r',
+            yes: function(index, layero){
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：
+                if(iframeWin.sortValue){
+                    var sortValueId = iframeWin.sortValue.id;
+                    $("#sortNumberHide").val(sortValueId);
+                    $("#sortNumber").val(sortValueId).change();
+                    // $("#sortNumber");
+                    getbookNumberFun();
+                }else {
+                    layer.msg("请选择分类", { icon: 5 });
+                    return;
+                }
+                layer.close(index);
+            },
+            btn2: function(index, layero){
+                layer.close(index);
+            },
+            success:function(layero,index){
+
+
+            }
+        });
+    }
+
+    //书次号选择
+    function getbookNumberFun(){
+        if(!$("#sortNumber").val()) return;
+        $.get("/bookPici/findMaxShucihao",{orgid:orgid,typecode:$("#sortNumber").val()},function(result){
+            $("#bookNumberValue").val(result.data+1);
+        });
+    }
+    function bookNumberFun(){
+        if(!$("#sortNumber").val()) return layer.msg("请先选择分类号", { icon: 2 });
+        layer.open({
+            type: 1,
+            area:['1100px','600px'],
+            title:"选择书次号",
+            content: $("#bookOrderNumber"),
+            btn:['取消'],
+            btnAlign: 'r',
+            yes: function(index, layero){
+                table.on('toolbar(dataTableBookNumber)', function(obj){
+                    var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+                    $("#bookNumberValue").val(checkStatus.data[0].maxshucihao+1);
+                });
+                layer.close(index);
+            },
+            success:function(layero,index){
+                $.get("/bookPici/findShucihaoList",{orgid:orgid,typecode:"G78"},function (result) {
+                    if (result.code == 200) {
+                        var data = result.data;
+                        table.render({
+                            elem: '#dataTableBookNumber'
+                            ,toolbar: '#toolbarBookNumber'
+                            ,data:data
+                            ,page: true //开启分页
+                            ,cols: [[ //表头
+                                {type: 'radio', title: '选择'}
+                                ,{field: 'isbn', title: 'ISBN/ISSN',align:'center'}
+                                ,{field: 'title', title: '题名/刊名', align:'center'}
+                                ,{field: 'author', title: '著者', align:'center'}
+                                ,{field: 'publisher', title: '出版社', align:'center'}
+                                ,{field: 'maxshucihao', title: '书次号', align:'center'}
+                                ,{title: '馆藏情况', align:'center',templet:function(d){
+                                        return '馆藏数：'+d.gcs+'&nbsp;&nbsp;可借数：'+d.kjs;
+                                    }}
+                            ]]
+                        });
+                        table.on('toolbar(dataTableBookNumber)', function(obj){
+                            var checkStatus = table.checkStatus(obj.config.id); //获取选中行状态
+                            switch(obj.event){
+                                case "radioBookNumber":
+                                    console.log(checkStatus.data[0].maxshucihao,34);
+                                    $("#bookNumberValue").val(checkStatus.data[0].maxshucihao+1).change();
+                                    layer.close(index);
+                                    break;
+                            };
+                        });
+                    }
+                });
+            }
+        })
+    }
+
+    if (params.type=='1'){
+        fillBookInfo(params.id);
+        $("[name='saveinfo']").hide();
+        $("[name='removetd']").hide();
+        $("#adddetaildiv").hide();
+
+    }else if (params.type=='2') {
+        fillBookInfo(params.id);
+    }else if (params.type=='libraryedit') {
+
+        fillBookInfo(params.id);
+    }
+
+    function fillBookInfo(id) {
+        $.get("/book/findBookInfoById",{id:id},function (data) {
+            var d ={};
+            for (var attr in data.data) {
+                d[attr]=data.data[attr];
+            }
+            form.val("queryForm",d);
+            $("#bookno").text(data.data["bean.bookno"]);
+            findDetailListById(id);
+        });
+    }
+    
+</script>
+#end
+#define tableForm()
+<div class="layui-tab" id="bookListDialog" style="display: none;">
+    <ul class="layui-tab-title">
+        <li class="layui-this">本校馆藏</li>
+        <li>回溯数据</li>
+        <li>Z39.50服务</li>
+    </ul>
+    <div class="layui-tab-content">
+        <div class="layui-tab-item layui-show">
+            <script type="text/html" id="toolbarOne">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-sm" lay-event="radioOne">下 载</button>
+                </div>
+            </script>
+            <table id="dataTableOne" lay-filter="dataTableOne"></table>
+        </div>
+        <div class="layui-tab-item">
+            <script type="text/html" id="toolbarTwo">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-sm" lay-event="radioTwo">下 载</button>
+                </div>
+            </script>
+            <table id="dataTableTwo" lay-filter="dataTableTwo"></table>
+        </div>
+        <div class="layui-tab-item">
+            <script type="text/html" id="toolbarThree">
+                <div class="layui-btn-container">
+                    <button class="layui-btn layui-btn-sm" lay-event="radioThree">下 载</button>
+                </div>
+            </script>
+            <table id="dataTableThree" lay-filter="dataTableThree"></table>
+        </div>
+    </div>
+</div>
+<!--书次号-->
+<div class="layui-tab" id="bookOrderNumber" style="display: none;">
+<script type="text/html" id="toolbarBookNumber">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="radioBookNumber">确 定</button>
+    </div>
+</script>
+<table id="dataTableBookNumber" lay-filter="dataTableBookNumber"></table>
+</div>
+#end

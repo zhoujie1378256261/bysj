@@ -1,0 +1,334 @@
+
+
+#@layout()
+#define main()
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <div class="layui-tab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">公告列表</li>
+            <li>发布公告</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div id="searchFormView"></div>
+                <table id="dataTable" lay-filter="dataTable" lay-data="{id: 'dataTable'}"></table></div>
+            <div class="layui-tab-item">
+                <form class="layui-form layui-form-pane">
+                    <div class="clearfix">
+                        <label class="layui-form-label">发布类型</label>
+                        <div class="layui-input-inline pull-left">
+                            <input type="radio" name="fblx" lay-filter="notice" value="1" title="公告" checked>
+                            <input type="radio" name="fblx" lay-filter="notice" value="2" title="通知">
+                        </div>
+                        <div class="layui-form-mid layui-word-aux">通知：仅接收学校可查看。公告：所有学校都可查看</div>
+                    </div>
+                    <div id="acceptNotice" style="display: none;">
+                        <label class="layui-form-label">接收机构</label>
+                        <div class="layui-input-inline">
+                            <input type="radio" name="school" value="1" lay-filter="nextName" title="所有机构" checked>
+                            <input type="radio" name="school" value="2" lay-filter="nextName" title="机构">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="layui-form-label">主题</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="bean.title" lay-verify="required" autocomplete="off" placeholder="主题" class="layui-input">
+                        </div>
+                    </div>
+                    <div class="layui-form-text">
+                        <label class="layui-form-label">发布内容</label>
+                        <div class="layui-input-block">
+                            <textarea name="bean.content" id="sendContent" placeholder="请输入内容" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-upload">
+                        <label class="layui-form-label">附件</label>
+                        <div class="layui-input-block">
+                            <button type="button" class="layui-btn layui-btn-normal" id="fileUploadBtn">选择文件</button>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <button class="layui-btn" id="saveNoticeBtn" lay-submit lay-filter="saveBtn">保存</button>
+                        <button class="layui-btn" id="sendNoticeBtn" lay-submit lay-filter="searchBtn">发布</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+#end
+#define methods()
+<script type="text/html" id="tableSetBtn">
+    <div class="text-center layui-btn-group">
+        <button onclick="myTable.detele(this,'/notice/delete')" data-id="{{d.id}}" class="layui-btn layui-btn-sm table-setbtn"><img src="/img/table-detale.png" alt=""></button>
+    </div>
+</script>
+<script type="text/html" id="tableHeader">
+    <div class="layui-btn-container text-right">
+        <button onclick="myTable.deteleMany()" class="layui-btn layui-btn-danger layui-btn-sm"><img src="/img/detele.png" alt=""></button>
+    </div>
+</script>
+<link rel="stylesheet" href="/lib/layui/css/checkbox.css">
+<script src="/lib/layui/lay/modules/checkbox.js"></script>
+<script>
+    var checkbox = layui.checkbox;
+    form.on('radio(notice)', function(data){
+        switch(data.value){
+            case "1":
+                $("#acceptNotice").hide();
+                break;
+            case "2":
+                $("#acceptNotice").show();
+                break;
+        }
+    });
+    var checkDataList = null;
+    var checkedListVal = [];
+    var checkallValue = [];
+    myAjax({url:"/selectcount/linkAge",data:{orgid:JSON.parse(sessionStorage.loginData).orgid}},function(result){
+        checkDataList = result.data;
+        result.data.forEach(function(item,index){
+            checkallValue.push(item.orgid);
+        });
+    });
+    function myCheckbox(checkListArg){
+        checkedListVal = [];
+        $("#testbox").children("li").remove();
+        checkbox({
+            elem: "#testbox"
+            , nodes: checkListArg
+            , click: function (node) {
+
+                if(node.on){
+                    checkedListVal.push(node.orgid);
+                }else {
+                    checkedListVal.forEach(function(item, index){
+                        if(node.orgid==item){
+                            checkedListVal.splice(index,1);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    form.on('radio(nextName)', function(data){
+        switch(data.value){
+            case "1":
+                break;
+            case "2":
+                layer.open({
+                    type: 1,
+                    title: '选择机构',
+                    area: ['550px', '350px'],
+                    btn:["确认"],
+                    content: $("#noticeDialog"),
+                    success: function (layero, index) {
+                        myCheckbox(checkDataList);
+                    }
+                });
+                break;
+        }
+    });
+
+    //选择机构查询
+    form.on('submit(institution)',function(data){
+        $.post("/org/fuzzyFindOrg",{orgid:JSON.parse(sessionStorage.loginData).orgid,
+            content:data.field.countent},function(result){
+            if(result.code==200){
+                myCheckbox(result.data);
+            }
+        });
+        return false;
+    });
+
+    form.on('submit(searchBtn)',function(data){
+        switch(data.field.fblx){
+            case "1":
+                delete data.field.school;
+                delete data.field.orgid;
+                break;
+            case "2":
+                delete data.field["bean.schoolcategoryid"];
+                break;
+        }
+        switch(data.field.school){
+            case "1":
+                data.field.orgid = checkallValue;
+                break;
+            case "2":
+                data.field.orgid = checkedListVal;
+                break;
+        }
+        data.field["bean.content"] = layedit.getContent(textEdit);
+        data.field["bean.status"] = 1;
+        $.ajax({
+            url: "/notice/add",
+            type: "POST",
+            data: data.field,
+            traditional: true,//这里设置为true
+            success: function(result) {
+                if(result.code==200){
+                    table.reload('dataTable');
+                    layer.msg(result.msg, { icon: 1,time:1000 },function(){
+                        location.reload();
+                    });
+                }
+            }
+        });
+        return false;
+    });
+
+    form.on('submit(saveBtn)',function(data){
+        switch(data.field.fblx){
+            case "1":
+                delete data.field.school;
+                delete data.field.orgid;
+                break;
+            case "2":
+                delete data.field["bean.schoolcategoryid"];
+                break;
+        }
+        switch(data.field.school){
+            case "1":
+                data.field.orgid = checkallValue;
+                break;
+            case "2":
+                data.field.orgid = checkedListVal;
+                break;
+        }
+        data.field["bean.content"] = layedit.getContent(textEdit);
+        data.field["bean.status"] = 0;
+        $.ajax({
+            url: "/notice/add",
+            type: "POST",
+            data: data.field,
+            traditional: true,//这里设置为true
+            success: function(result) {
+                if(result.code==200){
+                    table.reload('dataTable');
+                    layer.msg(result.msg, { icon: 1,time:1000 },function(){
+                        location.reload();
+                    });
+                }
+            }
+        });
+        return false;
+    });
+
+
+    var arrDetele;
+    myTable.list({
+        url:"/notice/list",
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        cols: [[ //表头
+            {type:'checkbox'}
+            ,{type: 'numbers', title: '序号'}
+            ,{field: 'status', title: '类型',align:'center'}
+            ,{field: 'flag', title: '状态',align:'center'}
+            ,{field: 'title', title: '主题',align:'center', event:'openMessage' ,style:'text-decoration-line: underline;color: #199ED8; cursor: pointer;'}
+            ,{field: 'createtime', title: '发布时间', align:'center',templet:function(d){
+                    return d.createtime.split(" ")[0];
+                }}
+            ,{templet: '#tableSetBtn', title: '操作', align:'center'}
+        ]],
+        done:function(result){
+            arrDetele = [];
+            table.on('checkbox()', function(obj){
+                if(obj.checked){
+                    arrDetele.push(obj.data.id);
+                    if(obj.type=="all"){
+                        arrDetele = [];
+                        result.data.map(function(item,index){
+                            arrDetele.push(item.id);
+                        })
+                    }
+                }else {
+                    arrDetele.map(function(item,index){
+                        if(item==obj.data.id){
+                            arrDetele.splice(index,1);
+                        }
+                    })
+                    if(obj.type=="all"){
+                        arrDetele = [];
+                    }
+                }
+            });
+        }
+    });
+    //公告内容
+    table.on('tool(dataTable)', function(obj){ //注：edit是固定事件名，test是table原始容器的属性 lay-filter="对应的值"
+        if(obj.event === 'openMessage'){
+            console.log(obj.data); //所在行的所有相关数据
+
+            var noticeStr = '<div id="noticeContent">\n' +
+                '    <h5>{{d.title}}</h5>\n' +
+                '    <div class="noticeContentText">{{d.content}}</div>\n' +
+                '    <footer style="margin-bottom: 0;"><div>{{d.filsurl}}</div><div>{{d.createtime.split(" ")[0]}}</div></footer>\n' +
+                '</div>';
+            laytpl(noticeStr).render(obj.data, function(string){
+                noticeStr = string;
+            });
+
+            layer.open({
+                title: "查看",
+                type: 1,
+                area: ['1000px', '500px'],
+                skin: 'noticeStr',
+                content: noticeStr,
+
+            });
+        }
+
+    });
+
+
+    //富文本编辑框
+    var textEdit = layedit.build('sendContent',{
+        uploadImage: {
+            url: '/file/uploadImage' //接口url
+        }
+    });
+
+
+
+    upload.render({
+        elem: '#fileUploadBtn'
+        ,url: '/file/uploadMultipleFile'
+        ,auto: false
+        ,accept:"file"
+        ,exts:"zip|rar|7z|jpg|png|gif|pdf|jpeg|doc|xlsx"
+        ,bindAction: '#sendNoticeBtn'
+    });
+
+    upload.render({
+        elem: '#fileUploadBtn'
+        ,url: '/file/uploadMultipleFile'
+        ,auto: false
+        ,accept:"file"
+        ,exts:"zip|rar|7z|jpg|png|gif|pdf|jpeg|doc|xlsx"
+        ,bindAction: '#saveNoticeBtn'
+    });
+</script>
+#end
+#define tableForm()
+<form id="noticeDialog" class="layui-card layui-form" style="display: none;">
+    <div class="layui-card-header">
+        <!--<b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>-->
+        <input type="text" name="countent" style="width: 200px;height: 30px;" class="layui-input-inline layui-input" placeholder="查询机构关键字...">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="institution" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </div>
+    <div class="layui-card-body clearfix">
+        <div id="testbox"></div>
+    </div>
+</form>
+
+#end

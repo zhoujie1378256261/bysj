@@ -1,0 +1,228 @@
+#@layout()
+#define main()
+<div class="areaSum clearfix">
+
+    <div class="line"></div>
+    <div class="hztj">
+        基本统计
+    </div>
+    <div id="basic">
+    <ul class="xxs clearfix">
+
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">学生数</span><i class="pull-right">●</i></div>
+                <div>{{result.xss}}</div>
+            </a>
+        </li>
+        <li>
+            <a href="readerQuery">
+            <div class="clearfix"><span class="pull-left">读者数</span><i class="pull-right">●</i></div>
+                {{result.dzs}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">图书总册数</span><i class="pull-right">●</i></div>
+                {{result.tszcs}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+            <div class="clearfix"><span class="pull-left">图书种数</span><i class="pull-right">●</i></div>
+                {{result.tszs}}
+            </a>
+        </li>
+    </ul>
+    <ul class="tszcs clearfix">
+        <li>
+            <a href="libNumberStats">
+                <div>缺书册数：</div>
+                {{result.qscs}}
+            </a>
+        </li>
+        <li>
+            <a href="libNumberStats">
+                <div>图书生均册数：</div>
+                {{result.tssjcs}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>期刊种数：</div>
+                {{result.qkzs}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>平均复本：</div>
+                {{result.pjfb}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>图书保障率：</div>
+                {{result.tsbzl}}
+            </a>
+        </li>
+        <li>
+            <a class="nolink" href="javascript:;">
+                <div>年度生均递增：</div>
+                {{result.sjdz}}
+            </a>
+        </li>
+    </ul>
+    </div>
+
+    <div class="line"></div>
+    <div class="hztj">
+        今日简报
+    </div>
+    <div id="today">
+        <ul class="tszcs clearfix">
+            <li>
+                <a href="libNumberStats">
+                    <div>借出数量：</div>
+                    {{result.jssl.jssl}}
+                </a>
+            </li>
+            <li>
+                <a href="libNumberStats">
+                    <div>还书数量：</div>
+                    {{result.hssl.hssl}}
+                </a>
+            </li>
+
+            <li>
+                <a class="nolink" href="javascript:;">
+                    <div>新增图书：</div>
+                    {{result.xzsl.xzsl}}
+                </a>
+            </li>
+            <li>
+                <a class="nolink" href="javascript:;">
+                    <div>注销图书：</div>
+                    {{result.zxsl.zxsl}}
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+    <div class="line"></div>
+    <div class="hztj">
+        流通统计
+    </div>
+
+    <div>
+
+        <div class="layui-tab-item layui-show">
+            <a id="dqjcsl">{{result.dqjcsl}}</a>
+            &nbsp;&nbsp;<a id="tsjcsl">{{result.tsjcsl}}</a>
+            &nbsp;&nbsp;<a id="qkjcsl">{{result.qkjcsl}}</a>
+        </div>
+        <div>
+            <label for="startDate">时间选择：</label>
+            <input type="text" name="kssj" id="startDate" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到：</label>
+            <input type="text" name="jssj" id="endDate" style="width: 80px;height: 30px;" placeholder="结束时间">
+            <button type="button" class="layui-btn layui-btn-danger" onclick="query()">查询</button>
+        </div>
+        <ul class="tszcs clearfix">
+            <li>
+                <a id="dzdgrc">
+                    {{result.dzdgrc}}
+                </a>
+            </li>
+            <li>
+                <a id="dzdgl">
+                    {{result.dzdgl}}
+                </a>
+            </li>
+            <li>
+                <a id="cslyl">
+                    {{result.cslyl}}
+                </a>
+            </li>
+            <li>
+                <a id="wxlyl">
+                    {{result.wxlyl}}
+                </a>
+            </li>
+            <li>
+                <a id="rjjycs">
+                    {{result.rjjycs}}
+                </a>
+            </li>
+            <li>
+                <a id="dzydl">{{result.dzydl}}</a>
+            </li>
+        </ul>
+</div>
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+        laydate.render({
+            elem: '#startDate' //指定元素
+        });
+        laydate.render({
+            elem: '#endDate' //指定元素
+        });
+
+    $.ajax({
+        url: "/comprehensiveStatistics/basicStatistics",
+        type: "POST",
+        data:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        success: function(result) {
+            if(result.code==200){
+                new Vue({
+                    el: '#basic',
+                    data: {
+                        result: result.data
+                    }
+                })
+            }
+        }
+    });
+
+    $.ajax({
+        url: "/comprehensiveStatistics/briefingToday",
+        type: "POST",
+        data:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        success: function(result) {
+            new Vue({
+                el: '#today',
+                data: {
+                    result: result.data
+                }
+            })
+        }
+    });
+        query();
+    function query(){
+        var kssj = $("#startDate").val();
+        var jssj = $("#endDate").val();
+        $.ajax({
+            url: "/comprehensiveStatistics/circulationStatistics",
+            type: "POST",
+            data:{orgid:JSON.parse(sessionStorage.loginData).orgid,kssj:kssj,jssj:jssj},
+            success: function(result) {
+                $("#dzydl").text("读者阅读率："+result.data.dzydl.toFixed(2));
+                $("#rjjycs").text("人均借阅册数："+result.data.rjjycs.toFixed(2));
+                $("#wxlyl").text("文献利用率："+result.data.wxlyl.toFixed(2));
+                $("#cslyl").text("藏书利用率："+result.data.cslyl.toFixed(2));
+                $("#dzdgl").text("读者到馆率："+result.data.dzdgl.toFixed(2));
+                $("#dzdgrc").text("读者到馆人次："+result.data.dzdgrc);
+                $("#dqjcsl").text("当前借出数量："+result.data.dqjcsl);
+                $("#tsjcsl").text("图书占："+result.data.tsjcsl);
+                $("#qkjcsl").text("期刊占："+result.data.qkjcsl);
+            }
+        });
+    }
+
+</script>
+#end

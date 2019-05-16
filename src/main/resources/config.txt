@@ -1,0 +1,14 @@
+jdbcUrl = jdbc:mysql://localhost:3306/ssm?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull
+user = root
+password =
+devMode = true
+
+pagesize=10
+# jwt参数配置
+JWT_SECRET = MDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjY=
+JWT_EXPIRE_MIN=10
+
+login_page_url=/teachLogin.html
+
+redis_host=47.104.182.250
+redis_password=123456

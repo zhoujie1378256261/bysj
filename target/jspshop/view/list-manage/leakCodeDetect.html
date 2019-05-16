@@ -1,0 +1,38 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <div>
+        <button class="layui-btn layui-btn-radius layui-btn-normal" onclick="leakDetectionBarcode()">检测图书条码</button>
+        <button class="layui-btn layui-btn-radius layui-btn-warm" onclick="leakDetectionshucihao()">检测种次号</button>
+        <div id="leakDetection">
+
+        </div>
+    </div>
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+    function leakDetectionBarcode(){
+        $.get("/book/leakDetectionBarcode",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+            var Barcodes = "";
+            for(var i=0;i<result.data.length;i++){
+                Barcodes += result.data[i]+"&nbsp;";
+            }
+            $("#leakDetection").html(Barcodes);
+        });
+    }
+
+    function leakDetectionshucihao(){
+        $.get("/book/leakDetectionshucihao",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+            var shucihao = "";
+            for(var i=0;i<result.data.length;i++){
+                shucihao += result.data[i]+"&nbsp;";
+            }
+            $("#leakDetection").html(shucihao);
+        });
+    }
+
+</script>
+#end

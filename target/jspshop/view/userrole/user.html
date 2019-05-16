@@ -1,0 +1,305 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <div class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">工&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;号：</label>
+        <input type="text" name="bean.code" class="layui-input-inline layui-input" placeholder="请输入">
+        <label for="">登录名：</label>
+        <input type="text" name="bean.loginname" class="layui-input-inline layui-input" placeholder="请输入">
+        <label for="">真实姓名：</label>
+        <input type="text" name="bean.realname" class="layui-input-inline layui-input" placeholder="请输入">
+        <div style="padding: 5px 0px 5px 40px;">
+            <label for="">电话号码：</label>
+            <input type="text" name="bean.phone" class="layui-input-inline layui-input" placeholder="请输入">
+            <label for="">状&nbsp;&nbsp;&nbsp;态：</label>
+            <div class="layui-input-inline">
+                <select name="bean.status" >
+                    <option value="1">正常</option>
+                    <option value="0">注销</option>
+                    <option value="2">停用</option>
+                </select>
+            </div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+        </div>
+    </div>
+</div>
+<div>
+
+
+
+    <div class="line"></div>
+    <table id="userTable" lay-filter="userTable"></table>
+
+</div>
+
+<script type="text/html" id="toolbarDemo">
+    <button class="layui-btn layui-btn-sm" lay-event="addUser">添加用户</button>
+    <!--<button class="layui-btn layui-btn-sm" lay-event="viewRoleBtn">查看所属角色</button>-->
+    <button class="layui-btn layui-btn-sm" lay-event="addRoleBtn">修改用户菜单</button>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+#end
+
+#define methods()
+<script>
+        var laydate = layui.laydate;
+        //常规用法
+        laydate.render({
+            elem: '#birthday'
+        });
+
+
+        var table = layui.table;
+        table.render({
+            title:"用户列表",
+            url:"/user/list",
+            elem:"#userTable",
+            toolbar: '#toolbarDemo',
+            page: true,
+            cols: [[ //表头
+                 {type:'radio'}
+                ,{field: 'loginname', title: '登录名',align:'center'}
+                ,{field: 'realname', title: '用户名',align:'center'}
+                ,{field: 'phone', title: '电话', align:'center'}
+                ,{field: 'email', title: '邮箱', align:'center'}
+                ,{field: 'orgname', title: '所属机构', align:'center'}
+                ,{field: 'status', title: '状态', align:'center',templet: function(d){
+                    if (d.status==1){
+                        return"正常";
+                    }else if (d.status==2){
+                        return"停用";
+                    }else if (d.status==0){
+                        return"注销";
+                    }else {
+                        return d.status;
+                    }
+                }}
+                ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+            ]],response: {
+                statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+            }, parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+               // alert(JSON.stringify(res));
+              //  console.log(res);
+                if(res.code==3){
+                    window.location.href ="/"
+                }
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.data.totalRow, //解析数据长度
+                    "data": res.data.list //解析数据列表
+                };
+            }
+        })
+
+
+
+    var dialogIndex;
+
+    //头工具栏事件
+    table.on('toolbar(userTable)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var data = checkStatus.data;
+        if(JSON.stringify(data) =='[]'  && obj.event !='addUser'){
+            layer.msg("请选择用户！")
+            return;
+        }
+        switch(obj.event){
+            case 'addRoleBtn':
+                var url ="/view/userrole/selectmenubyuser.html?userid="+data[0].id;
+                layer.open({
+                    type: 2,
+                    area: ['600px', '600px'],
+                    content: url
+                });
+                break;
+            case 'addUser':
+                addUser();
+                break;
+            case 'isAll':
+                layer.msg(checkStatus.isAll ? '全选': '未全选');
+                break;
+        };
+    });
+
+    /*searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+*/
+    var formjson;
+
+    table.on('tool(userTable)', function(obj){
+        //console.log(obj);
+        var data = obj.data;
+        if(obj.event == 'del'){
+            layer.confirm('真的删除行么', function(index){
+                delUser(obj);
+                layer.close(index)
+            });
+        }else if (obj.event=="edit"){
+            editUser(obj);
+            console.log(formjson)
+            obj.update(formjson);
+        }
+    });
+
+    function delUser(obj){
+        $.post("/user/delete",
+            {
+                id:obj.data.id
+            },
+            function(data,status){
+                if(data.code==200){
+                    obj.del();
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, { icon: 1 });
+                }
+            }
+        );
+    }
+
+    function editUser(obj){
+        var user = obj.data;
+       // alert(JSON.stringify(user));
+        layui.form.val('userform', {
+            "bean.id": user.id,
+            "bean.realname": user.realname,
+            "bean.code": user.code,
+            "bean.loginname": user.loginname,
+            "bean.password": user.password,
+            "bean.phone":user.phone,
+            "bean.email":user.email,
+            "bean.birthday":user.birthday,
+            "bean.sex":user.sex,
+            "bean.address":user.address,
+        });
+
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['1000px', '800px'],
+            content: $("#userform")
+        });
+    }
+
+    function addUser(){
+        $("#userform")[0].reset();
+        layui.form.render();
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#userform")
+        });
+    }
+
+    layui.form.on('submit(addUserBtn)', function (data) {
+        //console.log(data);
+        $.post("/user/addOrUpdate",
+            data.field,
+            function (data, status) {
+              //  console.log(data);
+                if (data.code == 200) {
+                   // layer.msg('保存成功！', {icon: 1});
+                    formjson =data.field;
+                    layer.close(dialogIndex);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            });
+        return false;
+    });
+
+    form.on('submit(searchBtn)', function(data){
+     //  alert(JSON.stringify(data.field));
+       table.reload('userTable',{
+           where:data.field
+       });
+    });
+
+</script>
+
+
+#end
+
+
+#define tableForm()
+
+#end
+
+
+<form class="layui-form" id="userform" style="display: none;" lay-filter="userform" >
+    <div class="layui-form-item" >
+        <label class="layui-form-label">工号</label>
+        <div class="layui-input-inline">
+            <input type="text"  name="bean.id"  class="layui-input"  style="display: none;"/>
+            <input type="text"  name="bean.code"  placeholder="工号" autocomplete="off" class="layui-input" lay-verify="required" >
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">真实姓名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.realname"  lay-verify="required" placeholder="真实姓名" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">登录名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.loginname"  lay-verify="required" placeholder="登录名" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">密码</label>
+        <div class="layui-input-inline">
+            <input type="password" name="bean.password" placeholder="密码" autocomplete="off" class="layui-input" lay-verify="required"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">电话号码</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.phone" placeholder="电话号码" autocomplete="off" class="layui-input" lay-verify="required|phone"></input>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">邮箱</label>
+        <div class="layui-input-inline" >
+            <input type="text" name="bean.email" placeholder="邮箱" autocomplete="off" class="layui-input" lay-verify="required|email"></input>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">出生年月</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.birthday"  id="birthday" lay-verify="required|date" placeholder="出生年月" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">性别</label>
+        <div class="layui-input-inline">
+            <select name="bean.sex" lay-verify="required" lay-search="">
+                <option value=""></option>
+                <option value="男">男</option>
+                <option value="女">女</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">详细地址</label>
+        <div class="layui-input-inline">
+          <!--  <div style="display: inline-block;" id="linkDiv"></div>-->
+            <textarea name="bean.address" placeholder="请输入详细地址" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="addUserBtn">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

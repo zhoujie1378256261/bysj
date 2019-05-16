@@ -1,0 +1,137 @@
+#@beforeLayout()
+#define main()
+<nav class="container">
+    <div class="tab">
+        <img src="img/tab-bg-lf.png" alt="">
+        <img src="img/tab-bg-rg.png" alt="">
+        <ul class="clearfix">
+            <li><a href="index" class="active">首页</a></li>
+            <li><a href="noticeTell">新闻公告</a></li>
+            <li><a href="libSearch">馆藏检索</a></li>
+            <li><a href="libRanking">排行版</a></li>
+            <li><a href="bookGood">图书推荐</a></li>
+            <li><a href="dataDownload">资料下载</a></li>
+        </ul>
+    </div>
+</nav>
+<section class="index">
+    <div class="ranking">
+        <i><img src="img/ranking.png" alt=""></i>
+        <span>图书排行</span>
+        <b><img src="img/icon-rg.png" alt=""></b>
+        <ul>
+            <li><a href="libRanking">图书借阅排行</a></li>
+            <li><a href="readerRanking">读者借阅排行</a></li>
+            <li><a href="lifeRanking">生均借阅排行</a></li>
+        </ul>
+    </div>
+    <div class="search">
+        <i><img src="img/search.png" alt=""></i>
+        <span>馆藏检索</span>
+        <b><img src="img/icon-rg-no.png" alt=""></b>
+        <ul>
+            <li><a href="libSearch">一般检索</a></li>
+            <li><a href="libSearch">高级检索</a></li>
+        </ul>
+    </div>
+    <div class="download">
+        <i><img src="img/download.png" alt=""></i>
+        <span>资料下载</span>
+        <b><img src="img/icon-rg-no.png" alt=""></b>
+        <ul>
+            <li><a href="dataDownload">下载</a></li>
+        </ul>
+    </div>
+    <p class="img-news">
+        图片风采
+    </p>
+    <hr>
+    <p class="tabloid">
+        tabloid
+    </p>
+    <ul class="clearfix img-model">
+        <li>
+            新闻图片新闻图片新闻图
+        </li>
+        <li></li>
+        <li></li>
+        <li></li>
+    </ul>
+    <p class="img-news" style="margin-top: 60px;">
+        最新公告
+    </p>
+    <hr>
+    <p class="tabloid">
+        announcement
+    </p>
+    <div class="new-notice clearfix">
+        <div class="pull-left notice-img">
+            <div class="layui-carousel" id="myCarousel">
+                <div carousel-item>
+                    <div>1</div>
+                    <div>2</div>
+                    <div>3</div>
+                    <div>4</div>
+                    <div>5</div>
+                </div>
+            </div>
+            <h5>热点新闻热点新闻热点新闻</h5>
+            <p>热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻热点新闻</p>
+        </div>
+        <ul id="newsNotice" class="pull-right notice-content">
+            <li style="margin-bottom: 30px;">
+                <span>最新公告</span>
+                <i class="pull-right"><a href="noticeTell"><img title="更多..." style="vertical-align: middle;" src="img/icon-rg.png" alt=""></a></i>
+            </li>
+            <!--<li class="list clearfix">-->
+                <!--<img src="img/li-icon.png" alt=""> <a href="">图书管理系统评估图书管理系统评估图书管理系统</a>-->
+                <!--<i>2018-06-08</i>-->
+            <!--</li>-->
+            <!--<li class="list clearfix">-->
+                <!--<img src="img/li-icon.png" alt=""> 图书管理系统评估图书管理系统评估图书管理系统-->
+                <!--<i>2018-06-08</i>-->
+            <!--</li>-->
+            <!--<li class="list clearfix">-->
+                <!--<img src="img/li-icon.png" alt=""> 图书管理系统评估图书管理系统评估图书管理系统-->
+                <!--<i>2018-06-08</i>-->
+            <!--</li>-->
+            <!--<li class="list clearfix">-->
+                <!--<img src="img/li-icon.png" alt=""> 图书管理系统评估图书管理系统评估图书管理系统-->
+                <!--<i>2018-06-08</i>-->
+            <!--</li>-->
+        </ul>
+    </div>
+</section>
+#end
+#define methods()
+<script type="text/javascript">
+    layui.use(['form', 'carousel'], function() {
+        var form = layui.form;
+        var carousel = layui.carousel;
+        var $ = layui.jquery;
+        carousel.render({
+            elem: '#myCarousel',
+            width: '311px',
+            height: '130px',
+            arrow: 'none',
+            indicator: 'outside',
+        });
+        $.get("/notice/noticeList",{pageNumber: 1,pageSize: 10},function(result){
+            var strData = "";
+            result.data.list.forEach(function(item,index){
+                strData += '<li class="list clearfix">\n' +
+                    '                <img src="img/li-icon.png" alt=""><a href="noticeTellDetail?id='+item.id+'">'+item.title+'</a>\n' +
+                    '                <i>'+item.createtime.split(" ")[0]+'</i>\n' +
+                    '            </li>';
+            });
+            $("#newsNotice").append(strData);
+        });
+        //首页加载orgid
+        $.get("/rankinglist/getOrgid",function(orgid){
+            console.log(orgid);
+            sessionStorage.orgid = orgid.data;
+        });
+    });
+
+</script>
+#end

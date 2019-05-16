@@ -1,0 +1,69 @@
+<style>
+    body ,ul ,li ,div  {
+        margin: 0;
+        padding: 0;
+    }
+    ul {
+        margin-left: 13mm;
+        margin-right: 14mm;
+        /*margin-top: 5mm;*/
+        width: 210mm;
+    }
+    ul >li {
+        float: left;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 39.5mm;
+        height: 27mm;
+        text-align: center;
+        box-sizing: border-box;
+        padding: 8mm 0 2mm 0;
+        /*border: 1px solid #000;*/
+
+    }
+    .clearfix:after {
+        clear: both;
+    }
+    .clearfix:after,
+    .clearfix:before {
+        display: table;
+        content: " ";
+    }
+    .clearfix {
+        zoom: 1;
+    }
+    ul li > div {
+        font-weight: bold;
+        font-size: 4.5mm;
+        height: 4.5mm;
+        line-height: 4.5mm;
+        font-family:"宋体";
+    }
+</style>
+<ul class="clearfix" id="view">
+    <!--<li>-->
+        <!--<div>A711/1-2版:1</div>-->
+        <!--<div>A711/1-2版:1</div>-->
+        <!--<div>A711/1-2版:1</div>-->
+    <!--</li>-->
+
+</ul>
+<script id="bookMarkTemp" type="text/html">
+    {{#  layui.each(d, function(index, item){ }}
+    <li>
+        <div>{{ item.bookno || ""}}</div>
+        <div>{{ item.isbn || "" }}</div>
+        <div>{{ item.barcode || "" }}</div>
+    </li>
+    {{#  }); }}
+</script>
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<script>
+    var $ = layui.$;
+    var laytpl = layui.laytpl;
+    function markList(res){
+        laytpl(bookMarkTemp.innerHTML).render(res.data, function(html){
+            document.getElementById('view').innerHTML = html;
+        });
+    }
+</script>

@@ -1,0 +1,182 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <div class="layui-tab-item layui-show">
+            &nbsp;&nbsp;
+            <button type="button" class="layui-btn layui-btn-lg layui-btn-normal">图书</button>
+            &nbsp;&nbsp;
+            <button type="button" onclick="window.location.href='/list-manage/damagedBookQ'" class="layui-btn layui-btn-warm">期刊</button>
+        </div>
+        <div style="padding: 10px 0 0 0px;">
+            <label for="startDate">损书处理日期</label>
+
+            <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到</label>
+            <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        </div>
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+            <label for="">部门</label>
+            <div class="layui-input-inline" >
+                <select name="dept" id="dept">
+
+                </select>
+            </div>
+
+            <label for="">读者证号/姓名</label>
+            <input type="text" name="cardnumber" style="width: 150px;" class="layui-input-inline layui-input" placeholder="读者证号/姓名">
+            &nbsp;&nbsp;
+            <label for="">书题名</label>
+            <input type="text" name="title" style="width: 150px;" class="layui-input-inline layui-input" placeholder="书题名">
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-normal">查询</button>
+            <button lay-submit type="button" class="layui-btn layui-btn-warm" lay-filter="exportExcel">导出</button>
+        </div>
+
+    </form>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+
+
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+
+
+    $.get("/orgdept/deptList",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#dept").append("<option value=''></option>");
+            result.data.forEach(function (item) {
+                $("#dept").append("<option value='"+item.id+"'>"+item.deptname+"</option>");
+            });
+            form.render('select');
+        }
+    });
+    function getDate(month){
+        var nowdate = new Date();
+        nowdate.setMonth(nowdate.getMonth()-month);
+        var y = nowdate.getFullYear();
+        var m = nowdate.getMonth()+1;
+        if(m<10) m="0"+m;
+        var d = nowdate.getDate();
+        if(d<10) d="0"+d;
+        return y+'-'+m+'-'+d;
+    }
+
+    myTable.list({
+        url:"/jieyue/damagedBook",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar:true,
+        cols: [
+            [
+                {type: 'numbers', title: '序号'}
+                ,{field:'barcode', title: '图书条码', align:'center'}
+                ,{field:'isbn', title: 'ISBN', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'bookno', title: '索书号', align:'center'}
+                ,{field: 'cardnumber', title: '读者证号', align:'center'}
+                ,{field:'realname', title: '姓名', align:'center'}
+                ,{field: 'deptname', title: '部门', align:'center'}
+                ,{field: 'createtime', title: '借阅日期', align:'center'}
+                ,{field: 'returntime', title: '还书日期', align:'center'}
+                ,{field:'remarks', title: '损书描述', align:'center'}
+                ,{field:'fcreatetime', title: '损书处理日期', align:'center'}
+
+            ]
+        ]
+    });
+
+    form.on('submit(exportExcel)', function(data){
+        if(data.field.month){
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        var kssj = data.field.kssj;
+        var jssj = data.field.jssj;
+        var dept = data.field.dept;
+        var cardnumber = data.field.cardnumber;
+        var title = data.field.title;
+        var url = "/jieyue/exportDamagedBook?orgid="+JSON.parse(sessionStorage.loginData).orgid;
+        if("" != kssj) {
+            url += "&kssj="+kssj;
+        }
+        if("" != jssj) {
+            url += "&jssj="+jssj;
+        }
+        if("" != dept) {
+            url += "&dept="+dept;
+        }
+        if("" != cardnumber) {
+            url += "&cardnumber="+cardnumber;
+        }
+        if("" != title) {
+            url += "&title="+title;
+        }
+        window.open(url)
+    });
+    form.on('submit(searchBtn)', function(data){
+        if(data.field.month){
+
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        delete data.field.month;
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+</script>
+#end

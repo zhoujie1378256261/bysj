@@ -1,0 +1,208 @@
+#@layout()
+#define main()
+
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+
+
+
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <div class="layui-tab-item layui-show">
+            <b>批次号</b> &nbsp;
+            <input type="text" name="batchname" style="width: 200px;" class="layui-input-inline layui-input" placeholder="请输入批次号">
+            &nbsp;&nbsp;
+            <b>建立人</b>&nbsp;
+            <input type="text" name="realname" style="width: 200px;" class="layui-input-inline layui-input" placeholder="请输入建立人">
+            &nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-normal">查询</button>
+            <button type="button"  lay-event="add" onclick="add()" class="layui-btn layui-btn-warm">新增</button>
+
+        </div>
+
+    </form>
+
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="edit">修改</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+
+
+
+</div>
+
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    myTable.list({
+        url:"/bookPici/picilist",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar: '#barDemo',
+        toolbar:true,
+        cols: [
+            [
+                {type: 'numbers', title: '序号'}
+                ,{field:'batchname', title: '批次号', align:'center'}
+                ,{field:'name', title: '图书来源', align:'center'}
+                ,{field: 'createtime', title: '建立日期', align:'center'}
+                ,{field: 'realname', title: '建立人', align:'center'}
+                ,{field: 'remarks', title: '备注', align:'center'}
+                ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+            ]
+        ]
+    });
+
+    form.on('submit(searchBtn)', function(data){
+
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+    $.get("/dict/list",{type:6},function (result) {
+        if (result.code==200){
+            $("#librarysource").append("<option value=''></option>");
+            result.data.forEach(function (item) {
+                $("#librarysource").append("<option value='"+item.id+"'>"+item.name+"</option>");
+            });
+            form.render('select');
+        }
+    });
+
+    function addMessage(){
+        myTable.addCell('/bookPici/addOrUpdate','addCell',function(){
+            $("#editCellBtn").remove();
+            $("#orgidInput").val(JSON.parse(sessionStorage.loginData).orgid);
+        });
+    };
+
+
+</script>
+<script>
+    table.on('tool(mainTable)', function(obj){
+        var data = obj.data;
+        if(obj.event == 'del'){
+            layer.confirm('真的删除行么', function(index){
+                delReader(obj);
+                layer.close(index)
+            });
+        }else if (obj.event=="edit"){
+            editReader(obj);
+        }
+    });
+    var id = null;
+    function editReader(obj){
+        id = obj.data.id;
+        var d ={};
+        for (var attr in obj.data) {
+            d["bean."+attr]=obj.data[attr];
+        }
+
+        form.val("addCell",d);
+        dialogIndex = layer.open({
+            type: 1,
+            area: ['450px', '500px'],
+            content: $("#addCell"),
+
+        });
+    }
+
+    function delReader(obj){
+        var d ={};
+        d["bean.id"]=obj.data.id;
+        $.post("/bookPici/delete",
+            d,
+            function(data,status){
+                if(data.code==200){
+                    alert("操作成功")
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, { icon: 1 });
+                }
+            }
+        );
+    }
+
+    var dialogIndex=-1;
+    function add(){
+        $("#addCell")[0].reset();
+        form.render();
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#addCell")
+        });
+    }
+    form.on('submit(addCell)', function(data){
+        data.field.token=JSON.parse(sessionStorage.loginData).token;
+        data.field["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        data.field["bean.id"]=id;
+        $.post("/bookPici/addOrUpdate",
+            data.field,
+            function (data, status) {
+                if (data.code == 200) {
+                    layer.msg("保存成功");
+                    layer.close(dialogIndex);
+                }
+            }
+        );
+        return false;
+    });
+</script>
+#end
+#define tableForm()
+<form class="layui-form" lay-filter="addCell" id="addCell" style="display: none;">
+    <div class="layui-form-item">
+        <label class="layui-form-label">图书批次号</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.batchname" lay-verify="required" placeholder="必填项" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">图书来源</label>
+        <div class="layui-input-block">
+        <select name="bean.dictid" id="librarysource">
+
+        </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">备注</label>
+        <div class="layui-input-block">
+            <input type="text" name="bean.remarks" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-input-block text-center">
+            <button class="layui-btn" lay-submit lay-filter="addCell">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+    <input type="text" style="display: none;" id="orgidInput" name="orgid">
+
+</form>
+#end

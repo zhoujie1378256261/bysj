@@ -1,0 +1,135 @@
+#@layout()
+#define main()
+<div>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">机构</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+</div>
+#end
+#define methods()
+
+<script>
+
+    var linkuserLevel;
+
+    var readerQueryJudge = linkuserLevel||JSON.parse(sessionStorage.userLevel);
+    //合计赋值
+    function totalValue(sendData){
+        myAjax({url:"/selectcount/bookTypeTotalListProvinces",data:sendData},function(result){
+            $(".layui-table-total").find("td[data-field='zcs']").children().text(result.data.zcs||0);
+            $(".layui-table-total").find("td[data-field='cs1']").children().text(result.data.cs1||0);
+            $(".layui-table-total").find("td[data-field='cs2']").children().text(result.data.cs2||0);
+            $(".layui-table-total").find("td[data-field='cs3']").children().text(result.data.cs3||0);
+            $(".layui-table-total").find("td[data-field='cs4']").children().text(result.data.cs4||0);
+            $(".layui-table-total").find("td[data-field='cs5']").children().text(result.data.cs5||0);
+            $(".layui-table-total").find("td[data-field='hjzb1']").children().text(result.data.hjzb1?result.data.hjzb1.toFixed(2):0);
+            $(".layui-table-total").find("td[data-field='hjzb2']").children().text(result.data.hjzb2?result.data.hjzb2.toFixed(2):0);
+            $(".layui-table-total").find("td[data-field='hjzb3']").children().text(result.data.hjzb3?result.data.hjzb3.toFixed(2):0);
+            $(".layui-table-total").find("td[data-field='hjzb4']").children().text(result.data.hjzb4?result.data.hjzb4.toFixed(2):0);
+            $(".layui-table-total").find("td[data-field='hjzb5']").children().text(result.data.hjzb5?result.data.hjzb5.toFixed(2):0);
+        });
+    };
+    myTable.list({
+        url:"/selectcount/bookTypeListProvinces",
+        elem:"#dataTable",
+        postData:{orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid},
+        totalRow: true,
+        done:function(){
+            totalValue({orgid:getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid});
+        },
+        cols: [
+            [ //表头
+                {type: 'numbers', title: '序号',rowspan:2}
+                ,{field:'orgname', title: '单位', align:'center',rowspan:2,totalRowText:"合计"}
+                ,{field: 'zcs', title: '总册数', align:'center',rowspan:2,templet:function(d){
+                    d.zcs = d.zcs||0;
+                    return "<a href='libSortSort?orgid="+d.orgid+"'>"+d.zcs+"</a>"
+                }}
+                ,{ title: 'A 马列主义毛泽东思想', align:'center',colspan:2}
+                ,{ title: 'B 哲学、宗教', align:'center',colspan:2}
+                ,{ title: 'C-K 社会科学', align:'center',colspan:2}
+                ,{title: 'N-X 自然科学', align:'center',colspan:2}
+                ,{ title: 'Z 综合性图书', align:'center',colspan:2}
+            ],
+            [ //表头
+                {field: 'cs1', title: 'A册数', align:'center',templet:function(d){
+                        return d.cs1?d.cs1:0;
+                    }}
+                ,{field: 'hjzb1',title: 'A占比', align:'center',templet:function(d){
+                    return d.hjzb1?d.hjzb1.toFixed(2):0;
+                }}
+                ,{field: 'cs2', title: 'B册数', align:'center',templet:function(d){
+                    return d.cs2?d.cs2:0;
+                }}
+                ,{field: 'hjzb2',title: 'B占比', align:'center',templet:function(d){
+                    return d.hjzb2?d.hjzb2.toFixed(2):0;
+                }}
+                ,{field: 'cs3', title: 'C-K册数', align:'center',templet:function(d){
+                    return d.cs3?d.cs3:0;
+                }}
+                ,{field: 'hjzb3',title: 'C-K占比', align:'center',templet:function(d){
+                    return d.hjzb3?d.hjzb3.toFixed(2):0;
+                }}
+                ,{field: 'cs4', title: 'N-X册数', align:'center',templet:function(d){
+                    return d.cs4?d.cs4:0;
+                }}
+                ,{field: 'hjzb4',title: 'N-X占比', align:'center',templet:function(d){
+                    return d.hjzb4?d.hjzb4.toFixed(2):0;
+                }}
+                ,{field: 'cs5', title: 'Z册数', align:'center',templet:function(d){
+                    return d.cs5?d.cs5:0;
+                }}
+                ,{field: 'hjzb5',title: 'Z占比', align:'center',templet:function(d){
+                    return d.hjzb5?d.hjzb5.toFixed(2):0;
+                }}
+            ]
+        ]
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+
+        judgeLevel(data.field.orgid);
+        switch(linkuserLevel){
+            case 1:
+                // window.location.href = "libSortSortState?orgid="+linkuserLevel;
+                break;
+            case 2:
+                // window.location.href = "libSortSortCity?orgid="+linkuserLevel;
+                break;
+            default:
+                window.location.href = "libSortSort?orgid="+linkuserLevel;
+                break;
+        };
+
+        table.reload("dataTable",{
+            // url:"/selectcount/collectionSearch",
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    totalValue(data.field);
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+
+        return false;
+    });
+
+    searchForm.linkage(getUrlParam("orgid")||JSON.parse(sessionStorage.loginData).orgid);
+</script>
+#end

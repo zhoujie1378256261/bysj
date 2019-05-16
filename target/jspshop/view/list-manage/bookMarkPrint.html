@@ -1,0 +1,154 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+
+        <label for="">图书批次</label>
+        <div class="layui-input-inline">
+            <select name="piciid" id="piciid">
+
+            </select>
+        </div>
+        <label for="">馆藏地</label>
+        <div class="layui-input-inline">
+            <select name="libraryid" id="libraryid">
+
+            </select>
+        </div>
+        <label for="">编目人员</label>
+        <div class="layui-input-inline">
+            <select name="username" id="username">
+
+            </select>
+        </div>
+        <label for="">是否上架</label>
+        <div class="layui-input-inline">
+            <select name="upperShelf">
+                <option value='0'>未上架</option>
+                <option value='1'>已上架</option>
+            </select>
+        </div>
+
+        <label for="">正题名</label>
+        <div class="layui-input-inline">
+            <input type="text" name="title" style="width: 100px;" class="layui-input-inline layui-input" placeholder="请输入正题名">
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+        <label for="">书刊条码范围</label>
+            <input type="text" name="barcode1" style="width: 100px;" class="layui-input-inline layui-input" placeholder="请输入初始条码">
+            <b>至</b>
+            <input type="text" name="barcode2" style="width: 100px;" class="layui-input-inline layui-input" placeholder="请输入结束条码">
+        </div>
+        <!--<button type="button" onclick="priceBook()">打印</button>-->
+    </form>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+
+
+
+</div>
+#end
+#define methods()
+<script type="text/html" id="tableHeader">
+    <div class="layui-btn-container text-right">
+        <button type="button" onclick="priceBook()" class="layui-btn layui-btn-warm layui-btn-sm">书标打印</button>
+    </div>
+</script>
+<script type="text/javascript">
+    $.get("/book/initBookList",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#username").append("<option value=''></option>");
+            $("#libraryid").append("<option value=''></option>");
+            result.data.userList.forEach(function (item) {
+                $("#username").append("<option value='"+item.id+"'>"+item.realname+"</option>");
+            });
+            result.data.libraryList.forEach(function (item) {
+                $("#libraryid").append("<option value='"+item.id+"'>"+item.library+"</option>");
+            });
+            form.render('select');
+        }
+    });
+    $.get("/bookPici/list",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#piciid").append("<option value=''></option>");
+            result.data.forEach(function (item) {
+                $("#piciid").append("<option value='"+item.id+"'>"+item.batchname+"</option>");
+            });
+            form.render('select');
+        }
+    });
+
+
+    myTable.list({
+        url:"/book/bookmarkPrinting",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        cols: [
+            [
+                {type: 'numbers', title: '序号'}
+                ,{field:'barcode', title: '图书条码', align:'center'}
+                ,{field:'bookno', title: '索书号', align:'center'}
+                ,{field: 'isbn', title: 'ISBN', align:'center'}
+                ,{field: 'title', title: '正题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field:'publisher', title: '出版社', align:'center'}
+            ]
+        ],
+        done:function(result){
+            console.log(result,234);
+            markList= result;
+        }
+    });
+
+    var queryObj = null;
+    form.on('submit(searchBtn)', function(data){
+
+        data.field.token = sessionStorage.token;
+        queryObj = data.field;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+    //打印
+    function priceBook(){
+        layer.open({
+            type: 2,
+            title:"书标打印",
+            area:['500px','500px'],
+            btn:['打印预览'],
+            content: "/view/list-manage/bookPrintTemp.html",
+            success:function(layero,index){
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                iframeWin.markList(markList);
+            },
+            yes: function(index, layero){
+                var body = layer.getChildFrame('body', index);
+                var iframeWin = window[layero.find('iframe')[0]['name']];
+                iframeWin.print();
+            }
+        });
+    }
+</script>
+#end

@@ -1,0 +1,138 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <label for="">学校所在地</label>
+        <div class="layui-input-inline">
+            <select name="areatypeid" id="areaoptionView">
+
+            </select>
+        </div>
+        <label for="">学校类别</label>
+        <div class="layui-input-inline">
+            <select name="schoolcategoryid" id="typeoptionView">
+
+            </select>
+        </div>
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        <div style="padding: 10px 0 0 50px;">
+            <label for="startDate">时间选择：</label>
+            <input type="radio" name="month" value="1" title="近1个月">
+            <input type="radio" name="month" value="6" title="近6个月" checked>
+            <input type="radio" name="month" value="12" title="近1年">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="month" value="" title="选择时间段">
+            <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到：</label>
+            <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+            <label for="">文献类型</label>
+            <div class="layui-input-inline">
+                <select name="wxlx">
+                    <option value="">请选择</option>
+                    <option value="0">图书</option>
+                    <option value="1">期刊</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    searchForm.init("areaoptionView","/org/areaType");
+    searchForm.init("typeoptionView","/org/schoolcategory");
+
+    var d = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        d[pair[0]]=pair[1];
+    }
+   // alert(JSON.stringify(d));
+
+    form.on('radio()', function(data){
+        //console.log(data.elem); //得到radio原始DOM对象
+       // console.log(data.value); //被点击的radio的value值
+        if(!data.value){
+            $("#startDate").removeAttr("disabled");
+            $("#endDate").removeAttr("disabled");
+        }else {
+            $("#startDate").attr("disabled","disabled");
+            $("#endDate").attr("disabled","disabled");
+        }
+    });
+
+    laydate.render({
+        elem: '#startDate',
+        ready:function(){
+            console.log('时间')
+        },
+        done: function(value, date, endDate){
+            console.log(value); //得到日期生成的值，如：2017-08-18
+            console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+            console.log(endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+        }
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date(),
+        done: function(value, date, endDate){
+
+        }
+    });
+
+
+
+
+    myTable.list({
+        url:"/selectcount/schoolsJieyueRecordList",
+        elem:"#dataTable",
+        postData:d,
+        toolbar:true,
+        cols: [
+            [ //表头
+                {type: 'numbers', title: '序号',rowspan:2}
+                ,{field:'flag', title: '文献类型', align:'center',templet:function(d){
+                    return d.flag==0?"图书":"期刊";
+                }}
+                ,{field:'ISBN/ISSN', title: 'ISBN/ISSN', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'realname', title: '读者姓名', align:'center'}
+                ,{field: 'cardnumber', title: '读者证号', align:'center'}
+                ,{field: 'createtime',title: '借书时间', align:'center',templet(d){
+                    return d.createtime.split(" ")[0];
+                }}
+                ,{field: 'returntime',title: '还书时间', align:'center',templet(d){
+                    return d.returntime =='' || d.returntime ==null?"" :d.returntime.split(" ")[0];
+                }}
+                ,{field: 'continuenum',title: '续借次数', align:'center'}
+                ,{field: 'library',title: '所在图书馆', align:'center'}
+            ]
+        ]
+    });
+
+    layui.form.val('queryForm',d);
+    layui.form.render();
+
+    searchForm.submit('submit(searchBtn)',"/selectcount/schoolsJieyueRecordList");
+
+
+</script>
+#end

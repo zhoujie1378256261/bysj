@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>教育局图书管理系统</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/img/jsw-logo.ico">
+    <link rel="stylesheet" href="/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="/css/cssreste.css">
+    <style type="text/css">
+        html, body {
+            height: 100%;
+        }
+        .lf {
+            float: left;
+            width: 50%;
+            height: 100%;
+            background: url("/img/teach-bg.jpg") no-repeat center center;
+            background-size: cover;
+        }
+        .rg {
+            float: right;
+            width: 50%;
+            height: 100%;
+            position: relative;
+        }
+        h4 {
+            font-size: 28px;
+            color: #000000;
+        }
+        .rg form {
+            width: 320px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            margin-top: -160px;
+            margin-left: -160px;
+        }
+        .rg div {
+            margin-top: 30px;
+        }
+        .layui-form-item {
+            position: relative;
+        }
+        .layui-form-item i {
+            position: absolute;
+            left: 5px;
+        }
+        .layui-input {
+            padding-left: 40px;
+        }
+        .login-btn {
+            display: block;
+            border-width: 1px;
+            border-color: rgb(59, 119, 227);
+            border-style: solid;
+            border-radius: 5px;
+            height: 40px;
+            width: 100%;
+            background-color: transparent;
+            vertical-align: middle;
+            text-align: center;
+            color: #3b77e3;
+            font-size: 22px;
+        }
+        .text-link {
+            font-size: 16px;
+            color: #999999;
+            text-align: center;
+        }
+        .text-link a {
+            text-decoration-line: underline;
+            font-size: 18px;
+            color: #999999;
+        }
+    </style>
+    <!--[if lt IE 9]>
+    <script src="/lib/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="clearfix">
+<div class="lf"></div>
+<div class="rg">
+    <form class="layui-form">
+        <h4 class="text-center">教 育 局</h4>
+        <div class="layui-form-item">
+            <i class="layui-icon layui-icon-username" style="font-size: 24px; color: #000000;"></i>
+            <input type="text" name="loginname" value="admin" lay-verify="required" placeholder="请输入用户名" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+            <i class="layui-icon layui-icon-password" style="font-size: 24px; color: #000000;"></i>
+            <input type="password" name="password" value="admin" lay-verify="required" placeholder="请输入密码" class="layui-input">
+        </div>
+        <div class="layui-form-item">
+            <button lay-submit lay-filter="*" class="login-btn">登录</button>
+        </div>
+        <div class="layui-form-item text-link">
+            点击切换到<a href="schoolLogin">中小学图书馆</a>,<a href="teachBefore/libRanking">门户网站</a>
+        </div>
+    </form>
+</div>
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<script type="text/javascript" src="/js/common.js"></script>
+<script type="text/javascript">
+    form.on('submit(*)', function(data){
+        $.ajax("/auth/login",{
+            type:"POST",
+            data:data.field,
+            success:function(result){
+                if(result.code==200){
+                    sessionStorage.token = result.data.token;
+                    sessionStorage.loginData = JSON.stringify(result.data);
+                    layer.msg('登录成功', { icon: 1,time: 300 }, function(){
+                        form.val("*",{"loginname":"","password":""});
+                        window.location.href = "page/areaSum";
+                    });
+                }else if(result.code==1){
+                    layer.msg(result.msg, { icon: 5,time: 2000 });
+                }else {
+                    layer.msg('登录失败', { icon: 5,time: 2000 });
+                }
+            },
+            error:function(result){
+                layer.msg('登录出错'+result.msg, { icon: 6,time: 2000 });
+            }
+        });
+        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+
+
+</script>
+</body>
+
+</html>

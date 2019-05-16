@@ -1,0 +1,191 @@
+
+#@beforeLayout()
+#define main()
+<nav class="container">
+    <div class="tab">
+        <img src="img/tab-bg-lf.png" alt="">
+        <img src="img/tab-bg-rg.png" alt="">
+        <ul class="clearfix">
+            <li><a href="index">首页</a></li>
+            <li><a href="noticeTell">新闻公告</a></li>
+            <li><a href="libSearch">馆藏检索</a></li>
+            <li><a href="libRanking" class="active">排行版</a></li>
+            <li><a href="bookGood">图书推荐</a></li>
+            <li><a href="dataDownload">资料下载</a></li>
+        </ul>
+    </div>
+</nav>
+<section class="lib-search">
+    <div>
+        <div class="query-form layui-form">
+            <div style="margin-bottom: 20px;">
+                <button class="my-btn active"><a href="libRanking">藏书借阅排行</a></button>
+                <button class="my-btn"><a href="readerRanking">读者借阅排行</a></button>
+                <button class="my-btn"><a href="lifeRanking">生均借阅排行</a></button>
+            </div>
+            <div style="padding: 10px 0 0 0px;">
+                <label for="startDate">时间选择：</label>
+                <input type="radio" name="month" value="1" title="近1个月" checked>
+                <input type="radio" name="month" value="6" title="近6个月">
+                <input type="radio" name="month" value="12" title="近1年">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="month" value="" title="选择时间段">
+                <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+                <label for="endDate">到：</label>
+                <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+            </div>
+            <label for="">机&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;构：</label>
+            <div style="display: inline-block;" id="linkDiv"></div>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+        </div>
+        <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+    </div>
+</section>
+#end
+#define methods()
+<script type="text/javascript">
+    layui.use(['form', 'element', 'jquery', 'layer', 'laytpl', 'table', 'laydate'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+        var laytpl = layui.laytpl;
+        laydate.render({
+            elem: '#startDate'
+        });
+        laydate.render({
+            elem: '#endDate',
+            value: new Date()
+        });
+
+        linkage(100001);
+        function linkage(psendData){
+                $.post("/rankinglist/linkAge",{orgid:psendData},function(result){
+                    var selectstar = '<div class="linkageelem" style="width: 150px;display: inline-block;">' +
+                        '<select lay-filter="layLinkage" class="linkageSelect" name="orgid">' +
+                        '<option value="'+psendData+'" disabled selected>请选择</option>';
+                    var selectend = '</select></div>';
+                    var Option;
+                    if(result.data.length!=0){
+                        for(var i= 0; i<result.data.length; i++){
+                            Option += "<option value="+result.data[i].orgid+">"+result.data[i].orgname+"</option>";
+                        }
+                    }else {
+                        Option = "<option value='' disabled>无下级机构</option>"
+                    }
+                    var linkageSelect = selectstar+Option+selectend;
+                    $("#linkDiv").append(linkageSelect);
+                    form.render('select');
+                });
+                form.on('select(layLinkage)', function(data){
+                    var targetindex;
+                    $($(data.elem).find("option")[0]).attr("disabled","disabled");
+                    $(".linkageSelect").each(function(index){
+                        if(data.elem == this){
+                            targetindex=index;
+                        }
+                    });
+                    var calc = $(".linkageelem").length-1;
+                    for(var i = calc; i>targetindex; i--){
+                        $($(".linkageelem")[i]).remove();
+                    }
+                    linkage(data.value);
+                });
+            };
+        table.render({
+            elem: '#dataTable'
+            ,url: '/rankinglist/libraryRanking' //数据接口
+            ,page: true //开启分页
+            ,where:{kssj:"",jssj:"",orgid:+sessionStorage.orgid}
+            ,cols: [[ //表头
+                {type: 'numbers', title: '序号'}
+                ,{field: 'isbn', title: 'ISBN',align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'jieyuenums', title: '借阅次数', align:'center'}
+            ]]
+            ,text: {
+                    none: '暂无相关数据' //默认：无数据。
+                },
+            request: {
+                pageName: 'pageNumber' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            },
+            response: {
+                statusCode: 200 //规定成功的状态码，默认：0
+            }
+            ,parseData: function(result) {
+                if(result.code==200){
+                    return {
+                        "code": result.code, //解析接口状态
+                        "msg": result.msg, //解析提示文本
+                        "count": result.data.totalRow, //解析数据长度
+                        "data": result.data.list //解析数据列表
+                    };
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            },
+        });
+
+        function getDate(month){
+            var nowdate = new Date();
+            nowdate.setMonth(nowdate.getMonth()-month);
+            var y = nowdate.getFullYear();
+            var m = nowdate.getMonth()+1;
+            if(m<10) m="0"+m;
+            var d = nowdate.getDate();
+            if(d<10) d="0"+d;
+            return y+'-'+m+'-'+d;
+        }
+
+
+        form.on('radio()',function(data){
+            if(data.value){
+                $("#startDate").attr("disabled","disabled");
+                $("#endDate").attr("disabled","disabled");
+            }else {
+                $("#startDate").removeAttr("disabled");
+                $("#endDate").removeAttr("disabled");
+            }
+        });
+
+        form.on('submit(searchBtn)', function(data){
+            if(data.field.month){
+                switch(data.field.month){
+                    case "1":
+                        data.field.kssj = getDate(1);
+                        break;
+                    case "6":
+                        data.field.kssj = getDate(6);
+                        break;
+                    case "12":
+                        data.field.kssj = getDate(12);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            delete data.field.month;
+            table.reload('dataTable',{
+                where:data.field,
+                page: {
+                    curr: 1
+                },
+                done:function(result){
+                    if(result.code==200){
+                        layer.msg('查询成功', { icon: 1});
+                    }else {
+                        layer.msg('查询失败：' + result.msg, { icon: 5 });
+                    }
+                }
+            });
+            return false;
+        });
+    });
+</script>
+#end

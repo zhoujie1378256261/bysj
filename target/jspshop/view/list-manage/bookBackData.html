@@ -1,0 +1,330 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+
+    <script type="text/html" id="periodicalToolbar">
+        <button type="button" class="layui-btn" id="importPeriodicalExcel">Excel导入期刊</button>
+        <button type="button" class="layui-btn" id="importPeriodicalMarc">Marc导入期刊</button>
+    </script>
+
+    <script type="text/html" id="bookToolbar">
+        <button type="button" class="layui-btn" id="importBookExcel">Excel导入图书</button>
+        <button type="button" class="layui-btn" id="importBookMarc">Marc导入图书</button>
+    </script>
+
+    <script type="text/html" id="periodicalbar">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-xs" lay-event="del">删除</a>
+    </script>
+    <script type="text/html" id="bookbar">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-xs" lay-event="del">删除</a>
+    </script>
+
+    <div class="layui-tab" lay-filter="booktab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">图书回溯数据</li>
+            <li>期刊回溯数据</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form" lay-filter="bookqueryform" id="bookqueryform">
+                    <div>
+                        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                        <label for="">ISBN</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.isbn" class="layui-input-inline layui-input" placeholder="ISBN">
+                        </div>
+                        <label for="">正题名：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.title" class="layui-input-inline layui-input" placeholder="正题名">
+                        </div>
+                        <label for="">著者：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.author" class="layui-input-inline layui-input" placeholder="著者">
+                        </div>
+                        <label for="">出版社：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.publisher" class="layui-input-inline layui-input" placeholder="出版社">
+                        </div>
+                        <button lay-submit lay-filter="searchBookBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="bookdatatable" lay-filter="bookdatatable"></table>
+            </div>
+            <div class="layui-tab-item">
+                <form class="layui-form" lay-filter="periodicalqueryform" id="periodicalqueryform">
+                    <div>
+                        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                        <label for="">ISSN</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.issn" class="layui-input-inline layui-input" placeholder="ISSN">
+                        </div>
+                        <label for="">刊名：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.kanming" class="layui-input-inline layui-input" placeholder="刊名">
+                        </div>
+                        <label for="">出版频率：</label>
+                        <div class="layui-input-inline">
+                            <select name="bean.chubanpinlv" >
+                                <option value="">全部</option>
+                                <option value="1">季刊</option>
+                                <option value="2">月刊</option>
+                                <option value="3">半月刊</option>
+                                <option value="4">旬刊</option>
+                                <option value="5">周刊</option>
+                            </select>
+                        </div>
+                        <label for="">编辑部：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bean.bianjibu" class="layui-input-inline layui-input" placeholder="编辑部">
+                        </div>
+                        <button lay-submit lay-filter="searchPeriodicalBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="periodicaldatatable" lay-filter="periodicaldatatable"></table>
+            </div>
+
+
+        </div>
+     </div>
+</div>
+
+
+</div>
+#end
+#define methods()
+<script type="text/javascript">
+
+
+    function getQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            d[this.name] = this.value;
+        });
+        return d;
+    }
+
+
+    table.render({
+        elem: '#bookdatatable'
+        ,url:'/bookyubian/list'
+        ,postData:getQueryCondition("bookqueryform")
+        ,toolbar:'#bookToolbar'
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'isbn', title:'ISBN', edit: 'text'}
+            ,{field:'title', title:'正题名' ,edit: 'text'}
+            ,{field:'author', title:'著者',edit: 'text'}
+            ,{field:'publisher', title:'出版社',edit: 'text'}
+            ,{field:'publishaddress', title:'出版地',edit: 'text'}
+            ,{field:'edition', title:'版本版次',edit: 'text'}
+            ,{field:'typecode', title:'分类号',edit: 'text'}
+            ,{field:'totalpages', title:'页数',edit: 'text'}
+            ,{field:'price', title:'定价（元）',edit: 'text'}
+            ,{fixed: 'right', title:'操作', toolbar: '#bookbar'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    table.render({
+        elem: '#periodicaldatatable'
+        ,url:'/periodicalyubian/list'
+        ,postData:getQueryCondition("periodicalqueryform")
+        ,toolbar:'#periodicalToolbar'
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'issn', title:'ISSN', edit: 'text'}
+            ,{field:'kanming', title:'刊名',edit: 'text'}
+            ,{field:'futiming', title:'副题名',edit: 'text'}
+            ,{field:'bianjibu', title:'编辑部',edit: 'text'}
+            ,{field:'tongyikanhao', title:'统一刊号',edit: 'text'}
+            ,{field:'youfadaihao', title:'邮发代号',edit: 'text'}
+            ,{field:'chubanpinlv', title:'出版频率',edit: 'text'}
+            ,{field:'typecode', title:'分类号',edit: 'text'}
+            ,{fixed: 'right', title:'操作', toolbar: '#periodicalbar'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    form.on('submit(searchPeriodicalBtn)', function(data){
+
+        table.reload("periodicaldatatable",{
+            where:data.field
+        })
+        return false;
+    });
+
+    form.on('submit(searchBookBtn)', function(data){
+        table.reload("bookdatatable",{
+            where:data.field
+        })
+        return false;
+    });
+
+
+    element.on('tab(booktab)', function(data){
+        console.log(data);
+    });
+
+
+    upload.render({ //允许上传的文件后缀
+        elem: '#importBookExcel'
+        ,url: "/bookyubian/upload/?token="+JSON.parse(sessionStorage.loginData).token+"&orgid="+JSON.parse(sessionStorage.loginData).orgid
+        ,accept: 'file' //普通文件
+        ,exts: 'xlsx|xls' //只允许上传excel文件
+        ,done: function(res){
+            if(res.code==3){
+                window.location.href ="/"
+            }else if (res.code==200){
+                layer.msg(res.msg, { icon: 1 });
+                if (res.data!=""){
+                    window.open("/file/downloadFile?filename="+encodeURI(res.data));
+                }
+            }else{
+                layer.msg(res.msg, { icon: 1 });
+            }
+
+        }
+        ,error:function (index, upload) {
+            console.log(index)
+        }
+    });
+
+    upload.render({ //允许上传的文件后缀
+        elem: '#importBookMarc'
+        ,url: "/bookyubian/uploadMarc/?token="+JSON.parse(sessionStorage.loginData).token+"&orgid="+JSON.parse(sessionStorage.loginData).orgid
+        ,accept: 'file' //普通文件
+        ,exts: 'iso' //只允许上传excel文件
+        ,done: function(res){
+            if(res.code==3){
+                window.location.href ="/"
+            }else if (res.code==200){
+                if (res.data != "导入成功"){
+                    window.open("/file/downloadFile?filename="+encodeURI(res.data));
+                } else {
+                    layer.msg(res.data, { icon: 1 });
+                }
+            }else{
+                layer.msg(res.msg, { icon: 1 });
+            }
+
+        }
+        ,error:function (index, upload) {
+            console.log(index)
+        }
+    });
+
+    upload.render({ //允许上传的文件后缀
+        elem: '#importPeriodicalExcel'
+        ,url: "/periodicalyubian/importPeriodicalExcel/?token="+JSON.parse(sessionStorage.loginData).token+"&orgid="+JSON.parse(sessionStorage.loginData).orgid
+        ,accept: 'file' //普通文件
+        ,exts: 'xlsx|xls' //只允许上传excel文件
+        ,done: function(res){
+            console.log(res)
+            if(res.code==3){
+                window.location.href ="/"
+            }else if (res.code==200){
+                layer.msg(res.msg, { icon: 1 });
+                if (res.data!=""){
+                    window.open("/file/downloadFile?filename="+encodeURI(res.data));
+                }
+            }else{
+                layer.msg(res.msg, { icon: 1 });
+            }
+        }
+        ,error:function (index, upload) {
+            console.log(index)
+        }
+    });
+
+
+    table.on('tool(bookdatatable)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+        var data = obj.data //获得当前行数据
+            ,layEvent = obj.event; //获得 lay-event 对应的值
+        console.log(data);
+        console.log(layEvent);
+        if ('edit' ==layEvent){
+            var d ={};
+            for (var attr in obj.data) {
+                d["bean."+attr]=obj.data[attr];
+            }
+            $.post("/bookyubian/saveOrUpdate",d,function (data) {
+                layer.msg('保存成功！', { icon: 1 });
+            });
+        }else if ('del' ==layEvent){
+            layer.confirm('真的删除行么', function(index){
+                $.post("/bookyubian/delete",{id:data.id},function(data) {
+                    obj.del();
+                    layer.close(index);
+                });
+            });
+        }
+    });
+
+    table.on('tool(periodicaldatatable)', function(obj){
+        var data = obj.data //获得当前行数据
+            ,layEvent = obj.event; //获得 lay-event 对应的值
+        console.log(data);
+        console.log(layEvent);
+        if ('edit' ==layEvent){
+            var d ={};
+            for (var attr in obj.data) {
+                d["bean."+attr]=obj.data[attr];
+            }
+            $.post("/periodicalyubian/saveOrUpdate",d,function (data) {
+                layer.msg('保存成功！', { icon: 1 });
+            });
+        }else if ('del' ==layEvent){
+            layer.confirm('真的删除行么', function(index){
+                $.post("/periodicalyubian/delete",{id:data.id},function(data) {
+                    obj.del();
+                    layer.close(index);
+                });
+            });
+        }
+    });
+</script>
+#end

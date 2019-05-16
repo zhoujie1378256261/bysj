@@ -1,0 +1,230 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form" id="queryForm">
+        <div class="layui-tab-item layui-show">
+            &nbsp;&nbsp;
+            <button type="button" class="layui-btn layui-btn-lg layui-btn-normal">图书</button>
+            &nbsp;&nbsp;
+            <button type="button" onclick="window.location.href='/list-manage/libraryPeriodicalChange'" class="layui-btn layui-btn-warm">期刊</button>
+        </div>
+
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+            <input type="hidden" name="status" value="0">
+            <label for="">条码范围:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.barcode" class="layui-input-inline layui-input" placeholder="条码">
+            </div>
+            <label for="">馆藏地</label>
+            <div class="layui-input-inline" >
+                <select name="library" id="library">
+                </select>
+            </div>
+            <label>ISBN:</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.isbn" class="layui-input-inline layui-input" placeholder="ISBN">
+            </div>
+            <label>正题名：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.title" class="layui-input-inline layui-input" placeholder="正题名">
+            </div>
+            <label>著者：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.author" class="layui-input-inline layui-input" placeholder="著者">
+            </div>
+            <label>出版社：</label>
+            <div class="layui-input-inline">
+                <input type="text" name="bean.publisher" class="layui-input-inline layui-input" placeholder="出版社">
+            </div>
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-normal">查询</button>
+        </div>
+
+    </form>
+    <table id="dataTable" lay-filter="dataTable" ></table>
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="change">调拨</button>
+        </div>
+    </script>
+
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    var selectBookDetailList;
+    //工具栏事件
+    table.on('toolbar(dataTable)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var bookDetailList = [];
+        for(var i=0;i<checkStatus.data.length;i++){
+            bookDetailList.push(checkStatus.data[i].bookdetailid);
+        }
+        if (bookDetailList.length==0){
+            layer.msg('请选择需要调拨的记录', { icon: 1 });
+            return;
+        }
+        console.log(bookDetailList);
+        switch(obj.event){
+            case 'change':
+                selectBookDetailList=bookDetailList;
+                change();
+                break;
+            default:
+                break;
+        };
+    });
+
+    var dialogIndex=-1;
+
+    function change(){
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#libraryfrom")
+        });
+    }
+
+    $("#library").append("<option value=''>全部</option>");
+    $.get("/library/ajaxlibrarylist",function (data) {
+        $.each(data.data,function(index,obj){
+            $("#library").append("<option value='"+obj.id+"'>"+obj.text+"</option>");
+            $("#tolibrary").append("<option value='"+obj.id+"'>"+obj.text+"</option>");
+        });
+        form.render('select');
+    });
+
+
+    function getDate(month){
+        var nowdate = new Date();
+        nowdate.setMonth(nowdate.getMonth()-month);
+        var y = nowdate.getFullYear();
+        var m = nowdate.getMonth()+1;
+        if(m<10) m="0"+m;
+        var d = nowdate.getDate();
+        if(d<10) d="0"+d;
+        return y+'-'+m+'-'+d;
+    }
+
+    function getQueryCondition() {
+        var d = {};
+        var t = $("#queryForm").serializeArray();
+        $.each(t, function () {
+            d[this.name] = this.value;
+        });
+        d["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        console.log(d);
+        return d;
+    }
+
+    table.render({
+        elem: '#dataTable'
+        ,url:'/book/list'
+        ,toolbar: '#toolbarDemo'
+        ,where:getQueryCondition()
+        ,title: '用户数据表'
+        ,cols: [[
+            {type:'checkbox'}
+            ,{field:'barcode', title:'图书条码', }
+            ,{field:'isbn', title:'ISBN', }
+            ,{field:'title', title:'正题名'}
+            ,{field:'author', title:'著者'}
+            ,{field:'publisher', title:'出版社'}
+            ,{field:'price', title:'定价（元）'}
+            ,{field:'totalpages', title:'页数'}
+            ,{field:'bookno', title:'索书号'}
+            ,{field:'library', title:'馆藏地点'}
+            ,{field:'status', title:'图书状态',templet: function(d){
+                    if(d.status==0){
+                        return "在馆";
+                    }else if (d.status==1){
+                        return"借出";
+                    }else if (d.status==2){
+                        return"已预约";
+                    }else if (d.status==0){
+                        return"已注销";
+                    }else {
+                        return "已丢失";
+                    }
+                }}
+            ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+    form.on('submit(changeLibrary)', function(data){
+        console.log(selectBookDetailList);
+        var tolibrary = $("#tolibrary").val();
+
+        $.post("/bookDetail/libraryBookChange",{
+                bookDetailIDList:selectBookDetailList,
+                tolibrary:tolibrary,
+                token:JSON.parse(sessionStorage.loginData).token,
+                orgid:JSON.parse(sessionStorage.loginData).orgid
+            },function (data) {
+                if (data.code==200){
+                    if (data.msg ==""){
+                        layer.msg('调拨成功', { icon: 1 });
+                        layer.close(dialogIndex);
+                    }else {
+                        layer.msg(data.msg , { icon: 1 });
+                    }
+                }
+            }
+        );
+        return false;
+    });
+</script>
+#end
+<form class="layui-form" id="libraryfrom" style="display: none;" lay-filter="libraryfrom" >
+    <label>调拨馆藏地</label>
+    <div class="layui-input-inline" >
+        <select name="libraryid" id="tolibrary">
+        </select>
+    </div>
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="changeLibrary">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

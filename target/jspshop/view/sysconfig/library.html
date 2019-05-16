@@ -1,0 +1,203 @@
+#@layout()
+#define main()
+<script type="text/html" id="toolbarDemo">
+    <button class="layui-btn layui-btn-sm" lay-event="addLibrary">添加馆藏地</button>
+</script>
+
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<table class="layui-hide" id="datatable" lay-filter="datatable"></table>
+#end
+#define methods()
+<script>
+    table.render({
+        elem: '#datatable'
+        ,url:'/library/list'
+        ,toolbar: '#toolbarDemo'
+        ,title: '用户数据表'
+        ,cols: [[
+             {field:'library', title:'馆藏地名称', }
+            ,{field:'area', title:'面积（㎡）'}
+            ,{field:'seating', title:'座位数（个）'}
+            ,{field:'computers', title:'计算机（台）'}
+            ,{field:'prints', title:'打印机（台）'}
+            ,{field:'booktables', title:'书架（个）'}
+            ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+        ]]
+        ,request: {
+                pageName: 'pageNumber' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+</script>
+#end
+
+#define tableForm()
+
+
+<script>
+    //头工具栏事件
+    table.on('toolbar(datatable)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var data = checkStatus.data;
+
+        switch(obj.event){
+            case 'addLibrary':
+                addLibrary();
+                break;
+        };
+    });
+
+    table.on('tool(datatable)', function(obj){
+        var data = obj.data;
+        if(obj.event == 'del'){
+            layer.confirm('真的删除行么', function(index){
+                delLibrary(obj);
+                layer.close(index)
+            });
+        }else if (obj.event=="edit"){
+            editLibrary(obj);
+        }
+    });
+
+
+
+
+    var dialogIndex=-1;
+    function addLibrary(){
+        $("#libraryfrom")[0].reset();
+        form.render();
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#libraryfrom")
+        });
+    }
+
+    function editLibrary(obj){
+      //  alert(JSON.stringify(obj.data));
+        var d ={};
+        for (var attr in obj.data) {
+            d["bean."+attr]=obj.data[attr];
+        }
+       // alert(JSON.stringify(d));
+        form.val("libraryfrom",d);
+        dialogIndex=  layer.open({
+            type: 1,
+            area: ['760px', '500px'],
+            content: $("#libraryfrom")
+        });
+    }
+
+    function delLibrary(obj){
+        $.post("/library/delete",
+            {
+                id:obj.data.id
+            },
+            function(data,status){
+                if(data.code==200){
+                    obj.del();
+                }else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, { icon: 1 });
+                }
+            }
+        );
+    }
+
+    form.on('submit(addlibrary)', function(data){
+        data.field.token=JSON.parse(sessionStorage.loginData).token
+        $.post("/library/addOrUpdate",
+            data.field,
+            function (data, status) {
+                if (data.code == 200) {
+                    layer.msg("保存成功");
+                    layer.close(dialogIndex);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            }
+        );
+        return false;
+    });
+
+
+
+</script>
+
+#end
+
+<form class="layui-form" id="libraryfrom" style="display: none;" lay-filter="libraryfrom" >
+    <div class="layui-form-item" >
+        <label class="layui-form-label">图书馆名称</label>
+        <div class="layui-input-inline">
+            <input type="hidden" name="bean.id"/>
+            <input type="text"  name="bean.library"  placeholder="图书馆名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.memo"  lay-verify="required" placeholder="描述" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">面积</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.area"  lay-verify="required" placeholder="面积" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">座位数（个） </label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.seating" placeholder="座位数（个）" autocomplete="off" class="layui-input" lay-verify="required|number"></input>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">计算机（台）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.computers" placeholder="计算机（台）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">打印机（台）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.prints" placeholder="打印机（台）" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">书架（个）</label>
+        <div class="layui-input-inline">
+            <input type="text" name="bean.booktables" placeholder="书架数量" autocomplete="off" class="layui-input" lay-verify="required|number"></textarea>
+        </div>
+    </div>
+    <div class="text-center">
+        <button class="layui-btn" lay-submit lay-filter="addlibrary">提交</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>

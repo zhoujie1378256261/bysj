@@ -1,0 +1,292 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <div class="layui-tab-item layui-show">
+            &nbsp;&nbsp;
+            <button type="button" onclick="window.location.href='/list-manage/loseBook'" class="layui-btn layui-btn-warm">图书</button>
+            &nbsp;&nbsp;
+            <button type="button" class="layui-btn layui-btn-lg layui-btn-normal">期刊</button>
+        </div>
+        <div style="padding: 10px 0 0 0px;">
+
+            <label for="startDate">丢书处理日期</label>
+
+            <input type="text" name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到</label>
+            <input type="text" name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        </div>
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+            <label for="">部门</label>
+            <div class="layui-input-inline" >
+                <select name="dept" id="dept">
+
+                </select>
+            </div>
+            <label for="">是否超期</label>
+            <div class="layui-input-inline" >
+                <select name="overdue">
+                    <option value=''>全部</option>
+                    <option value='1'>是</option>
+                    <option value="2">否</option>
+                </select>
+            </div>
+            <label for="">读者证号/姓名</label>
+            <input type="text" name="cardnumber" style="width: 150px;" class="layui-input-inline layui-input" placeholder="读者证号/姓名">
+            &nbsp;&nbsp;
+            <label for="">刊名</label>
+            <input type="text" name="title" style="width: 150px;" class="layui-input-inline layui-input" placeholder="刊名">
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-normal">查询</button>
+            <button lay-submit type="button" class="layui-btn layui-btn-warm" lay-filter="exportExcel">导出</button>
+        </div>
+
+    </form>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="getCheckData">注销选中行</button>
+        </div>
+    </script>
+
+
+</div>
+#end
+#define methods()
+<script type="text/javascript">
+    //工具栏事件
+    table.on('toolbar(mainTable)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        switch(obj.event){
+            case 'getCheckData':
+                $.ajax({
+                    type:"post",
+                    url:"/jieyue/removeLoseBookQ",
+                    data:{detailids:detailids,token:JSON.parse(sessionStorage.loginData).token},
+                    traditional: true,
+                    success: function(result){
+                        if(result.code == 200){
+                            layer.alert(result.msg);
+                            table.reload("dataTable");
+                        }else if(result.code == 2){
+                            layer.alert(result.msg);
+                        }
+                    }});
+                break;
+            default:
+                break;
+        };
+    });
+</script>
+<script type="text/javascript">
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+
+    $.get("/orgdept/deptList",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#dept").append("<option value=''></option>");
+            result.data.forEach(function (item) {
+                $("#dept").append("<option value='"+item.id+"'>"+item.deptname+"</option>");
+            });
+            form.render('select');
+        }
+    });
+    function getDate(month){
+        var nowdate = new Date();
+        nowdate.setMonth(nowdate.getMonth()-month);
+        var y = nowdate.getFullYear();
+        var m = nowdate.getMonth()+1;
+        if(m<10) m="0"+m;
+        var d = nowdate.getDate();
+        if(d<10) d="0"+d;
+        return y+'-'+m+'-'+d;
+    }
+
+    myTable.list({
+        url:"/jieyue/loseBookQ",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar: '#toolbarDemo',
+        totalRow:true,
+        cols: [
+            [
+                {field:'checkBox',title: '已全部注销', align:'center', templet:function(d){
+                        if(d.status==3){
+                            // return "<input type=\"checkbox\" lay-skin=\"primary\" disabled>";
+                            return "";
+                        }else {
+                            return "<input value="+d.detailid+" lay-filter=\"checkboxBtn\" type=\"checkbox\" lay-skin=\"primary\">";
+                        }
+                    }}
+                ,{field:'barcode', title: '图书条码', align:'center'}
+                ,{field:'issn', title: 'ISSN', align:'center'}
+                ,{field: 'kanming', title: '刊名', align:'center'}
+                ,{field: 'bookno', title: '索刊号', align:'center'}
+                ,{field: 'cardnumber', title: '读者证号', align:'center'}
+                ,{field:'realname', title: '姓名', align:'center'}
+                ,{field: 'deptname', title: '部门', align:'center'}
+                ,{field: 'createtime', title: '借阅日期', align:'center'}
+                ,{field: 'duetime', title: '应还日期', align:'center'}
+                ,{field:'remarks', title: '丢书原因', align:'center'}
+                ,{field:'fcreatetime', title: '丢书处理日期', align:'center'}
+                ,{field:'status', title: '是否注销', align:'center',templet:function (d) {
+                    return d.status == 3?"是":"否";
+                }}
+            ]
+        ],
+        done:function(result){
+            var all = "<input id=\"allcheckBox\" lay-filter=\"checkboxAll\" type=\"checkbox\" lay-skin=\"primary\">";
+            var allVal = [];
+            result.data.map(function(item,index){
+                allVal.push(item.detailid);
+            });
+            for(var i=0; i<result.data.length; i++){
+                // debugger;
+                if(result.data[i].status!=3){
+                    $(".layui-table-header").find("th[data-field='checkBox'] span").html(all);
+                    form.render('checkbox');
+                    break;
+                }
+            };
+            detailids = [];
+            form.on('checkbox(checkboxAll)', function(data){
+                if(data.elem.checked){
+                    detailids = [];
+                    $(".layui-table-box .layui-table-body").find("input[type='checkbox']").attr("checked","checked");
+                    result.data.map(function(item,index){
+                        detailids.push(item.detailid);
+                    })
+                    $(".layui-table-box .layui-table-body").find(".layui-form-checkbox").addClass("layui-form-checked");
+                }else {
+                    detailids = [];
+                    $(".layui-table-box .layui-table-body").find("input[type='checkbox']").removeAttr("checked");
+                    $(".layui-table-box .layui-table-body").find(".layui-form-checkbox").removeClass("layui-form-checked");
+                }
+                console.log(detailids);
+            });
+            form.on('checkbox(checkboxBtn)', function(data){
+                data.value = +data.value;
+                if(data.elem.checked){
+                    $(data.elem).attr("checked","checked");
+                    // if(detailids.length!=0){
+                    //     detailids.map(function(item,index){
+                    //         if(item==data.value){
+                    detailids.push(data.value);
+                    // }
+                    //     });
+                    // }
+                }else {
+                    detailids.map(function(item,index){
+                        if(item==data.value){
+                            detailids.splice(index,1);
+                        }
+                    });
+                    $(data.elem).removeAttr("checked");
+                    $(".layui-table-box .layui-table-header").find("input[type='checkbox']").removeAttr("checked");
+                    $(".layui-table-box .layui-table-header").find(".layui-form-checkbox").removeClass("layui-form-checked");
+                }
+                detailids.sort();
+                allVal.sort();
+                if(JSON.stringify(detailids) == JSON.stringify(allVal)){
+                    $(".layui-table-box .layui-table-header").find("input[type='checkbox']").attr("checked","checked");
+                    $(".layui-table-box .layui-table-header").find(".layui-form-checkbox").addClass("layui-form-checked");
+                }
+                console.log(detailids);
+            });
+        }
+    });
+
+    form.on('submit(exportExcel)', function(data){
+        if(data.field.month){
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        var kssj = data.field.kssj;
+        var jssj = data.field.jssj;
+        var dept = data.field.dept;
+        var overdue = data.field.overdue;
+        var cardnumber = data.field.cardnumber;
+        var title = data.field.title;
+        var url = "/jieyue/exportLoseBookQ?orgid="+JSON.parse(sessionStorage.loginData).orgid;
+        if("" != kssj) {
+            url += "&kssj="+kssj;
+        }
+        if("" != jssj) {
+            url += "&jssj="+jssj;
+        }
+        if("" != dept) {
+            url += "&dept="+dept;
+        }
+        if("" != overdue) {
+            url += "&overdue="+overdue;
+        }
+        if("" != cardnumber) {
+            url += "&cardnumber="+cardnumber;
+        }
+        if("" != title) {
+            url += "&title="+title;
+        }
+        window.open(url)
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        if(data.field.month){
+
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        delete data.field.month;
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+</script>
+#end

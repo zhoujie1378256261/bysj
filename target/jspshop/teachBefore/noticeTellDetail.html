@@ -1,0 +1,52 @@
+#@beforeLayout()
+#define main()
+<nav class="container">
+    <div class="tab">
+        <img src="img/tab-bg-lf.png" alt="">
+        <img src="img/tab-bg-rg.png" alt="">
+        <ul class="clearfix">
+            <li><a href="index">首页</a></li>
+            <li><a href="noticeTell" class="active">通知公告</a></li>
+            <li><a href="libSearch">馆藏检索</a></li>
+            <li><a href="libRanking">排行版</a></li>
+            <li><a href="bookGood">图书推荐</a></li>
+            <li><a href="dataDownload">资料下载</a></li>
+        </ul>
+    </div>
+</nav>
+<section class="notice-tell-detail clearfix">
+    <div class="bread-nav">首页>新闻公告><span>新闻详情</span></div>
+    <h5 id="title"></h5>
+    <div class="lf-img">
+        <img src="img/notice-tell-detail-img.jpg" alt="">
+    </div>
+    <div id="content" class="rg-text">
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+        <!--<p>新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告新闻公告</p>-->
+    </div>
+    <div style="margin: 50px 20px 20px 0;float: right;" id="noticeDate"></div>
+</section>
+#end
+#define methods()
+<script type="text/javascript">
+    //获取url参数
+    function getUrlParam(name) {
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+    layui.use(['jquery'], function() {
+        var $ = layui.jquery;
+        $.get("/notice/noticeLists",{id:getUrlParam("id")},function(result){
+            $("#title").text(result.data.title);
+            $("#content").html(result.data.content);
+            $("#noticeDate").text(result.data.createtime.split(" ")[0]);
+        });
+    });
+</script>
+#end

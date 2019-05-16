@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script language="JavaScript">
+        function change(){
+
+        }
+    </script>
+</head>
+<body>
+<input name="Isbn" type="text" class="smallinput" id="Isbn"
+       isempty="false" msg="ISBN不能为空！" notice="输入ISBN!"
+
+        isfocus='0' Style="ime-mode: disabled;"
+       onpropertychange="if(/[^\-\d]/g.test(value))value=value.replace(/[^\-\d]/g,'')" />
+</body>
+</html>

@@ -1,0 +1,126 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="toolbarDemo">
+        <button class="layui-btn layui-btn-sm" lay-event="addPeriodicalList">新增期刊合订</button>
+    </script>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        <input type="text" name="issnorkanming" id="issnorkanming" class="layui-input-inline layui-input" style="width: 150px;" placeholder="ISSN / 刊名">
+
+        <label>出版频率</label>
+        <div class="layui-input-inline">
+            <select name="chubanpinlv" id="chubanpinlv">
+                <option value=''></option>
+                <option value='1'>季刊</option>
+                <option value='2'>月刊</option>
+                <option value='3'>半月刊</option>
+                <option value='4'>旬刊</option>
+                <option value='5'>周刊</option>
+            </select>
+        </div>
+
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+    <table id="datatable" lay-filter="datatable" ></table>
+
+</div>
+#end
+#define methods()
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+</script>
+<script type="text/javascript">
+
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate'
+    });
+
+    table.render({
+        url:"/periodical/findPeriodicalList",
+        where:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#datatable",
+        toolbar: '#toolbarDemo',
+        cols: [
+            [
+                ,{field:'id', title: 'id', align:'center',hide:true}
+                ,{field:'kanming', title: '刊名', align:'center'}
+                ,{field:'futiming', title: '副题名', align:'center'}
+                ,{field: 'bianjibu', title: '编辑部', align:'center'}
+                ,{field: 'issn', title: 'ISSN', align:'center'}
+                ,{field: 'tongyikanhao', title: '统一刊号', align:'center'}
+                ,{field:'youfadaihao', title: '邮发代号', align:'center'}
+                ,{field:'chubanpinlv', title: '出版频率', align:'center'}
+                ,{field: 'bookno', title: '索刊号', align:'center'}
+                ,{field: 'fubenshu', title: '合订数', align:'center'}
+                ,{field: 'hedingtime', title: '编目时间', align:'center'}
+                ,{fixed: 'right', width: 165, align:'center', toolbar: '#barDemo'}
+            ]
+        ]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: false
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            console.log(result)
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        table.reload("datatable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+    //头工具栏事件
+    table.on('toolbar(datatable)', function(obj){
+        switch(obj.event){
+            case 'addPeriodicalList':
+                location.href="/periodical/addPeriodicalList";
+                break;
+        };
+    });
+
+    //监听行工具事件
+    table.on('tool(datatable)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+        var data = obj.data //获得当前行数据
+            ,layEvent = obj.event; //获得 lay-event 对应的值
+        location.href="/periodical/addPeriodicalList?id="+data.id+"&type="+layEvent;
+    });
+
+</script>
+#end

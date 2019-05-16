@@ -1,0 +1,186 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+        <form class="layui-form" lay-filter="bookqueryform" id="bookqueryform">
+            <div class="layui-inline">
+                <label class="layui-form-label" style="width: 110px;">22基本大类</label>
+                <div class="layui-input-inline" >
+                    <select id="twentyTwo" name="bean.typeid"  lay-search=""  lay-filter="twentyTwo">
+                    </select>
+                </div>
+            </div>
+            <div>
+                <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+                <label>ISBN</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.isbn" class="layui-input-inline layui-input" placeholder="ISBN">
+                </div>
+                <label>正题名：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.title" class="layui-input-inline layui-input" placeholder="正题名">
+                </div>
+                <label>著者：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.author" class="layui-input-inline layui-input" placeholder="著者">
+                </div>
+                <label>出版社：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.publisher" class="layui-input-inline layui-input" placeholder="出版社">
+                </div>
+                <label>索书号：</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="bean.bookno" class="layui-input-inline layui-input" placeholder="索书号">
+                </div>
+                <input type="hidden" name="bookstatus" value="1">
+                <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查&nbsp;&nbsp;询</button>
+            </div>
+        </form>
+    </div>
+</div>
+<div>
+</div>
+
+
+<script type="text/html" id="barDemo">
+    <button type='button' class="layui-btn layui-btn-danger layui-btn-xs" lay-event="recommend" >推荐</button>
+</script>
+
+<table class="layui-hide" id="datatable" lay-filter="datatable"></table>
+#end
+#define methods()
+<script>
+
+</script>
+#end
+
+#define tableForm()
+
+
+<script>
+    var params = {};
+    var query = window.location.search.substring(1);
+    var vars = query.split("&");
+    for (var i=0;i<vars.length;i++) {
+        var pair = vars[i].split("=");
+        params[pair[0]]=pair[1];
+    }
+    $("#twentyTwo").append("<option value=''>全部</option>");
+    $.get("/standardbooktype/selectType",function (data) {
+        $.each(data.data.twentyTwo,function(index,obj){
+            $("#twentyTwo").append("<option value='"+obj.id+"'>"+obj.name+"</option>");
+        });
+        form.render('select');
+    });
+
+
+    function getQueryCondition() {
+        var d = {};
+        var t = $("#bookqueryform").serializeArray();
+        $.each(t, function () {
+            d[this.name] = this.value;
+        });
+        d["bookstatus"]="1";
+        d["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        return d;
+    }
+
+    table.render({
+        elem: '#datatable'
+        ,url:'/book/list'
+        ,where:getQueryCondition()
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'isbn', title:'ISBN', }
+            ,{field:'title', title:'正题名'}
+            ,{field:'author', title:'著者'}
+            ,{field:'publisher', title:'出版社'}
+            ,{field:'publishaddress', title:'出版地'}
+            ,{field:'price', title:'定价（元）'}
+            ,{field:'bookno', title:'索书号'}
+            ,{fixed: 'right', title:'操作', toolbar: '#barDemo'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    table.on('tool(datatable)', function(obj){
+        var data = obj.data;
+        if(obj.event == 'recommend'){
+            layer.open({  //预约取图书
+                type: 1,
+                area:['300px','300px'],
+                btn:['保存','取消'],
+                content: $('#bookrecommend'),
+                yes:function(index, layero){
+                    var param={
+                        orgid:JSON.parse(sessionStorage.loginData).orgid,
+                        token:JSON.parse(sessionStorage.loginData).token
+                    };
+                    param["bean.bookid"] = data.bookid;
+                    param["bean.flag"]=params.type;
+                    param["bean.contentsynopsis"]=$("#contentsynopsis").val();
+                    param["bean.authorsynopsis"]=$("#authorsynopsis").val();
+                    param["bean.recommendstatus"]=$("#recommendstatus").val();
+                    param["bean.recommendreason"]=$("#recommendreason").val();
+                    $.post("/schoolBookRecommend/saveSchoolBookRecommend",param,function (data) {
+                        if (data.code==200){
+                            location.href="/schoolBookRecommend/index";
+                        }
+                    });
+                },
+                btn2:function(index, layero){
+                    layer.close(index);
+                }
+            });
+            form.render();
+        }
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        data.field["bean.orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        table.reload('datatable',{
+            where:data.field
+        });
+        return false;
+    });
+
+</script>
+#end
+<div id="bookrecommend" class="areaSum clearfix dialog-form" style="display: none;">
+    <form class="query-form layui-form clearfix" id="readerBookForm" lay-filter="readerBookForm">
+        <input type="hidden" name="type" id="type">
+        <div>
+            <label for="">内容简介:</label><input type="text" class="layui-input-inline layui-input" style="width: 150px;height: 30px; margin-bottom: 10px" placeholder="内容简介" id="contentsynopsis" name="contentsynopsis">
+        </div>
+        <div>
+            <label for="">著者简介:</label><input type="text" class="layui-input-inline layui-input" style="width: 150px;height: 30px;margin-bottom: 10px" placeholder="著者简介" id="authorsynopsis" name="authorsynopsis">
+        </div>
+        <div>
+            <label for="">推荐指数:</label><input type="text" class="layui-input-inline layui-input" style="width: 150px;height: 30px;margin-bottom: 10px" placeholder="推荐指数" id="recommendstatus" name="recommendstatus">
+        </div>
+        <div>
+            <label for="">推荐理由:</label><input type="text" class="layui-input-inline layui-input" style="width: 150px;height: 30px;margin-bottom: 10px" placeholder="推荐理由" id="recommendreason" name="recommendreason">
+        </div>
+
+    </form>
+</div>

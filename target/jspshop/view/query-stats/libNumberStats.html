@@ -1,0 +1,95 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <b>查询&nbsp;&nbsp;&nbsp;&nbsp;</b>
+
+            <label for="">学校所在地</label>
+            <div class="layui-input-inline">
+                <select name="bean.areatypeid" id="areaoptionView">
+
+                </select>
+            </div>
+            <label for="">学校类别</label>
+            <div class="layui-input-inline">
+                <select name="bean.schoolcategoryid" id="typeoptionView">
+
+                </select>
+            </div>
+
+        <label for="">学校</label>
+        <div style="display: inline-block;" id="linkDiv"></div>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-sm layui-btn-normal">查询</button>
+    </form>
+
+
+
+    <div class="line"></div>
+    <table id="dataTable" lay-filter="mainTable"></table>
+</div>
+#end
+#define methods()
+
+<script>
+    searchForm.init("areaoptionView","/org/areaType");
+    searchForm.init("typeoptionView","/org/schoolcategory");
+
+    function getQueryVariable(variable)
+    {
+        var query = window.location.search.substring(1);
+        var vars = query.split("&");
+        for (var i=0;i<vars.length;i++) {
+            var pair = vars[i].split("=");
+            if(pair[0] == variable){return pair[1];}
+        }
+        return(false);
+    }
+
+    var orgid=getQueryVariable("orgid");
+    var paras="";
+    if (orgid){
+        paras="?orgid="+orgid;
+    }
+    //alert(paras);
+
+    myTable.list({
+        url:"/selectcount/booksNumList" + paras,
+        elem:"#dataTable",
+        toolbar:"#tableHeader",
+        cols: [[ //表头
+            {field: 'orgname', title: '学校名称', align: 'center'}
+            , {field: 'category', title: '学校类别', align: 'center'}
+            , {field: 'xss', title: '学生数', align: 'center'}
+            , {field: 'dzs', title: '读者数', align: 'center'}
+            , {title: '图书数量（册）', align: 'center', templet: function (d) {
+                    return '<a href="libBookDetail?orgid=' + d.orgid + '">' + d.tszcs + '</a>';
+                }
+            }
+            , {field: 'tsfbl', title: '图书复本率', align: 'center'}
+            , {
+                title: '生均册数', align: 'center', templet: function (d) {
+                    return d.tssjcs * 100 + "%";
+                }
+            }
+            , {
+                title: '期刊数量（种）', align: 'center', templet: function (d) {
+                    return "<a href='libJournalDetail?orgid=" + d.orgid + "'>" + d.qkzs + "</a>"
+                }
+            }
+        ]]
+    });
+
+
+    searchForm.submit('submit(searchBtn)',"/selectcount/booksNumList");
+
+    searchForm.linkage(JSON.parse(sessionStorage.loginData).orgid);
+</script>
+#end

@@ -1,0 +1,145 @@
+#@layout()
+#define main()
+<style>
+    .reader-message > li {
+        float: left;
+    }
+    .reader-message > li:nth-of-type(1) {
+        width: 100px;
+        height: 100px;
+        background-color: #c2c2c2;
+    }
+    table.reader-table td{
+        padding: 3px;
+    }
+    table.reader-table td label {
+        text-align: right;
+        width: 82px;
+        display: inline-block;
+    }
+    table.reader-table td textarea {
+        height: 20px;
+        resize: none;
+        width: 120px;
+        vertical-align: middle;
+        line-height: 20px;
+        text-indent: 10px;
+        color: #000;
+    }
+    table.reader-table td input[disabled] {
+        background-color: #e6e6e6!important;
+    }
+
+</style>
+<div>
+    <div id="navTitle" class="nav-title"></div>
+
+    <div class="layui-tab" lay-filter="yujietab">
+        <ul class="layui-tab-title">
+            <li class="layui-this">新书推荐</li>
+            <li>好书推荐</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form" lay-filter="yuyuequeryform" id="yuyuequeryform">
+                    <div>
+                        <button type="button" onclick="addrecommendbook(0)" class="layui-btn layui-btn-sm layui-btn-normal">新增新书推荐</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="newbook" lay-filter="newbook"></table>
+            </div>
+            <div class="layui-tab-item">
+                <form class="layui-form" lay-filter="yujiequeryform" id="yujiequeryform">
+                    <div>
+                        <button type="button" onclick="addrecommendbook(1)" class="layui-btn layui-btn-sm layui-btn-normal">新增好书推荐</button>
+                    </div>
+                </form>
+                <table class="layui-hide" id="goodbook" lay-filter="goodbook"></table>
+            </div>
+        </div>
+    </div>
+</div>
+#end
+#define methods()
+<script type="text/javascript">
+    function getQueryCondition() {
+        var d = {};
+        d["orgid"]=JSON.parse(sessionStorage.loginData).orgid;
+        return d;
+    }
+    table.render({
+        elem: '#newbook'
+        ,url:'/schoolBookRecommend/newbookList'
+        ,where:getQueryCondition()
+        ,title: '新书推荐列表'
+        ,cols: [[
+            {field:'isbn', title:'ISBN', edit: 'text'}
+            ,{field:'title', title:'正题名' ,edit: 'text'}
+            ,{field:'author', title:'著者',edit: 'text'}
+            ,{field:'publisher', title:'出版社',edit: 'text'}
+            ,{field:'recommendreason', title:'推荐理由' ,edit: 'text'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+
+    table.render({
+        elem: '#goodbook'
+        ,url:'/schoolBookRecommend/goodbookList'
+        ,where:getQueryCondition()
+        // ,toolbar:'#yujieToolbar'
+        ,title: '用户数据表'
+        ,cols: [[
+            {field:'isbn', title:'ISBN', edit: 'text'}
+            ,{field:'title', title:'正题名' ,edit: 'text'}
+            ,{field:'author', title:'著者',edit: 'text'}
+            ,{field:'publisher', title:'出版社',edit: 'text'}
+            ,{field:'recommendreason', title:'推荐理由' ,edit: 'text'}
+        ]]
+        ,request: {
+            pageName: 'pageNumber' //页码的参数名称，默认：page
+            , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+        }
+        ,page: true
+        ,response: {
+            statusCode: 200 //重新规定成功的状态码为 200，table 组件默认为 0
+        },
+        parseData: function(result) {
+            //alert(JSON.stringify(result))
+            if(result.code==200){
+                return {
+                    "code": result.code, //解析接口状态
+                    "msg": result.msg, //解析提示文本
+                    "count": result.data.totalRow, //解析数据长度
+                    "data": result.data.list //解析数据列表
+                };
+            }else {
+                layer.msg(result.msg, { icon: 5 });
+            }
+        }
+    });
+    function addrecommendbook(type) {
+        location.href = "/schoolBookRecommend/gotoaddrecommend?type="+type;
+    }
+
+</script>
+#end

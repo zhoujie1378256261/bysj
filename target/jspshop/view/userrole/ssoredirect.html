@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录中...</title>
+</head>
+<body>
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<script type="text/javascript">
+    var $ = layui.$;
+    $.post("/sso/checksession", function(result){
+        if(result.code==200){
+            sessionStorage.token = result.data.token;
+            sessionStorage.loginData = JSON.stringify(result.data);
+            window.location.href = "/page/areaSum";
+        }else{
+            window.history.back(-1);
+        }
+    });
+</script>
+</body>
+</html>

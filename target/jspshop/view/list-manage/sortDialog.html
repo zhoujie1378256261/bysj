@@ -1,0 +1,67 @@
+<!--<link rel="stylesheet" href="/lib/css/zTree/demo.css" type="text/css">-->
+<link rel="stylesheet" href="/lib/zTree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+
+<div>
+    <ul id="treeDemo" class="ztree"></ul>
+</div>
+<script type="text/javascript" src="/lib/zTree/js/jquery-1.4.4.min.js"></script>
+<script type="text/javascript" src="/lib/zTree/js/jquery.ztree.core.js"></script>
+<script>
+    var zNodes;
+    $.get("/booktype/find22Type",function(result){
+        result.data.map(function(item, index){
+            item.name = item.parentid +"--"+ item.name;
+            if(item.childnode==1){
+                item.childnode=true;
+            }else {
+
+            }
+        });
+        zNodes = result.data;
+        $(document).ready(function(){
+            zTreeObj = $.fn.zTree.init($("#treeDemo"), setting, zNodes);
+        });
+    })
+
+    var zTreeObj;
+    //异步后数据处理
+    function ajaxResponseData(treeId, parentNode, responseData){
+        responseData.map(function(item,index){
+            item.parentid = item.id;
+            item.name = item.id+"--"+item.name;
+        });
+        return responseData;
+    }
+    //点击节点回调
+    var sortValue;
+    function nodeOnClick(event,treeId,treeNode){
+        sortValue = treeNode;
+    }
+    var setting = {
+        showLine : true,
+        data:{
+            key: {
+                isParent: "childnode"
+            }
+        },
+        async:{
+            enable:true,
+            contentType:"application/x-www-form-urlencoded",
+            url:"/booktype/findByParentId",
+            autoParam: ["parentid"],
+            dataFilter:ajaxResponseData,
+
+        },
+        simpleData:{
+            enable: true,
+            idKey: "parentid"
+        },
+        callback:{
+            onClick: nodeOnClick
+        }
+
+    };
+    // zTree 的数据属性，深入使用请参考 API 文档（zTreeNode 节点数据详解）
+
+
+</script>

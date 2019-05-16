@@ -1,0 +1,607 @@
+#@layout()
+#define main()
+<style>
+    .addBookList {
+        /*border-top: 5px solid transparent;*/
+        /*border-bottom: 5px solid transparent;*/
+    }
+    .book-message tr {
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+    }
+    .book-message td label {
+        width: 100px;
+        text-align: right;
+    }
+</style>
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 编目管理 > 图书编目 > <span>新增图书编目</span>
+    </div>
+    <form lay-filter="queryForm" id="queryForm" class="query-form layui-form">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal">馆藏导入</button>
+        <div>
+            <b>书目信息&nbsp;&nbsp;&nbsp;&nbsp;</b>
+        </div>
+        <table class="book-message">
+            <tr>
+                <td>
+                    <label>ISBN</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.isbn" id="isbn" class="layui-input-inline layui-input" style="width: 150px;" placeholder="输入ISBN搜索">
+                </td>
+                <td>
+                    <label >正题名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.title" id="title" class="layui-input-inline layui-input" style="width: 150px;" placeholder="输入正题名搜索">
+                </td>
+            </tr>
+            <tr>
+                <td id="bltitletd">
+                    <label >并列提名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.bltitle" class="layui-input-inline layui-input" style="width: 150px;" placeholder="并列提名">
+                </td>
+                <td id="subtitletd">
+                    <label >副题名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.subtitle" class="layui-input-inline layui-input" style="width: 150px;" placeholder="副题名">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label >第一责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.author" class="layui-input-inline layui-input" style="width: 150px;" placeholder="第一责任者">
+                </td>
+                <td id="authorworkmodetd">
+                    <label >著作方式</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="bean.authorworkmodeid" id="authorworkmodeid">
+
+                        </select>
+                    </div>
+                </td>
+                <td id="authorguobietd">
+                    <label >国别或朝代</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="bean.authorguobieid" id="authorguobieid">
+
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="otherauthortd">
+                    <label >其他责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.otherauthor" class="layui-input-inline layui-input" style="width: 150px;" placeholder="其他责任者">
+                </td>
+                <td id="workmodetd">
+                    <label >著作方式</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="beanPlus.workmodeid" id="beanPlus.workmodeid">
+
+                        </select>
+                    </div>
+                </td>
+                <td id="guobietd">
+                    <label >国别或朝代</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="beanPlus.guobieid" id="beanPlus.guobieid">
+
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label >出版社</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publisher" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版社">
+                </td>
+                <td>
+                    <label >出版地</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publishaddress" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版地">
+                </td>
+                <td>
+                    <label >出版年月</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.publishdate" class="layui-input-inline layui-input" style="width: 150px;" placeholder="出版年月">
+                </td>
+                <td id="editiontd">
+                    <label >版本版次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.edition" class="layui-input-inline layui-input" style="width: 150px;" placeholder="版本版次">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label >价格</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.price" class="layui-input-inline layui-input" style="width: 150px;" placeholder="价格">
+                </td>
+                <td id="sizetd">
+                    <label >尺寸</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="beanPlus.sizeid" id="sizeid">
+
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <label >附件</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.filesurl" class="layui-input-inline layui-input" style="width: 150px;" placeholder="附件">
+                </td>
+            </tr>
+            <tr>
+                <td id="languagetd">
+                    <label >语种</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="beanPlus.languageid" id="languageid">
+
+                        </select>
+                    </div>
+                </td>
+                <td>
+                    <label >页数</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.totalpages" class="layui-input-inline layui-input" style="width: 150px;" placeholder="页数">
+                </td>
+                <td id="bindingtd">
+                    <label >装订</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="beanPlus.bindingid" id="bindingid">
+
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td id="congshumingtd">
+                    <label >丛书名</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.congshuming" class="layui-input-inline layui-input" style="width: 150px;" placeholder="丛书名">
+                </td>
+                <td id="congshuauthortd">
+                    <label >丛书责任者</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.congshuauthor" class="layui-input-inline layui-input" style="width: 150px;" placeholder="丛书责任者">
+                </td>
+                <td id="newsourcetd">
+                    <label >图书来源</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="bean.newsource" id="newsource">
+
+                        </select>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label >文献类型</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="layui-input-inline">
+                        <select name="schoolcategoryid" name="booktype" id="booktype">
+
+                        </select>
+                    </div>
+                </td>
+                <td id="keywordtd">
+                    <label >主题词</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.keyword" class="layui-input-inline layui-input" style="width: 150px;" placeholder="主题词">
+                </td>
+                <td id="fuzhudt">
+                    <label >附注</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.fuzhu" class="layui-input-inline layui-input" style="width: 150px;" placeholder="附注">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label >分类号</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.typecode" class="layui-input-inline layui-input" style="width: 150px;" placeholder="分类号">
+                </td>
+                <td>
+                    <label >书次号</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="bean.shucihao" class="layui-input-inline layui-input" style="width: 150px;" placeholder="书次号">
+                </td>
+                <td>
+                    <label >卷次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.juanci" class="layui-input-inline layui-input" style="width: 150px;" placeholder="卷次">
+                </td>
+                <td>
+                    <label >册次</label>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <input type="text" name="beanPlus.ceci" class="layui-input-inline layui-input" style="width: 150px;" placeholder="册次">
+                </td>
+            </tr>
+        </table>
+        <fieldset class="layui-elem-field">
+            <div class="layui-field-box">
+                <label >电子资源：<span>1111111</span></label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label >索书号：<span>G624/1:1</span></label>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <label >复本数量：<span id="fubennum">0</span></label>
+            </div>
+        </fieldset>
+        <div>
+            <b>馆藏情况&nbsp;&nbsp;&nbsp;&nbsp;</b>
+            <input type="radio" name="month" value="1" title="批量生成复本" checked>
+            <div style="padding: 10px 0 0 50px;">
+                <label>条码起止号：</label>
+                <input type="text" name="startserial" id="startserial" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="起始序号">
+                <input type="text" name="endserial" id="endserial" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束序号">
+                <label>馆藏地点</label>
+                <div class="layui-input-inline">
+                    <select name="libraryid" id="libraryList">
+
+                    </select>
+                </div>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <label>图书批次&nbsp;&nbsp;&nbsp;&nbsp;</label>
+                <div class="layui-input-inline">
+                    <select name="piciid" id="bookpiciselect">
+
+                    </select>
+                </div>
+                <button class="layui-btn layui-btn-sm layui-btn-normal" id="addbarcode">确 定</button>
+            </div>
+        </div>
+    </form>
+        <table class="layui-table">
+            <colgroup>
+                <col width="150">
+                <col width="200">
+                <col>
+            </colgroup>
+            <thead>
+            <tr>
+                <th>图书条码</th>
+                <th>馆藏地点</th>
+                <th>图书批次</th>
+                <th>操 作</th>
+            </tr>
+            </thead>
+            <tbody id="appendflag">
+            </tbody>
+        </table>
+
+        <div class="text-center">
+            <button class="layui-btn" lay-submit lay-filter="queryForm" id="saveinfo">保 存</button>
+            <button id="cancel" class="layui-btn layui-btn-sm layui-btn-normal">取 消</button>
+        </div>
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+    var orgid = JSON.parse(sessionStorage.loginData).orgid;
+    var tstiaoxinmaweishu = 0;
+    var tstiaoxingmaqianzhui = 0;
+    var qianzhuilength = 0;
+    $.get("/book/initBookList",{orgid:orgid},function (result) {
+        if (result.code==200){
+            result.data.piciList.forEach(function (item) {
+                $("#bookpiciselect").append("<option value='"+item.id+"'>"+item.batchname+"</option>");
+            });
+            result.data.libraryList.forEach(function (item) {
+                $("#libraryList").append("<option value='"+item.id+"'>"+item.library+"</option>");
+            });
+            form.render('select');
+            findDetailListByISBN();
+        }
+    });
+
+    $.get("/book/orgSetting",{orgid:orgid},function (result) {
+        if (result.code==200){
+            tstiaoxinmaweishu = result.data.tstiaoxinmaweishu;
+            tstiaoxingmaqianzhui = result.data.tstiaoxingmaqianzhui;
+            if(tstiaoxingmaqianzhui == null){
+                tstiaoxingmaqianzhui = "";
+            }else{
+                qianzhuilength = tstiaoxingmaqianzhui.length;
+            }
+            if(tstiaoxinmaweishu != "" && tstiaoxingmaqianzhui.length>tstiaoxinmaweishu){
+                tstiaoxinmaweishu = 0;
+                alert("条形码设置你异常!前缀长度超出总长度");
+                return;
+            }
+
+        }
+    });
+
+    $.get("/dict/findDict",function (result) {
+        if (result.code==200){
+            result.data.list0.forEach(function (item) {
+                $("#authorworkmodeid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+                $("#workmodeid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list1.forEach(function (item) {
+                $("#authorguobieid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+                $("#guobieid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list2.forEach(function (item) {
+                $("#booktype").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list3.forEach(function (item) {
+                $("#sizeid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list4.forEach(function (item) {
+                $("#languageid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list5.forEach(function (item) {
+                $("#bindingid").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            result.data.list6.forEach(function (item) {
+                $("#newsource").append("<option value='"+item.name+"'>"+item.name+"</option>");
+            });
+            form.render('select');
+        }
+    });
+
+    $.get("/orgBookField/getById",{orgid:orgid},function (result) {
+        if (result.code==200){
+            if(result.data.keyword != 1) {
+                $("#keywordtd").html("");
+            }
+            if(result.data.edition != 1) {
+                $("#editiontd").html("");
+            }
+            if(result.data.otherauthor != 1) {
+                $("#otherauthortd").html("");
+            }
+            if(result.data.newsource != 1) {
+                $("#newsourcetd").html("");
+            }
+            if(result.data.bltitle != 1) {
+                $("#bltitletd").html("");
+            }
+            if(result.data.subtitle != 1) {
+                $("#subtitletd").html("");
+            }
+            if(result.data.authorworkmode != 1) {
+                $("#authorworkmodetd").html("");
+            }
+            if(result.data.authorguobie != 1) {
+                $("#authorguobietd").html("");
+            }
+            if(result.data.workmode != 1) {
+                $("#workmodetd").html("");
+            }
+            if(result.data.guobie != 1) {
+                $("#guobietd").html("");
+            }
+            if(result.data.size != 1) {
+                $("#sizetd").html("");
+            }
+            if(result.data.language != 1) {
+                $("#languagetd").html("");
+            }
+            if(result.data.binding != 1) {
+                $("#bindingtd").html("");
+            }
+            if(result.data.congshuming != 1) {
+                $("#congshumingtd").html("");
+            }
+            if(result.data.congshuauthor != 1) {
+                $("#congshuauthortd").html("");
+            }
+            if(result.data.fuzhu != 1) {
+                $("#fuzhudt").html("");
+            }
+        }
+    });
+    $("#isbn,#title").keydown(function() {
+        if(event.keyCode == "13") {
+            var value = $(this).val();
+            if(value=="") {
+                return;
+            }
+            var type = 1;
+            if($(this).attr("bean.title")==""){
+                type = 2;
+            }else{
+                if(value.length != 13) {
+                    alert("ISBN不正确，请重新输入");
+                    return;
+                }else{
+                    var s1 = value.substr(0,3);
+                    var s2 = value.substr(3,1);
+                    var s3 = value.substr(4,4);
+                    var s4 = value.substr(8,4);
+                    var s5 = value.substr(12,1);
+                    value = s1 + "-" + s2 + "-" + s3 + "-" + s4 + "-" + s5;
+                    $("#isbn").val(value);
+                }
+            }
+
+            $.get("/book/findBookListByISBNOrZTM",{orgid:orgid,queryStr:value,queryType:type},function (result) {
+                if (result.code == 200) {
+                    console.log(result);
+                }
+            });
+        }
+    });
+    function getBeanPlusQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            var namestr = this.name;
+            if(namestr.indexOf("beanPlus")>-1 && "" != this.value && "null" != this.value){
+                d[namestr.substr(9)] = this.value;
+            }
+        });
+        return d;
+    }
+    function getBeanQueryCondition(id) {
+        var d = {};
+        var t = $("#"+id).serializeArray();
+        $.each(t, function () {
+            var namestr = this.name;
+            if(namestr.indexOf("bean") > -1 && namestr.indexOf("beanPlus")==-1 && "" != this.value && "null" != this.value) {
+                d[namestr.substr(5)] = this.value;
+            }
+        });
+        return d;
+    }
+    $("#saveinfo").click(function () {
+        var jsonstr = "[";
+        $("[name='bookdetailinfo']").each(function () {
+            var barcodeindex = $(this).attr("barcode");
+            var barcode = $("#barcode"+barcodeindex).val();
+            var library = $("#libraryList"+barcodeindex).val();
+            var pici = $("#bookpiciselect"+barcodeindex).val();
+            jsonstr += "{\"libraryid\":"+library+",\"piciid\":"+pici+",\"barcode\":"+barcode+"},";
+        });
+        jsonstr = jsonstr.substr(0,jsonstr.length-1);
+        jsonstr+="]";
+        var beanstr = JSON.stringify(getBeanQueryCondition("queryForm"));
+        var beanPlusstr = JSON.stringify(getBeanPlusQueryCondition("queryForm"));
+        $.post("/book/saveBookInfo",{bookDetailJsonStr:jsonstr,bean:beanstr,beanPlus:beanPlusstr},
+            function (data, status) {
+                if (data.code == 200) {
+                    //alert(123);
+                } else {
+                    if(data.code==3){
+                        window.location.href ="/"
+                    }
+                    layer.msg(data.msg, {icon: 1});
+                }
+            });
+        return false;
+    });
+
+    $("#addbarcode").click(function () {
+        var startserial = $("#startserial").val();
+        var endserial = $("#endserial").val();
+        var reg = /^\+?[1-9][0-9]*$/;
+        if (!reg.test(startserial) || !reg.test(endserial)) {
+            alert("请输入正确条码序号")
+            return false;
+        }
+        var barcodenum = endserial-startserial;
+        if(barcodenum <= 0) {
+            alert("结束序号必须大于开始序号");
+            return;
+        }
+        if(barcodenum > 100) {
+            alert("一次最多生成100条数据");
+            return;
+        }
+        if(tstiaoxinmaweishu == 0) {
+            alert("条形码配置异常")
+            return;
+        }
+        var libraryListselect = $("#libraryList  option:selected").val();
+        var bookpiciselectselect = $("#bookpiciselect  option:selected").val();
+        var libraryListhtml = $("#libraryList").html();
+        var bookpiciselecthtml = $("#bookpiciselect").html();
+        var bulingstr = "00000000000000000000000000000";
+        for(var i = startserial; i <= endserial; i ++) {
+            var startseriallegnth = (i+"").length;
+            var bulinggeshu = tstiaoxinmaweishu - startseriallegnth - qianzhuilength;
+            if(bulinggeshu < 0) {
+                alert("条形码配置异常")
+                return;
+            }
+            var barcode = tstiaoxingmaqianzhui+bulingstr.substr(0,bulinggeshu)+i;
+            $("#appendflag").append(zuzhuang(i,barcode,libraryListhtml,bookpiciselecthtml,2));
+            $("#libraryList"+i).val(libraryListselect);
+            $("#bookpiciselect"+i).val(bookpiciselectselect);
+        }
+        return false;
+    });
+
+    function zuzhuang(i,barcode,libraryListhtml,bookpiciselecthtml,type) { // type 0未上架 1 已上架 2 新增
+        var addhtmlstr = "";
+        if(type == 1) { //如果已上架 则只需要显示
+            addhtmlstr += "<tr name='' barcode='"+i+"' id='DB"+i+"'>";
+        } else {
+            addhtmlstr += "<tr name='bookdetailinfo' barcode='"+i+"' type='"+type+"' id='td"+i+"'>";
+        }
+        if(type == 1) { //如果已上架
+            addhtmlstr += "<td><input type=\"text\" id=\"barcode"+i+"\" value='"+barcode+"' class=\"layui-input-inline layui-input\" style=\"width: 150px;\" disabled></td>";
+        } else {
+            addhtmlstr += "<td><input type=\"text\" id=\"barcode"+i+"\" value='"+barcode+"' class=\"layui-input-inline layui-input\" style=\"width: 150px;\"></td>";
+        }
+        addhtmlstr += "<td><select id=\"libraryList"+i+"\">" + libraryListhtml + "</select></td>";
+        addhtmlstr += "<td><select id=\"bookpiciselect"+i+"\">" + bookpiciselecthtml + "</select></td>";
+        if(type != 2) { //如果不是新增的
+            addhtmlstr += "<td><button class=\"layui-btn layui-btn-sm layui-btn-normal\" onclick='removetoDB("+i+","+type+")' name=\"removetd\">删除</button></td></tr>";
+        } else {
+            addhtmlstr += "<td><button class=\"layui-btn layui-btn-sm layui-btn-normal\" onclick='removetd("+i+")' name=\"removetd\">删除</button></td></tr>";
+        }
+        return addhtmlstr;
+    }
+
+    function removetd(startserial){
+        $("#td"+startserial).remove();
+    }
+    function removetoDB(startserial,type){// type 0未上架 1 已上架 2 新增
+        if(type == 1) {
+            alert("已上架，不能删除！");
+        } else {
+            $.get("/bookDetail/deleteById",{orgid:orgid,id:startserial},function (result) {
+                if (result.code==200){
+                    $("#td"+startserial).remove();
+                } else {
+                    alert("删除失败！");
+                }
+            });
+        }
+    }
+
+
+    function findDetailListByISBN() {
+        var libraryListhtml = $("#libraryList").html();
+        var bookpiciselecthtml = $("#bookpiciselect").html();
+        var isbn = $("#isbn").val();
+        isbn = "978-7-80680-798-9";
+        $.get("/bookDetail/findDetailListByISBN",{orgid:orgid,isbn:isbn},function (result) {
+            if (result.code==200){
+                $("#fubennum").html(result.data.length);
+                result.data.forEach(function (item) {
+                    $("#appendflag").append(zuzhuang(item.id,item.barcode,libraryListhtml,bookpiciselecthtml,item.bookstatus));
+                    $("#libraryList"+item.id).val(item.libraryid);
+                    $("#bookpiciselect"+item.id).val(item.piciid);
+                });
+            }
+        });
+    }
+
+    laydate.render({
+        elem: '#startDate',
+        value:new Date()
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+
+</script>
+#end

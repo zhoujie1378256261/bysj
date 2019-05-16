@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>商户首页</title>
+    <link rel="shortcut icon" type="image/x-icon" href="img/jsw-logo.ico">
+    <link href="../../lib/layui/css/layui.css" rel="stylesheet" />
+    <link rel="stylesheet" href="../../css/merchant.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+
+<body class="clearfix">
+    <header class="clearfix">
+        <span class="pull-left"><img src="../../img/merchant-logo.png" alt=""> 供应商装备推荐平台</span>
+        <a class="uer-name pull-right" href=""><i>&nbsp;&nbsp;</i> Jane Pearson ( 管理员 ) </a>
+        <a class="pull-right">&nbsp;&nbsp;<img src="../../img/exit.png" alt="">&nbsp;&nbsp;</a>
+        <a class="link-index pull-right" href="">进入平台首页</a>
+    </header>
+    <aside class="pull-left">
+        <div><i>&nbsp;&nbsp;</i> Jane Pearson</div>
+        <ul id="menu">
+            <li>
+                店铺设置<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a href="goodsType.html"> <img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品分类</a>
+                    </li>
+                    <li>
+                        <a href="shopNotices.html"><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;店铺公告</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                店铺设置<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a href="releasegoods.html"><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品发布</a>
+                    </li>
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品管理</a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                店铺设置<img class="pull-right" src="../../img/merchant-icon-01.png" alt=""> <i class="layui-icon layui-icon-left pull-right"></i>
+                <ul class="children" style="display: none;">
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品发布</a>
+                    </li>
+                    <li>
+                        <a><img src="../../img/arrorw-rg.png" alt="">&nbsp;&nbsp;&nbsp;&nbsp;商品管理</a>
+                    </li>
+                </ul>
+
+            </li>
+        </ul>
+    </aside>
+    <section>
+        <p>我的位置：&nbsp;&nbsp;&nbsp;&nbsp;商品管理 >
+            <font color="#ff9900">商品管理</font>
+        </p>
+        <div style="margin: 28px 0 10px 0;"><a href="javascript:newNotice();" style="font-size: 12px;" class="new-article">发布新公告</a></div>
+        <article>
+            <div class="search">
+                <table id="mainTable" lay-filter="mainTable"></table>
+            </div>
+        </article>
+    </section>
+    <script type="text/javascript" src="../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../js/common.js"></script>
+    <script type="text/javascript">
+        $("#menu").find("li").on("click", function() {
+            $(this).siblings().find(".children").slideUp();
+            $(this).find(".children").slideToggle();
+        })
+        laydate.render({
+            elem: '#startDate'
+        });
+        laydate.render({
+            elem: '#endDate',
+            value: new Date()
+        });
+
+        myTable.list({
+            url:"/shopNotices/findNoticesList",
+            postData:{token:JSON.parse(sessionStorage.loginData).token},
+            elem:"#mainTable",
+            toolbar:true,
+            cols: [
+                [
+                    {type: 'numbers', title: '序号'}
+                    ,{field: 'noticetitile',title: '公告主题',align: 'center'}
+                    ,{field: 'updatetime',title: '发布时间',align: 'center',templet:function(d){
+                        return d.updatetime.split(" ")[0];
+                    }}
+                    ,{templet: '#tableSetBtn',title: '操作',field: 'status',align: 'center',
+                        templet: function(d) {
+                            d = JSON.stringify(d);
+                            return `<a onclick='javascript:newNotice(` + d + `);' class='layui-btn layui-btn-xs'>查看</a>&nbsp;&nbsp;
+                                        <a onclick='javascript:mydelete(` + d + `);' class='layui-btn layui-btn-xs'>删除</a>&nbsp;&nbsp;`;
+                        }
+                    }
+                ]
+            ]
+        });
+
+        function newNotice(arg) {
+            if (undefined == arg) {
+                arg = {
+                    id: "",
+                    noticetitile: "",
+                    noticecontent: ""
+                }
+            }
+            layer.open({
+                title: '发公告（店铺首页展示）',
+                content: `<div>
+                            <label>主        题</label>
+                            <input type="hidden" id="noticeId" value="` + arg.id +`">
+                            <input type="text" id="noticetitile" lay-verify="required" class="layui-input-inline layui-input" style="width: 315px;height: 30px;" placeholder="主题" value="` + arg.noticetitile + `">
+                        </div>
+                        <div>
+                            <label style="vertical-align: top;">发布内容</label>
+                            <textarea id="noticecontent" placeholder="发布内容" style="width: 300px;height: 100px;font-size: 14px; padding: 5px;border: 1px solid #c2c2c2;">` + arg.noticecontent + `</textarea>
+                        </div>
+                        `,
+                yes: function(index, layero) {
+                    var noticeId = $("#noticeId").val();
+                    var noticetitile = $("#noticetitile").val();
+                    var noticecontent = $("#noticecontent").val();
+                    var params={};
+                    params["token"]=JSON.parse(sessionStorage.loginData).token;
+                    params["bean.id"]=noticeId;
+                    params["bean.noticetitile"]=noticetitile;
+                    params["bean.noticecontent"]=noticecontent;
+                    $.get("/shopNotices/addOrUpdateNotices",params,function (result) {
+                        if (result.code==200){
+                            layer.msg("操作成功");
+                            setTimeout(function(){location.reload();},1500);
+                        } else {
+                            layer.msg(result.msg);
+                        }
+                    });
+                    layer.close(index);
+                }
+            });
+        }
+
+        function mydelete(arg) {
+            layer.confirm('确定删除吗', function(index){
+                var params={};
+                params["token"]=JSON.parse(sessionStorage.loginData).token;
+                params["noticesId"]=arg.id;
+                $.get("/shopNotices/deleteNotices",params,function (result) {
+                    if (result.code==200){
+                        layer.msg("操作成功");
+                        setTimeout(function(){location.reload();},1500);
+                    } else {
+                        layer.msg(result.msg);
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

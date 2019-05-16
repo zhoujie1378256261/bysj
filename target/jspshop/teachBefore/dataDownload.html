@@ -1,0 +1,128 @@
+
+#@beforeLayout()
+#define main()
+<nav class="container">
+    <div class="tab">
+        <img src="img/tab-bg-lf.png" alt="">
+        <img src="img/tab-bg-rg.png" alt="">
+        <ul class="clearfix">
+            <li><a href="index">首页</a></li>
+            <li><a href="noticeTell">新闻公告</a></li>
+            <li><a href="libSearch">馆藏检索</a></li>
+            <li><a href="libRanking">排行版</a></li>
+            <li><a href="bookGood">图书推荐</a></li>
+            <li><a href="dataDownload" class="active">资料下载</a></li>
+        </ul>
+    </div>
+</nav>
+<section class="data-down">
+    <h3><b>资料下载</b></h3>
+    <ul>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+        <li>
+            <a href="">
+                <i></i>
+                <h5><b>图书管理系统评估图书管理系统评估图书管理系统</b></h5>
+                <p>新闻公告新闻公告新闻公告新闻公告新闻公新闻公告新闻新闻
+                    新闻公告新闻公告新闻公告新闻公告新闻公告</p>
+                <span><img src="img/downlocal-icon.png" alt=""></span>
+            </a>
+        </li>
+
+    </ul>
+</section>
+#end
+#define methods()
+<script type="text/javascript">
+    layui.use(['form', 'element', 'jquery', 'layer', 'laytpl', 'table', 'laydate'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var element = layui.element;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var laydate = layui.laydate;
+        var laytpl = layui.laytpl;
+
+        table.render({
+            elem: '#dataTable'
+            ,url: '/rankinglist/libraryRanking' //数据接口
+            ,page: true //开启分页
+            ,where:{kssj:"",jssj:"",orgid:+sessionStorage.orgid}
+            ,cols: [[ //表头
+                {type: 'numbers', title: '序号'}
+                ,{field: 'isbn', title: 'ISBN',align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field: 'jieyuenums', title: '借阅次数', align:'center'}
+            ]]
+            ,text: {
+                none: '暂无相关数据' //默认：无数据。
+            },
+            request: {
+                pageName: 'pageNumber' //页码的参数名称，默认：page
+                , limitName: 'pageSize' //每页数据量的参数名，默认：limit
+            },
+            response: {
+                statusCode: 200 //规定成功的状态码，默认：0
+            }
+            ,parseData: function(result) {
+                if(result.code==200){
+                    return {
+                        "code": result.code, //解析接口状态
+                        "msg": result.msg, //解析提示文本
+                        "count": result.data.totalRow, //解析数据长度
+                        "data": result.data.list //解析数据列表
+                    };
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            },
+        });
+    });
+</script>
+#end

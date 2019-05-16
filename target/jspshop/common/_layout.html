@@ -1,0 +1,222 @@
+#define layout()
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="renderer" content="webkit">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>图书管理系统</title>
+	<link rel="shortcut icon" type="image/x-icon" href="/img/jsw-logo.ico">
+    <!--<link rel="stylesheet" href="/css/iview.css">-->
+    <link rel="stylesheet" href="/lib/layui/css/layui.css">
+	<link rel="stylesheet" href="/css/cascader.css">
+	<link href="/css/main.css" rel="stylesheet">
+	<!--[if lt IE 9]>
+	<script src="/lib/html5shiv.min.js"></script>
+	<![endif]-->
+</head>
+
+<body>
+<div id="main" v-cloak>
+	<nav>
+		<div class="logo text-center">
+			<img src="../img/index-logo.png" alt="">
+			<div class="text-center">贵 州 省</div>
+		</div>
+		<ul @mouseenter="navChildShow=true">
+			<li @mouseenter="enter(index)" v-for="(item,index) in navMenu" :key="index" :style="{color:navSizeColor==index?'#497ee3':'#333333'}">
+				<img :src="'/img/nav-'+(1+index)+(imgActiveSuffix==index?'-active':'')+'.png'" alt="">&nbsp;{{item.menuname}}
+			</li>
+		</ul>
+	</nav>
+	<article v-show="navChildShow" @mouseleave="navChildShow=false" style="display: none;" :class="{show:navChildFixed}">
+		<div class="subtitle">
+			下级菜单&nbsp;&nbsp;
+			<img src="/img/subtitle.png" alt="">
+			<input type="text" disabled="disabled">
+			<em></em>
+		</div>
+		<ul>
+			<li v-for="(value,key,index) in childrenMenu" :key="index">
+                <a :href="value" @click="breadcrumb" :data-arrindex="arrIndex" :data-text="key"><b>{{index+1}}</b>  {{key}}</a>
+			</li>
+		</ul>
+		<span @click="navFixed">
+            <img src="/img/shrink.png" alt="">
+        </span>
+	</article>
+
+	<aside id="aside" v-show="rgBtnShow">
+		<div class="head">
+			<span><img src="/img/head-photo.png" alt=""></span>
+		</div>
+		<p style="margin-top: 30px;">{{orgname}}</p>
+		<p style="font-size: 11px;">欢迎登陆！</p>
+		<ul>
+			<li>
+				<div><i></i></div>
+				<div>图书总册数</div>
+				<div><b>{{summaryList.tszcs||0}}</b></div>
+			</li>
+			<li>
+				<div><i></i></div>
+				<div>学校数</div>
+				<div><b>{{summaryList.xxs}}</b></div>
+			</li>
+			<li>
+				<div><i></i></div>
+				<div>学生数</div>
+				<div><b>{{summaryList.xss||0}}</b></div>
+			</li>
+			<li>
+				<div><i></i></div>
+				<div>读者数</div>
+				<div><b>{{summaryList.dzs||0}}</b></div>
+			</li>
+		</ul>
+		<span @click="rgBtnFun">
+                <img src="/img/shrink-white.png" alt="">
+            </span>
+		<strong>
+
+			<!--<a href="/auth/logout">退出</a>-->
+			<button @click="signOut" class="layui-btn layui-btn-normal layui-btn-sm"><img style="vertical-align: -4px;" src="/img/exit.png" alt=""> &nbsp;退出</button>
+		</strong>
+	</aside>
+</div>
+<section id="section">
+    #@main()
+    <span class="rgBtnShow" id="sectionShrinkImg" style="display: none;" onclick="showRgData()">
+            <img src="/img/shrink.png" alt="">
+    </span>
+</section>
+<script type="text/javascript" src="/lib/vue.min.js"></script>
+<!--<script type="text/javascript" src="/lib/iview.js"></script>-->
+<script type="text/javascript" src="/lib/layui/layui.all.js"></script>
+<!--<script type="text/javascript" src="/lib/layui/lay/modules/cascader.js"></script>-->
+<script type="text/javascript" src="/js/common.js"></script>
+#@methods()
+<script>
+    var main = new Vue({
+        el: "#main",
+        data: {
+            arrIndex: 0,
+			menuAll:[],
+	        navMenu:[],			//一级目录
+            navStr:sessionStorage.navStr||"基本概况+区域汇总统计",
+            orgname:JSON.parse(sessionStorage.loginData).orgname,
+            navChildren: [], 	//二级目录
+            childrenMenu: {},	//初始目录
+            navChildShow: false,
+            navChildFixed: false,
+            sectionLeft: '100px',
+            sectionRight: '170px',
+            rgBtnShow: true,
+            section:document.getElementById("section"),
+            sectionShrinkImg:document.getElementById("sectionShrinkImg"),
+            summaryList:null,
+			imgActiveSuffix:sessionStorage.navStrActiveIndex||"0",
+            navSizeColor:sessionStorage.navStrActiveIndex||"0",
+            navStrActiveIndex:sessionStorage.navStrActiveIndex,
+
+        },
+
+        methods: {
+            enter: function(arg) {
+                this.childrenMenu = this.navChildren[arg];
+                this.arrIndex = arg;
+                this.imgActiveSuffix = arg;
+                this.navSizeColor = arg;
+            },
+            leave: function(arg) {
+
+            },
+            navFixed: function() {
+                if (localStorage.lfNavFixed == "true") {
+                    this.section.style.left="270px";
+                    this.navChildFixed = true;
+                    localStorage.lfNavFixed = "false";
+
+                } else {
+                    this.section.style.left="100px";
+                    localStorage.lfNavFixed = "true";
+                    this.navChildFixed = false;
+                }
+
+            },
+            rgBtnFun: function() {
+                this.rgBtnShow = false;
+                this.sectionShrinkImg.style.display = "";
+                this.section.style.right = '0';
+            },
+            breadcrumb: function(event){
+                var navStrOne = this.navMenu[+$(event.currentTarget).data("arrindex")].menuname;
+                sessionStorage.navStrActiveIndex = $(event.currentTarget).data("arrindex");
+                var navStrTwo = $(event.currentTarget).data("text");
+                sessionStorage.navStr = "我的位置：&nbsp;&nbsp;" + navStrOne+" > <span>"+navStrTwo+"</span>";
+            },
+            signOut:function(){
+                delete sessionStorage.loginData;	
+                delete sessionStorage.token;
+                delete sessionStorage.navStrActiveIndex;
+                location.href = "/auth/logout";
+			}
+        },
+        beforeCreate:function(){
+
+        },
+        created:function() {
+            var that = this;
+			myAjax({url:"/menu/findMenuByUser",data:{userid:JSON.parse(sessionStorage.loginData).id},async:false},function(result){
+				if(result.code==200){
+				    var childIndex = 0;
+					result.data.map(function(item,index){
+					    if(item.pid==0){
+                            that.navMenu.push(item);
+						}
+                            var r = {};
+                            item.submenu.map(function(item,index){
+								r[item.menuname]=item.url;
+							});
+                        that.navChildren.push(r);
+					});
+				}
+                that.childrenMenu = that.navChildren[0];
+			});
+
+            myAjax({url:"/region/summaryList",async:false},function(result){
+
+                that.summaryList = result.data;      //汇总统计
+            });
+
+
+        },
+        mounted:function(){
+            if(localStorage.lfNavFixed == "false"){
+                localStorage.lfNavFixed = "true";
+            }else {
+                localStorage.lfNavFixed = "false"
+            }
+            this.navFixed();
+            if(document.getElementById("navTitle")){
+                var navTitleEle = document.getElementById("navTitle");
+                navTitleEle.innerHTML = sessionStorage.navStr||"我的位置：&nbsp;&nbsp; 基本概况 > <span>区域汇总统计</span>";
+			}
+
+        }
+    });
+    function showRgData(){
+        var sectionShrinkImg = document.getElementById("sectionShrinkImg");
+        var section = document.getElementById("section");
+        sectionShrinkImg.style.display = "none";
+        section.style.right = '170px';
+        main.$data.rgBtnShow = true;
+    }
+</script>
+#@tableForm?()
+</body>
+
+</html>
+#end

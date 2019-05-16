@@ -1,0 +1,126 @@
+#@layout()
+#define main()
+<div>
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form" id="queryForm">
+        <div class="layui-tab-item layui-show">
+
+            <button type="button"  onclick="window.location.href='/list-manage/barCodeChangeBook'" class="layui-btn layui-btn-lg layui-btn-normal">图书</button>
+        </div>
+
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+
+            <label>旧合订条码：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="oldbarcode" class="layui-input-inline layui-input" placeholder="旧合订条码">
+            </div>
+            <label>新合订条码：</label>
+            <div class="layui-input-inline">
+                <input type="text" id="newbarcode" class="layui-input-inline layui-input" placeholder="新合订条码">
+            </div>
+            <button lay-submit lay-filter="barChangeBtn" class="layui-btn layui-btn-normal">置换</button>
+        </div>
+    </form>
+
+    <form lay-filter="bookForm" class="query-form layui-form" id="bookForm">
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+            <div>
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">合订条码:</label>
+                    <div class="layui-input-inline">
+                        <input type="hidden" name="periodicaldetailid" id="periodicaldetailid">
+                        <input type="text" name="barcode" class="layui-input-inline layui-input" placeholder="图书条码">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">ISSN：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="issn" class="layui-input-inline layui-input" placeholder="ISSN">
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">刊名：</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="kanming" class="layui-input-inline layui-input" placeholder="刊名">
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="layui-form-item" >
+                    <div class="layui-form-item" >
+                        <label class="layui-form-label">索刊号 ：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="bookno" class="layui-input-inline layui-input" placeholder="索刊号">
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item" >
+                    <div class="layui-form-item" >
+                        <label class="layui-form-label">合订期数：</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="qizhiqi" class="layui-input-inline layui-input" placeholder="合订期数">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="layui-form-item" >
+                    <label class="layui-form-label">馆藏地：</label>
+                    <div class="layui-input-inline">
+                        <select name="libraryid" id="library">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+    $("#library").append("<option value=''>全部</option>");
+    $.get("/library/ajaxlibrarylist",function (data) {
+        $.each(data.data,function(index,obj){
+            $("#library").append("<option value='"+obj.id+"'>"+obj.text+"</option>");
+        });
+        form.render('select');
+    });
+
+    $("#oldbarcode").keydown(function() {
+        if (event.keyCode == "13") {
+            var value = $(this).val();
+            if (value == "") {
+                return;
+            }
+
+            $.get("/periodicaldetail/findPeriodicalByBarcode",{barcode: value,orgid:JSON.parse(sessionStorage.loginData).orgid},function (data) {
+                console.log(data);
+                if (data.code==200){
+                    form.val("bookForm",data.data);
+                }else{
+                    layer.msg(data.msg, { icon: 1 });
+                }
+            });
+            return false;
+        }
+    });
+
+    form.on('submit(barChangeBtn)', function(data){
+        data.field.token = sessionStorage.token;
+        $.post("/periodicaldetail/updateBarCode",{periodicaldetailid:$("#periodicaldetailid").val(),newbarcode:$("#newbarcode").val()},function (data) {
+            console.log(data);
+            if (data.code==200){
+                layer.msg('置换成功', { icon: 1 });
+            }else{
+                layer.msg(data.msg, { icon: 1 });
+            }
+        });
+        return false;
+    });
+
+</script>
+#end

@@ -1,0 +1,265 @@
+#@layout()
+#define main()
+<div>
+    <script type="text/html" id="optionTpl">
+        <option value="">请选择</option>
+        {{#  layui.each(d, function(index, item){ }}
+        <option value="{{item.id}}">{{ item.text }}</option>
+        {{#  }); }}
+    </script>
+
+    <div id="navTitle" class="nav-title"></div>
+    <form lay-filter="queryForm" class="query-form layui-form">
+        <div class="layui-tab-item layui-show">
+            &nbsp;&nbsp;
+            <button type="button" class="layui-btn layui-btn-lg layui-btn-normal">图书</button>
+            &nbsp;&nbsp;
+            <button type="button" onclick="window.location.href='/list-manage/removeBookQ'" class="layui-btn layui-btn-warm">期刊</button>
+        </div>
+        <div style="padding: 10px 0 0 0px;">
+            <label for="startDate">时间选择：</label>
+            <input type="radio" name="month" value="1" title="近1个月" checked>
+            <input type="radio" name="month" value="6" title="近6个月">
+            <input type="radio" name="month" value="12" title="近1年">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="month" value="" title="选择时间段">
+            <input type="text" disabled name="kssj" id="startDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="开始日期">
+            <label for="endDate">到：</label>
+            <input type="text" disabled name="jssj" id="endDate" class="layui-input-inline layui-input" style="width: 80px;height: 30px;" placeholder="结束时间">
+        </div>
+
+        <div class="layui-tab-item layui-show" style="padding-top: 25px;">
+            <label for="">22基本大类</label>
+            <div class="layui-input-inline" >
+                <select name="booktype" id="booktype">
+
+                </select>
+            </div>
+            <label for="">馆藏地</label>
+            <div class="layui-input-inline" >
+                <select name="library" id="library">
+
+                </select>
+            </div>
+            <label for="">注销原因</label>
+            <div class="layui-input-inline" >
+                <select name="reason" id="reason">
+                    <option value=''>全部</option>
+                    <option value='剔旧'>剔旧</option>
+                    <option value='丢失'>丢失</option>
+                    <option value="损坏">损坏</option>
+                    <option value="其它">其它</option>
+                </select>
+            </div>
+
+            <label for="">条形码</label>
+            <input type="text" name="barcode" style="width: 150px;" class="layui-input-inline layui-input" placeholder="条形码">
+            <label for="">正题名</label>
+            <input type="text" name="title" style="width: 150px;" class="layui-input-inline layui-input" placeholder="正题名">
+            &nbsp;&nbsp;
+            <button lay-submit lay-filter="searchBtn" class="layui-btn layui-btn-normal">查询</button>
+            <button lay-submit type="button" class="layui-btn layui-btn-warm" lay-filter="exportExcel">导出</button>
+        </div>
+
+    </form>
+    <table id="dataTable" lay-filter="mainTable" lay-data="{id: 'dataTable'}"></table>
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="getCheckData">恢复</button>
+        </div>
+    </script>
+
+
+</div>
+#end
+#define methods()
+
+<script type="text/javascript">
+
+    //工具栏事件
+    table.on('toolbar(mainTable)', function(obj){
+        var checkStatus = table.checkStatus(obj.config.id);
+        var zxids = [];
+        for(var i=0;i<checkStatus.data.length;i++){
+            zxids.push(checkStatus.data[i].zxid);
+        }
+        switch(obj.event){
+            case 'getCheckData':
+                $.ajax({
+                    type:"post",
+                    url:"/jieyue/recoveryRemoveBook",
+                    data:{zxid:zxids},
+                    traditional: true,
+                    success: function(result){
+                        if(result.code == 200){
+                            layer.alert(result.msg);
+                        }else if(result.code == 2){
+                            layer.alert(result.msg);
+                        }
+                    }});
+                break;
+            default:
+                break;
+        };
+    });
+</script>
+<script type="text/javascript">
+
+    laydate.render({
+        elem: '#startDate'
+    });
+    laydate.render({
+        elem: '#endDate',
+        value:new Date()
+    });
+    form.on('radio()',function(data){
+        if(data.value){
+            $("#startDate").attr("disabled","disabled");
+            $("#endDate").attr("disabled","disabled");
+        }else {
+            $("#startDate").removeAttr("disabled");
+            $("#endDate").removeAttr("disabled");
+        }
+    });
+
+    $("#booktype").append("<option value=''>全部</option>");
+    $.get("/standardbooktype/selectType",function (data) {
+        $.each(data.data.twentyTwo,function(index,obj){
+            $("#booktype").append("<option value='"+obj.id+"'>"+obj.name+"</option>");
+        });
+        form.render('select');
+    });
+    $("#library").append("<option value=''>全部</option>");
+    $.get("/library/ajaxlibrarylist",function (data) {
+        $.each(data.data,function(index,obj){
+            $("#library").append("<option value='"+obj.id+"'>"+obj.text+"</option>");
+        });
+        form.render('select');
+    });
+
+    $.get("/orgdept/deptList",{orgid:JSON.parse(sessionStorage.loginData).orgid},function (result) {
+        if (result.code==200){
+            $("#dept").append("<option value=''></option>");
+            result.data.forEach(function (item) {
+                $("#dept").append("<option value='"+item.id+"'>"+item.deptname+"</option>");
+            });
+            form.render('select');
+        }
+    });
+    function getDate(month){
+        var nowdate = new Date();
+        nowdate.setMonth(nowdate.getMonth()-month);
+        var y = nowdate.getFullYear();
+        var m = nowdate.getMonth()+1;
+        if(m<10) m="0"+m;
+        var d = nowdate.getDate();
+        if(d<10) d="0"+d;
+        return y+'-'+m+'-'+d;
+    }
+
+    form.on('submit(exportExcel)', function(data){
+        if(data.field.month){
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        var kssj = data.field.kssj;
+        var jssj = data.field.jssj;
+        var booktype = data.field.booktype;
+        var library = data.field.library;
+        var reason = data.field.reason;
+        var barcode = data.field.barcode;
+        var title = data.field.title;
+        var url = "/jieyue/exportRemoveBook?orgid="+JSON.parse(sessionStorage.loginData).orgid;
+        if("" != kssj) {
+            url += "&kssj="+kssj;
+        }
+        if("" != jssj) {
+            url += "&jssj="+jssj;
+        }
+        if("" != booktype) {
+            url += "&booktype="+booktype;
+        }
+        if("" != library) {
+            url += "&library="+library;
+        }
+        if("" != reason) {
+            url += "&reason="+reason;
+        }
+        if("" != barcode) {
+            url += "&barcode="+barcode;
+        }
+        if("" != title) {
+            url += "&title="+title;
+        }
+        window.open(url)
+    });
+
+    myTable.list({
+        url:"/jieyue/removeBook",
+        postData:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        elem:"#dataTable",
+        toolbar: '#toolbarDemo',
+        totalRow:true,
+        cols: [
+            [
+                {type:'checkbox'}
+                ,{field:'barcode', title: '图书条码', align:'center'}
+                ,{field: 'title', title: '题名', align:'center'}
+                ,{field: 'author', title: '著者', align:'center'}
+                ,{field: 'publisher', title: '出版社', align:'center'}
+                ,{field:'bookno', title: '索书号', align:'center'}
+                ,{field: 'price', title: '定价', align:'center'}
+                ,{field: 'library', title: '馆藏地', align:'center'}
+                ,{field: 'reason', title: '注销原因', align:'center'}
+                ,{field:'createtime', title: '注销日期', align:'center'}
+            ]
+        ],
+    });
+
+    form.on('submit(searchBtn)', function(data){
+        if(data.field.month){
+            switch(data.field.month){
+                case "1":
+                    data.field.kssj = getDate(1);
+                    break;
+                case "6":
+                    data.field.kssj = getDate(6);
+                    break;
+                case "12":
+                    data.field.kssj = getDate(12);
+                    break;
+                default:
+                    break;
+            }
+        }
+        delete data.field.month;
+        data.field.token = sessionStorage.token;
+        table.reload("dataTable",{
+            where:data.field,
+            page: {
+                curr: 1
+            },
+            done:function(result){
+                if(result.code==200){
+                    layer.msg('查询成功', { icon: 1 });
+                }else {
+                    layer.msg(result.msg, { icon: 5 });
+                }
+            }
+        });
+        return false;
+    });
+
+</script>
+#end

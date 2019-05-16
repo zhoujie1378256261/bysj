@@ -1,0 +1,221 @@
+#@layout()
+#define main()
+<style>
+     .class-22 td {
+         vertical-align: middle;
+     }
+</style>
+<div>
+
+    <div class="nav-title">
+        我的位置：&nbsp;&nbsp; 报表统计 >  <span>图书分类统计</span>
+    </div>
+    <div class="line"></div>
+    <header>
+        <style media="screen">
+            table{
+                border-collapse: collapse;
+            }
+        </style>
+    </header>
+    <body>
+    <table border="1px" class="layui-table class-22" >
+        <tr>
+            <td colspan="1">五大类</td>
+            <td colspan="1">22基本类</td>
+            <td colspan="1">种数</td>
+            <td colspan="1">总册数</td>
+            <td colspan="1">图书分类比例</td>
+        </tr>
+        <tr>
+            <td colspan="1">第一大类</td>
+            <td colspan="1">A马克思主义、列宁主义、毛泽东思想、邓小平理论</td>
+            <td colspan="1" id="A"></td>
+            <td colspan="1" id="A1"></td>
+            <td colspan="1" id="ratio0"></td>
+        </tr>
+        <tr>
+            <td colspan="1">第二大类</td>
+            <td colspan="1">B哲学、宗教</td>
+            <td colspan="1" id="B"></td>
+            <td colspan="1" id="B1"></td>
+            <td colspan="1" id="ratio1"></td>
+        </tr>
+        <tr>
+            <td rowspan="9">第三大类</td>
+            <td colspan="1">C社会科学总论</td>
+            <td colspan="1" id="C"></td>
+            <td colspan="1" id="C1"></td>
+            <td rowspan="9" id="ratio2"></td>
+        </tr>
+        <tr>
+            <td colspan="1">D政治法律</td>
+            <td colspan="1" id="D"></td>
+            <td colspan="1" id="D1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">E军事</td>
+            <td colspan="1" id="E"></td>
+            <td colspan="1" id="E1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">F经济</td>
+            <td colspan="1" id="F"></td>
+            <td colspan="1" id="F1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">G文化、科学、教育、体育</td>
+            <td colspan="1" id="G"></td>
+            <td colspan="1" id="G1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">H语言、文字</td>
+            <td colspan="1" id="H"></td>
+            <td colspan="1" id="H1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">I文学</td>
+            <td colspan="1" id="I"></td>
+            <td colspan="1" id="I1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">J艺术</td>
+            <td colspan="1" id="J"></td>
+            <td colspan="1" id="J1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">K历史、地理</td>
+            <td colspan="1" id="K"></td>
+            <td colspan="1" id="K1"></td>
+        </tr>
+        <tr>
+            <td rowspan="10">第四大类</td>
+            <td colspan="1">N自然科学总论</td>
+            <td colspan="1" id="N"></td>
+            <td colspan="1" id="N1"></td>
+            <td rowspan="10" id="ratio3"></td>
+        </tr>
+        <tr>
+            <td colspan="1">O数理科学和化学</td>
+            <td colspan="1" id="O"></td>
+            <td colspan="1" id="O1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">P天文学、地球科学</td>
+            <td colspan="1" id="P"></td>
+            <td colspan="1" id="P1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">Q生物科学</td>
+            <td colspan="1" id="Q"></td>
+            <td colspan="1" id="Q1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">R医药、卫生</td>
+            <td colspan="1" id="R"></td>
+            <td colspan="1" id="R1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">S农业科学</td>
+            <td colspan="1" id="S"></td>
+            <td colspan="1" id="S1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">T工业技术</td>
+            <td colspan="1" id="T"></td>
+            <td colspan="1" id="T1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">U交通运输</td>
+            <td colspan="1" id="U"></td>
+            <td colspan="1" id="U1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">V航空、航天</td>
+            <td colspan="1" id="V"></td>
+            <td colspan="1" id="V1"></td>
+        </tr>
+        <tr>
+            <td colspan="1">X环境科学、安全科学</td>
+            <td colspan="1" id="X"></td>
+            <td colspan="1" id="X1"></td>
+        </tr>
+        <tr>
+            <td rowspan="1">第五大类</td>
+            <td colspan="1">Z综合性图书</td>
+            <td colspan="1" id="Z"></td>
+            <td colspan="1" id="Z1"></td>
+            <td rowspan="1" id="ratio4"></td>
+        </tr>
+        <tr style="color: red">
+            <td rowspan="1">合计</td>
+            <td colspan="1"></td>
+            <td colspan="1" id="zs"></td>
+            <td colspan="1" id="cs"></td>
+            <td rowspan="1"></td>
+        </tr>
+    </table>
+    </body>
+
+</div>
+#end
+#define methods()
+
+<script>
+
+    //22大类
+    $.ajax({
+        url: "/classificationStatistics/bookClassificationStatistics",
+        type: "POST",
+        data:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        traditional: true,
+        success: function(result) {
+            if(result.code==200){
+                for(var i=0;i<result.data.length;i++){
+                    var id = result.data[i].id;
+                    if(id != null){
+                        $("#"+id).text(result.data[i].zs);
+                        $("#"+id+"1").text(result.data[i].cs)
+                    }
+                }
+
+            }
+        }
+    });
+
+    //合计 保留总册数计算五大类比例
+    var zcs = null;
+    $.ajax({
+        url: "/classificationStatistics/bookTotalClassificationStatistics",
+        type: "POST",
+        data:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        traditional: true,
+        success: function(result) {
+            if(result.code==200){
+                var zs = result.data.zs;
+                zcs = result.data.cs;
+                $("#zs").text(zs);
+                $("#cs").text(zcs);
+            }
+        }
+    });
+
+    //比例
+    $.ajax({
+        url: "/classificationStatistics/bookFiveClassificationStatistics",
+        type: "POST",
+        data:{orgid:JSON.parse(sessionStorage.loginData).orgid},
+        traditional: true,
+        success: function(result) {
+            if(result.code==200){
+                for(var i=0;i<result.data.length;i++){
+                    var cs = result.data[i].cs;
+                    var ratio = (cs / zcs).toFixed(2) * 100;
+                    var ratios = ratio+"%";
+                    $("#ratio"+i).text(ratios);
+                }
+            }
+        }
+    });
+</script>
+#end
