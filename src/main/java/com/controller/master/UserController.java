@@ -52,7 +52,22 @@ public class UserController extends BaseController {
             }else {
                 success();
             }
-
+        }catch(Exception e){
+            log.error("", e);
+            fail();
+        }
+    }
+    public void updatUserInfo(){
+        try {
+            int userid = this.getParaToInt("userid");
+            String phone = this.getPara("phone");
+            String email = this.getPara("email");
+            if (userid == 0) {
+                fail_token();
+                return;
+            }
+            service.updatUserInfo(userid,phone,email);
+            success();
         }catch(Exception e){
             log.error("", e);
             fail();
