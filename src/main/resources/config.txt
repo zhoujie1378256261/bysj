@@ -10,5 +10,4 @@ JWT_EXPIRE_MIN=10
 
 login_page_url=/teachLogin.html
 
-redis_host=47.104.182.250
-redis_password=123456
+
